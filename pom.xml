@@ -25,6 +25,13 @@
             <version>2.12.3</version>
         </dependency>
 
+        <!-- OkHttp dependency for HTTP operations -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.0</version>
+        </dependency>
+
         <!-- Example dependency: JUnit for testing -->
         <dependency>
             <groupId>junit</groupId>
