@@ -58,7 +58,7 @@ jobs:
       run: mvn clean install
 
     - name: Publish to Maven Central
-      run: mvn deploy
+      run: mvn deploy -X
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
