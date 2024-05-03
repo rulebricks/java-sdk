@@ -1,0 +1,35 @@
+name: Build and push all images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docker-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Depot CLI
+        uses: depot/setup-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: rulebricks
+          password: dckr_pat_Pg3iPJBwXhF3CwD6PZDAXeo_Llk
+
+      - name: Build and push app image
+        uses: depot/build-push-action@v1
+        with:
+          project: 5xk9fhc1hj
+          context: ./
+          file: ./production.Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: rulebricks/app:latest
