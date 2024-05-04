@@ -52,11 +52,24 @@ requestDataList.add(requestData); // Add all request data maps
 List<Map<String, Object>> results = client.rules().bulkSolve("rule-slug", requestDataList);
 ```
 
-Here's how to solve multiple rules in parallel:
+Parallel solving rules requires a particular format using `$rule` alongside respective data payloads:
 
 ```java
 Map<String, Map<String, Object>> requestDataMap = new HashMap<>();
-requestDataMap.put("rule-slug", requestData); // Map of rule slugs to request data maps
+requestDataMap.put("eligibility", {
+    "$rule": "1ef03ms",
+    "customer_id": "anc39as3",
+    "purchase_history": ["t-shirt", "mug"],
+    "account_age_days": 4,
+    "last_purchase_days_ago": 3,
+    "email_subscription": false
+});
+requestDataMap.put("offers", {
+    "$rule": "OvmsYwn",
+    "customer_id": "anc39as3",
+    "last_purchase_days_ago": 3,
+    "selected_plan": "premium"
+});
 
 Map<String, Object> results = client.rules().parallelSolve(requestDataMap);
 ```
