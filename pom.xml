@@ -188,7 +188,7 @@
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>prepare-package</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
