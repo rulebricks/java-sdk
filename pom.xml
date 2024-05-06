@@ -108,6 +108,7 @@
                 <version>3.2.0</version>
             </plugin>
 
+            <!-- Maven Central Publishing Plugin -->
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -119,6 +120,8 @@
                     <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
+
+            <!-- Maven Javadoc Plugin for generating Javadoc 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -132,6 +135,9 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
+
+            <!-- Maven Source Plugin for generating source JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -144,6 +150,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven Release Plugin -->
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${version.maven-release-plugin}</version>
@@ -151,6 +159,7 @@
                     <tagNameFormat>@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
+
             <!-- The key's name & passphrase are configured via GitHub's setup-java action. -->
             <plugin>
                 <artifactId>maven-gpg-plugin</artifactId>
