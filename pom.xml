@@ -183,7 +183,6 @@
                 <executions>
                     <execution>
                         <id>publish</id>
-                        <phase>deploy</phase>
                         <goals>
                             <goal>publish</goal>
                         </goals>
