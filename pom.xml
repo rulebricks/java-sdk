@@ -158,8 +158,7 @@
                             </configuration>
                         </plugin>
 
-                        <!-- The key's name & passphrase are configured via GitHub's setup-java
-                        action. -->
+                        <!-- GPG Plugin -->
                         <plugin>
                             <artifactId>maven-gpg-plugin</artifactId>
                             <version>${version.maven-gpg-plugin}</version>
