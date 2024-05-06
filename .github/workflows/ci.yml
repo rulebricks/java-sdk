@@ -53,12 +53,11 @@ jobs:
           java-package: "jdk"
           java-version: "11"
           check-latest: true
-          server-id: "ossrh"
+          server-id: ossrh
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
-          cache: "maven"
 
       - name: Publish to Maven Central
         run: mvn -U -B -X clean deploy -P release

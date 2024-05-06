@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rulebricks</groupId>
-    <artifactId>java-sdk</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>rulebricks-sdk-java</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>Rulebricks Java SDK</name>
@@ -69,10 +69,6 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 
     <profiles>
@@ -142,7 +138,7 @@
             </build>
         </profile>
     </profiles>
-    
+
     <build>
         <plugins>
             <!-- Maven Compiler Plugin -->
