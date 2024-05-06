@@ -12,7 +12,7 @@ For Maven:
 <dependency>
   <groupId>com.rulebricks</groupId>
   <artifactId>rulebricks-sdk-java</artifactId>
-  <version>1.0.0</version>
+  <version>1.0</version>
 </dependency>
 ```
 
