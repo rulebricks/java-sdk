@@ -51,7 +51,7 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "11"
-          server-id: ossrh
+          server-id: central
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
