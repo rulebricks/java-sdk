@@ -9,16 +9,41 @@
     <packaging>jar</packaging>
 
     <name>Rulebricks Java SDK</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/rulebricks/java-sdk/tree/main</url>
 
     <developers>
         <developer>
             <id>rulebricks</id>
             <name>Rulebricks</name>
             <email>support@rulebricks.com</email>
+            <organization>Rulebricks</organization>
+            <organizationUrl>https://rulebricks.com</organizationUrl>
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:git://github.com/rulebricks/java-sdk.git</connection>
+        <developerConnection>scm:git:ssh://github.com:rulebricks/java-sdk.git</developerConnection>
+        <url>https://github.com/rulebricks/java-sdk/tree/main</url>
+   </scm>
+
+    <licenses>
+        <license>
+        <name>MIT License</name>
+        <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <snapshotRepository>
+        <id>ossrh</id>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+        <id>ossrh</id>
+        <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
