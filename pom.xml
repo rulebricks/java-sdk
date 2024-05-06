@@ -86,7 +86,7 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>central</id>
             <properties>
                 <version.maven-release-plugin>3.0.0-M7</version.maven-release-plugin>
                 <version.maven-gpg-plugin>3.0.1</version.maven-gpg-plugin>
