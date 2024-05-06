@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: "adopt"
-          java-version: "1.8"
+          java-version: "11"
           server-id: central
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
