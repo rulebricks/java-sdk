@@ -12,14 +12,14 @@ For Maven:
 <dependency>
   <groupId>com.rulebricks</groupId>
   <artifactId>rulebricks-sdk-java</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
 </dependency>
 ```
 
 For Gradle:
 
 ```groovy
-implementation 'com.rulebricks:rulebricks-sdk-java:1.0.0'
+implementation 'com.rulebricks:rulebricks-sdk-java:1.1.0'
 ```
 
 ## Configuration
