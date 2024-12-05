@@ -43,7 +43,7 @@ public class FlowsClient {
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("api/v1/flow")
+      .addPathSegments("api/v1/flows")
       .addPathSegment(slug)
       .build();
     RequestBody body;

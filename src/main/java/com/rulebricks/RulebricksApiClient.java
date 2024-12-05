@@ -5,8 +5,13 @@
 import core.ClientOptions;
 import core.Suppliers;
 import java.util.function.Supplier;
+import resources.assets.AssetsClient;
+import resources.decisions.DecisionsClient;
 import resources.flows.FlowsClient;
 import resources.rules.RulesClient;
+import resources.tests.TestsClient;
+import resources.users.UsersClient;
+import resources.values.ValuesClient;
 
 public class RulebricksApiClient {
   protected final ClientOptions clientOptions;
@@ -15,10 +20,25 @@ public class RulebricksApiClient {
 
   protected final Supplier<FlowsClient> flowsClient;
 
+  protected final Supplier<DecisionsClient> decisionsClient;
+
+  protected final Supplier<AssetsClient> assetsClient;
+
+  protected final Supplier<UsersClient> usersClient;
+
+  protected final Supplier<TestsClient> testsClient;
+
+  protected final Supplier<ValuesClient> valuesClient;
+
   public RulebricksApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rulesClient = Suppliers.memoize(() -> new RulesClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new FlowsClient(clientOptions));
+    this.decisionsClient = Suppliers.memoize(() -> new DecisionsClient(clientOptions));
+    this.assetsClient = Suppliers.memoize(() -> new AssetsClient(clientOptions));
+    this.usersClient = Suppliers.memoize(() -> new UsersClient(clientOptions));
+    this.testsClient = Suppliers.memoize(() -> new TestsClient(clientOptions));
+    this.valuesClient = Suppliers.memoize(() -> new ValuesClient(clientOptions));
   }
 
   public RulesClient rules() {
@@ -27,6 +47,26 @@ public class RulebricksApiClient {
 
   public FlowsClient flows() {
     return this.flowsClient.get();
+  }
+
+  public DecisionsClient decisions() {
+    return this.decisionsClient.get();
+  }
+
+  public AssetsClient assets() {
+    return this.assetsClient.get();
+  }
+
+  public UsersClient users() {
+    return this.usersClient.get();
+  }
+
+  public TestsClient tests() {
+    return this.testsClient.get();
+  }
+
+  public ValuesClient values() {
+    return this.valuesClient.get();
   }
 
   public static RulebricksApiClientBuilder builder() {
