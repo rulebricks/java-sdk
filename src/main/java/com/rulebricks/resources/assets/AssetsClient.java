@@ -15,6 +15,7 @@ import java.lang.Exception;
 import java.lang.Object;
 import java.lang.RuntimeException;
 import java.lang.String;
+import java.util.List;
 import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -26,6 +27,7 @@ import resources.assets.requests.ExportRuleRequest;
 import resources.assets.requests.ImportRuleRequest;
 import resources.assets.types.DeleteRuleResponse;
 import resources.assets.types.ImportRuleResponse;
+import resources.assets.types.ListRulesResponseItem;
 import resources.assets.types.UsageResponse;
 
 public class AssetsClient {
@@ -155,16 +157,49 @@ public class AssetsClient {
     }
 
     /**
-     * List all flows in the organization.
+     * List all rules in the organization.
      */
-    public void list() {
-      list(null);
+    public List<ListRulesResponseItem> listRules() {
+      return listRules(null);
+    }
+
+    /**
+     * List all rules in the organization.
+     */
+    public List<ListRulesResponseItem> listRules(RequestOptions requestOptions) {
+      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("api/v1/admin/rules/list")
+        .build();
+      Request okhttpRequest = new Request.Builder()
+        .url(httpUrl)
+        .method("GET", null)
+        .headers(Headers.of(clientOptions.headers(requestOptions)))
+        .addHeader("Content-Type", "application/json")
+        .build();
+      try {
+        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        if (response.isSuccessful()) {
+          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRulesResponseItem>>() {});
+        }
+        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     /**
      * List all flows in the organization.
      */
-    public void list(RequestOptions requestOptions) {
+    public void listFlows() {
+      listFlows(null);
+    }
+
+    /**
+     * List all flows in the organization.
+     */
+    public void listFlows(RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("api/v1/admin/flows/list")

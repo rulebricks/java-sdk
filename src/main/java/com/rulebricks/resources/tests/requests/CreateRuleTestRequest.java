@@ -22,9 +22,9 @@ import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(
-    builder = CreateTestRequest.Builder.class
+    builder = CreateRuleTestRequest.Builder.class
 )
-public final class CreateTestRequest {
+public final class CreateRuleTestRequest {
   private final String name;
 
   private final Map<String, Object> request;
@@ -35,8 +35,8 @@ public final class CreateTestRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateTestRequest(String name, Map<String, Object> request, Map<String, Object> response,
-      boolean critical, Map<String, Object> additionalProperties) {
+  private CreateRuleTestRequest(String name, Map<String, Object> request,
+      Map<String, Object> response, boolean critical, Map<String, Object> additionalProperties) {
     this.name = name;
     this.request = request;
     this.response = response;
@@ -79,7 +79,7 @@ public final class CreateTestRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof CreateTestRequest && equalTo((CreateTestRequest) other);
+    return other instanceof CreateRuleTestRequest && equalTo((CreateRuleTestRequest) other);
   }
 
   @JsonAnyGetter
@@ -87,7 +87,7 @@ public final class CreateTestRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(CreateTestRequest other) {
+  private boolean equalTo(CreateRuleTestRequest other) {
     return name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical;
   }
 
@@ -108,7 +108,7 @@ public final class CreateTestRequest {
   public interface NameStage {
     CriticalStage name(String name);
 
-    Builder from(CreateTestRequest other);
+    Builder from(CreateRuleTestRequest other);
   }
 
   public interface CriticalStage {
@@ -116,7 +116,7 @@ public final class CreateTestRequest {
   }
 
   public interface _FinalStage {
-    CreateTestRequest build();
+    CreateRuleTestRequest build();
 
     _FinalStage request(Map<String, Object> request);
 
@@ -150,7 +150,7 @@ public final class CreateTestRequest {
     }
 
     @java.lang.Override
-    public Builder from(CreateTestRequest other) {
+    public Builder from(CreateRuleTestRequest other) {
       name(other.getName());
       request(other.getRequest());
       response(other.getResponse());
@@ -243,8 +243,8 @@ public final class CreateTestRequest {
     }
 
     @java.lang.Override
-    public CreateTestRequest build() {
-      return new CreateTestRequest(name, request, response, critical, additionalProperties);
+    public CreateRuleTestRequest build() {
+      return new CreateRuleTestRequest(name, request, response, critical, additionalProperties);
     }
   }
 }

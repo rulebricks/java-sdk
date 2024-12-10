@@ -24,9 +24,9 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(
-    builder = CreateTestResponse.Builder.class
+    builder = DeleteFlowTestResponse.Builder.class
 )
-public final class CreateTestResponse {
+public final class DeleteFlowTestResponse {
   private final String id;
 
   private final String name;
@@ -47,7 +47,7 @@ public final class CreateTestResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateTestResponse(String id, String name, Map<String, Object> request,
+  private DeleteFlowTestResponse(String id, String name, Map<String, Object> request,
       Map<String, Object> response, boolean critical, boolean error, boolean success,
       Optional<Map<String, Object>> testState, Optional<OffsetDateTime> lastExecuted,
       Map<String, Object> additionalProperties) {
@@ -138,7 +138,7 @@ public final class CreateTestResponse {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof CreateTestResponse && equalTo((CreateTestResponse) other);
+    return other instanceof DeleteFlowTestResponse && equalTo((DeleteFlowTestResponse) other);
   }
 
   @JsonAnyGetter
@@ -146,7 +146,7 @@ public final class CreateTestResponse {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(CreateTestResponse other) {
+  private boolean equalTo(DeleteFlowTestResponse other) {
     return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical && error == other.error && success == other.success && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
   }
 
@@ -167,7 +167,7 @@ public final class CreateTestResponse {
   public interface IdStage {
     NameStage id(String id);
 
-    Builder from(CreateTestResponse other);
+    Builder from(DeleteFlowTestResponse other);
   }
 
   public interface NameStage {
@@ -187,7 +187,7 @@ public final class CreateTestResponse {
   }
 
   public interface _FinalStage {
-    CreateTestResponse build();
+    DeleteFlowTestResponse build();
 
     _FinalStage request(Map<String, Object> request);
 
@@ -239,7 +239,7 @@ public final class CreateTestResponse {
     }
 
     @java.lang.Override
-    public Builder from(CreateTestResponse other) {
+    public Builder from(DeleteFlowTestResponse other) {
       id(other.getId());
       name(other.getName());
       request(other.getRequest());
@@ -410,8 +410,8 @@ public final class CreateTestResponse {
     }
 
     @java.lang.Override
-    public CreateTestResponse build() {
-      return new CreateTestResponse(id, name, request, response, critical, error, success, testState, lastExecuted, additionalProperties);
+    public DeleteFlowTestResponse build() {
+      return new DeleteFlowTestResponse(id, name, request, response, critical, error, success, testState, lastExecuted, additionalProperties);
     }
   }
 }

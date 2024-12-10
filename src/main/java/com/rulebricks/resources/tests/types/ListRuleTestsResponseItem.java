@@ -24,9 +24,9 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(
-    builder = DeleteTestResponse.Builder.class
+    builder = ListRuleTestsResponseItem.Builder.class
 )
-public final class DeleteTestResponse {
+public final class ListRuleTestsResponseItem {
   private final String id;
 
   private final String name;
@@ -47,7 +47,7 @@ public final class DeleteTestResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private DeleteTestResponse(String id, String name, Map<String, Object> request,
+  private ListRuleTestsResponseItem(String id, String name, Map<String, Object> request,
       Map<String, Object> response, boolean critical, boolean error, boolean success,
       Optional<Map<String, Object>> testState, Optional<OffsetDateTime> lastExecuted,
       Map<String, Object> additionalProperties) {
@@ -138,7 +138,7 @@ public final class DeleteTestResponse {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof DeleteTestResponse && equalTo((DeleteTestResponse) other);
+    return other instanceof ListRuleTestsResponseItem && equalTo((ListRuleTestsResponseItem) other);
   }
 
   @JsonAnyGetter
@@ -146,7 +146,7 @@ public final class DeleteTestResponse {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(DeleteTestResponse other) {
+  private boolean equalTo(ListRuleTestsResponseItem other) {
     return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical && error == other.error && success == other.success && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
   }
 
@@ -167,7 +167,7 @@ public final class DeleteTestResponse {
   public interface IdStage {
     NameStage id(String id);
 
-    Builder from(DeleteTestResponse other);
+    Builder from(ListRuleTestsResponseItem other);
   }
 
   public interface NameStage {
@@ -187,7 +187,7 @@ public final class DeleteTestResponse {
   }
 
   public interface _FinalStage {
-    DeleteTestResponse build();
+    ListRuleTestsResponseItem build();
 
     _FinalStage request(Map<String, Object> request);
 
@@ -239,7 +239,7 @@ public final class DeleteTestResponse {
     }
 
     @java.lang.Override
-    public Builder from(DeleteTestResponse other) {
+    public Builder from(ListRuleTestsResponseItem other) {
       id(other.getId());
       name(other.getName());
       request(other.getRequest());
@@ -410,8 +410,8 @@ public final class DeleteTestResponse {
     }
 
     @java.lang.Override
-    public DeleteTestResponse build() {
-      return new DeleteTestResponse(id, name, request, response, critical, error, success, testState, lastExecuted, additionalProperties);
+    public ListRuleTestsResponseItem build() {
+      return new ListRuleTestsResponseItem(id, name, request, response, critical, error, success, testState, lastExecuted, additionalProperties);
     }
   }
 }

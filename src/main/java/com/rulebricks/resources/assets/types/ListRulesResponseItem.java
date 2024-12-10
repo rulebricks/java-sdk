@@ -23,9 +23,9 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(
-    builder = ListResponseItem.Builder.class
+    builder = ListRulesResponseItem.Builder.class
 )
-public final class ListResponseItem {
+public final class ListRulesResponseItem {
   private final Optional<String> id;
 
   private final Optional<String> name;
@@ -40,9 +40,9 @@ public final class ListResponseItem {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListResponseItem(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<Boolean> published, Optional<String> slug, Optional<String> updatedAt,
-      Map<String, Object> additionalProperties) {
+  private ListRulesResponseItem(Optional<String> id, Optional<String> name,
+      Optional<String> description, Optional<Boolean> published, Optional<String> slug,
+      Optional<String> updatedAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
@@ -103,7 +103,7 @@ public final class ListResponseItem {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ListResponseItem && equalTo((ListResponseItem) other);
+    return other instanceof ListRulesResponseItem && equalTo((ListRulesResponseItem) other);
   }
 
   @JsonAnyGetter
@@ -111,7 +111,7 @@ public final class ListResponseItem {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(ListResponseItem other) {
+  private boolean equalTo(ListRulesResponseItem other) {
     return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && published.equals(other.published) && slug.equals(other.slug) && updatedAt.equals(other.updatedAt);
   }
 
@@ -151,7 +151,7 @@ public final class ListResponseItem {
     private Builder() {
     }
 
-    public Builder from(ListResponseItem other) {
+    public Builder from(ListRulesResponseItem other) {
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
@@ -245,8 +245,8 @@ public final class ListResponseItem {
       return this;
     }
 
-    public ListResponseItem build() {
-      return new ListResponseItem(id, name, description, published, slug, updatedAt, additionalProperties);
+    public ListRulesResponseItem build() {
+      return new ListRulesResponseItem(id, name, description, published, slug, updatedAt, additionalProperties);
     }
   }
 }

@@ -21,10 +21,14 @@ import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import resources.tests.requests.CreateTestRequest;
-import resources.tests.types.CreateTestResponse;
-import resources.tests.types.DeleteTestResponse;
-import resources.tests.types.ListTestsResponseItem;
+import resources.tests.requests.CreateFlowTestRequest;
+import resources.tests.requests.CreateRuleTestRequest;
+import resources.tests.types.CreateFlowTestResponse;
+import resources.tests.types.CreateRuleTestResponse;
+import resources.tests.types.DeleteFlowTestResponse;
+import resources.tests.types.DeleteRuleTestResponse;
+import resources.tests.types.ListFlowTestsResponseItem;
+import resources.tests.types.ListRuleTestsResponseItem;
 
 public class TestsClient {
   protected final ClientOptions clientOptions;
@@ -34,16 +38,131 @@ public class TestsClient {
   }
 
   /**
-   * Retrieves a list of tests associated with the flow identified by the slug.
+   * Retrieves a list of tests associated with the rule identified by the slug.
    */
-  public List<ListTestsResponseItem> listTests(String slug) {
-    return listTests(slug,null);
+  public List<ListRuleTestsResponseItem> listRuleTests(String slug) {
+    return listRuleTests(slug,null);
+  }
+
+  /**
+   * Retrieves a list of tests associated with the rule identified by the slug.
+   */
+  public List<ListRuleTestsResponseItem> listRuleTests(String slug, RequestOptions requestOptions) {
+    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+      .addPathSegments("api/v1/admin/rules")
+      .addPathSegment(slug)
+      .addPathSegments("tests")
+      .build();
+    Request okhttpRequest = new Request.Builder()
+      .url(httpUrl)
+      .method("GET", null)
+      .headers(Headers.of(clientOptions.headers(requestOptions)))
+      .addHeader("Content-Type", "application/json")
+      .build();
+    try {
+      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      if (response.isSuccessful()) {
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRuleTestsResponseItem>>() {});
+      }
+      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Adds a new test to the test suite of a rule identified by the slug.
+   */
+  public CreateRuleTestResponse createRuleTest(String slug, CreateRuleTestRequest request) {
+    return createRuleTest(slug,request,null);
+  }
+
+  /**
+   * Adds a new test to the test suite of a rule identified by the slug.
+   */
+  public CreateRuleTestResponse createRuleTest(String slug, CreateRuleTestRequest request,
+      RequestOptions requestOptions) {
+    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+      .addPathSegments("api/v1/admin/rules")
+      .addPathSegment(slug)
+      .addPathSegments("tests")
+      .build();
+    RequestBody body;
+    try {
+      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+    }
+    catch(Exception e) {
+      throw new RuntimeException(e);
+    }
+    Request okhttpRequest = new Request.Builder()
+      .url(httpUrl)
+      .method("POST", body)
+      .headers(Headers.of(clientOptions.headers(requestOptions)))
+      .addHeader("Content-Type", "application/json")
+      .build();
+    try {
+      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      if (response.isSuccessful()) {
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateRuleTestResponse.class);
+      }
+      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Deletes a test from the test suite of a rule identified by the slug.
+   */
+  public DeleteRuleTestResponse deleteRuleTest(String slug, String testId) {
+    return deleteRuleTest(slug,testId,null);
+  }
+
+  /**
+   * Deletes a test from the test suite of a rule identified by the slug.
+   */
+  public DeleteRuleTestResponse deleteRuleTest(String slug, String testId,
+      RequestOptions requestOptions) {
+    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+      .addPathSegments("api/v1/admin/rules")
+      .addPathSegment(slug)
+      .addPathSegments("tests")
+      .addPathSegment(testId)
+      .build();
+    Request okhttpRequest = new Request.Builder()
+      .url(httpUrl)
+      .method("DELETE", null)
+      .headers(Headers.of(clientOptions.headers(requestOptions)))
+      .addHeader("Content-Type", "application/json")
+      .build();
+    try {
+      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      if (response.isSuccessful()) {
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteRuleTestResponse.class);
+      }
+      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
    * Retrieves a list of tests associated with the flow identified by the slug.
    */
-  public List<ListTestsResponseItem> listTests(String slug, RequestOptions requestOptions) {
+  public List<ListFlowTestsResponseItem> listFlowTests(String slug) {
+    return listFlowTests(slug,null);
+  }
+
+  /**
+   * Retrieves a list of tests associated with the flow identified by the slug.
+   */
+  public List<ListFlowTestsResponseItem> listFlowTests(String slug, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/flows")
@@ -59,7 +178,7 @@ public class TestsClient {
     try {
       Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListTestsResponseItem>>() {});
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFlowTestsResponseItem>>() {});
       }
       throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
     }
@@ -71,14 +190,14 @@ public class TestsClient {
   /**
    * Adds a new test to the test suite of a flow identified by the slug.
    */
-  public CreateTestResponse createTest(String slug, CreateTestRequest request) {
-    return createTest(slug,request,null);
+  public CreateFlowTestResponse createFlowTest(String slug, CreateFlowTestRequest request) {
+    return createFlowTest(slug,request,null);
   }
 
   /**
    * Adds a new test to the test suite of a flow identified by the slug.
    */
-  public CreateTestResponse createTest(String slug, CreateTestRequest request,
+  public CreateFlowTestResponse createFlowTest(String slug, CreateFlowTestRequest request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -102,7 +221,7 @@ public class TestsClient {
     try {
       Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateFlowTestResponse.class);
       }
       throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
     }
@@ -114,14 +233,15 @@ public class TestsClient {
   /**
    * Deletes a test from the test suite of a flow identified by the slug.
    */
-  public DeleteTestResponse deleteTest(String slug, String testId) {
-    return deleteTest(slug,testId,null);
+  public DeleteFlowTestResponse deleteFlowTest(String slug, String testId) {
+    return deleteFlowTest(slug,testId,null);
   }
 
   /**
    * Deletes a test from the test suite of a flow identified by the slug.
    */
-  public DeleteTestResponse deleteTest(String slug, String testId, RequestOptions requestOptions) {
+  public DeleteFlowTestResponse deleteFlowTest(String slug, String testId,
+      RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/flows")
@@ -138,7 +258,7 @@ public class TestsClient {
     try {
       Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteFlowTestResponse.class);
       }
       throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
     }
