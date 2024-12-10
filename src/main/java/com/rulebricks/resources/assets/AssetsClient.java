@@ -22,12 +22,18 @@ import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import resources.assets.requests.DeleteFolderRequest;
 import resources.assets.requests.DeleteRuleRequest;
 import resources.assets.requests.ExportRuleRequest;
 import resources.assets.requests.ImportRuleRequest;
+import resources.assets.requests.ListRulesRequest;
+import resources.assets.requests.UpsertFolderRequest;
+import resources.assets.types.DeleteFolderResponse;
 import resources.assets.types.DeleteRuleResponse;
 import resources.assets.types.ImportRuleResponse;
+import resources.assets.types.ListFoldersResponseItem;
 import resources.assets.types.ListRulesResponseItem;
+import resources.assets.types.UpsertFolderResponse;
 import resources.assets.types.UsageResponse;
 
 public class AssetsClient {
@@ -157,100 +163,224 @@ public class AssetsClient {
     }
 
     /**
-     * List all rules in the organization.
+     * List all rules in the organization. Optionally filter by folder name or ID.
      */
     public List<ListRulesResponseItem> listRules() {
-      return listRules(null);
+      return listRules(ListRulesRequest.builder().build());
     }
 
     /**
-     * List all rules in the organization.
+     * List all rules in the organization. Optionally filter by folder name or ID.
      */
-    public List<ListRulesResponseItem> listRules(RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+    public List<ListRulesResponseItem> listRules(ListRulesRequest request) {
+      return listRules(request,null);
+    }
 
-        .addPathSegments("api/v1/admin/rules/list")
-        .build();
-      Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("GET", null)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json")
-        .build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
-        if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRulesResponseItem>>() {});
+    /**
+     * List all rules in the organization. Optionally filter by folder name or ID.
+     */
+    public List<ListRulesResponseItem> listRules(ListRulesRequest request,
+        RequestOptions requestOptions) {
+      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("api/v1/admin/rules/list");if (request.getFolder().isPresent()) {
+          httpUrl.addQueryParameter("folder", request.getFolder().get());
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    /**
-     * List all flows in the organization.
-     */
-    public void listFlows() {
-      listFlows(null);
-    }
-
-    /**
-     * List all flows in the organization.
-     */
-    public void listFlows(RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-        .addPathSegments("api/v1/admin/flows/list")
-        .build();
-      Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("GET", null)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
-        if (response.isSuccessful()) {
-          return;
+        Request.Builder _requestBuilder = new Request.Builder()
+          .url(httpUrl.build())
+          .method("GET", null)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRulesResponseItem>>() {});
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    /**
-     * Get the rule execution usage of your organization.
-     */
-    public UsageResponse usage() {
-      return usage(null);
-    }
-
-    /**
-     * Get the rule execution usage of your organization.
-     */
-    public UsageResponse usage(RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-        .addPathSegments("api/v1/admin/usage")
-        .build();
-      Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("GET", null)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json")
-        .build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
-        if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), UsageResponse.class);
+        catch (IOException e) {
+          throw new RuntimeException(e);
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
       }
-      catch (IOException e) {
-        throw new RuntimeException(e);
+
+      /**
+       * List all flows in the organization.
+       */
+      public void listFlows() {
+        listFlows(null);
+      }
+
+      /**
+       * List all flows in the organization.
+       */
+      public void listFlows(RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("api/v1/admin/flows/list")
+          .build();
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl)
+          .method("GET", null)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return;
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      /**
+       * Get the rule execution usage of your organization.
+       */
+      public UsageResponse usage() {
+        return usage(null);
+      }
+
+      /**
+       * Get the rule execution usage of your organization.
+       */
+      public UsageResponse usage(RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("api/v1/admin/usage")
+          .build();
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl)
+          .method("GET", null)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), UsageResponse.class);
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      /**
+       * Retrieve all rule folders for the authenticated user.
+       */
+      public List<ListFoldersResponseItem> listFolders() {
+        return listFolders(null);
+      }
+
+      /**
+       * Retrieve all rule folders for the authenticated user.
+       */
+      public List<ListFoldersResponseItem> listFolders(RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("api/v1/admin/folders")
+          .build();
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl)
+          .method("GET", null)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFoldersResponseItem>>() {});
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      /**
+       * Create a new rule folder or update an existing one for the authenticated user.
+       */
+      public UpsertFolderResponse upsertFolder(UpsertFolderRequest request) {
+        return upsertFolder(request,null);
+      }
+
+      /**
+       * Create a new rule folder or update an existing one for the authenticated user.
+       */
+      public UpsertFolderResponse upsertFolder(UpsertFolderRequest request,
+          RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("api/v1/admin/folders")
+          .build();
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(Exception e) {
+          throw new RuntimeException(e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl)
+          .method("POST", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), UpsertFolderResponse.class);
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      /**
+       * Delete a specific rule folder for the authenticated user. This does not delete the rules within the folder.
+       */
+      public DeleteFolderResponse deleteFolder(DeleteFolderRequest request) {
+        return deleteFolder(request,null);
+      }
+
+      /**
+       * Delete a specific rule folder for the authenticated user. This does not delete the rules within the folder.
+       */
+      public DeleteFolderResponse deleteFolder(DeleteFolderRequest request,
+          RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("api/v1/admin/folders")
+          .build();
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(Exception e) {
+          throw new RuntimeException(e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl)
+          .method("DELETE", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .build();
+        try {
+          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+          if (response.isSuccessful()) {
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteFolderResponse.class);
+          }
+          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
-  }

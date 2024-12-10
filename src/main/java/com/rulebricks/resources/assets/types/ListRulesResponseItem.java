@@ -13,9 +13,9 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import core.ObjectMappers;
-import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,27 +28,34 @@ import java.util.Optional;
 public final class ListRulesResponseItem {
   private final Optional<String> id;
 
+  private final Optional<OffsetDateTime> createdAt;
+
   private final Optional<String> name;
 
   private final Optional<String> description;
 
-  private final Optional<Boolean> published;
-
   private final Optional<String> slug;
 
-  private final Optional<String> updatedAt;
+  private final Optional<ListRulesResponseItemFolder> folder;
+
+  private final Optional<Map<String, Object>> requestSchema;
+
+  private final Optional<Map<String, Object>> responseSchema;
 
   private final Map<String, Object> additionalProperties;
 
-  private ListRulesResponseItem(Optional<String> id, Optional<String> name,
-      Optional<String> description, Optional<Boolean> published, Optional<String> slug,
-      Optional<String> updatedAt, Map<String, Object> additionalProperties) {
+  private ListRulesResponseItem(Optional<String> id, Optional<OffsetDateTime> createdAt,
+      Optional<String> name, Optional<String> description, Optional<String> slug,
+      Optional<ListRulesResponseItemFolder> folder, Optional<Map<String, Object>> requestSchema,
+      Optional<Map<String, Object>> responseSchema, Map<String, Object> additionalProperties) {
     this.id = id;
+    this.createdAt = createdAt;
     this.name = name;
     this.description = description;
-    this.published = published;
     this.slug = slug;
-    this.updatedAt = updatedAt;
+    this.folder = folder;
+    this.requestSchema = requestSchema;
+    this.responseSchema = responseSchema;
     this.additionalProperties = additionalProperties;
   }
 
@@ -58,6 +65,14 @@ public final class ListRulesResponseItem {
   @JsonProperty("id")
   public Optional<String> getId() {
     return id;
+  }
+
+  /**
+   * @return The date this rule was created.
+   */
+  @JsonProperty("created_at")
+  public Optional<OffsetDateTime> getCreatedAt() {
+    return createdAt;
   }
 
   /**
@@ -77,14 +92,6 @@ public final class ListRulesResponseItem {
   }
 
   /**
-   * @return Whether the rule is published.
-   */
-  @JsonProperty("published")
-  public Optional<Boolean> getPublished() {
-    return published;
-  }
-
-  /**
    * @return The unique slug for the rule used in API requests.
    */
   @JsonProperty("slug")
@@ -93,11 +100,27 @@ public final class ListRulesResponseItem {
   }
 
   /**
-   * @return The date this rule was last updated.
+   * @return The folder containing this rule
    */
-  @JsonProperty("updated_at")
-  public Optional<String> getUpdatedAt() {
-    return updatedAt;
+  @JsonProperty("folder")
+  public Optional<ListRulesResponseItemFolder> getFolder() {
+    return folder;
+  }
+
+  /**
+   * @return The published request schema for the rule.
+   */
+  @JsonProperty("request_schema")
+  public Optional<Map<String, Object>> getRequestSchema() {
+    return requestSchema;
+  }
+
+  /**
+   * @return The published response schema for the rule.
+   */
+  @JsonProperty("response_schema")
+  public Optional<Map<String, Object>> getResponseSchema() {
+    return responseSchema;
   }
 
   @java.lang.Override
@@ -112,12 +135,12 @@ public final class ListRulesResponseItem {
   }
 
   private boolean equalTo(ListRulesResponseItem other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && published.equals(other.published) && slug.equals(other.slug) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && createdAt.equals(other.createdAt) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && folder.equals(other.folder) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.published, this.slug, this.updatedAt);
+    return Objects.hash(this.id, this.createdAt, this.name, this.description, this.slug, this.folder, this.requestSchema, this.responseSchema);
   }
 
   @java.lang.Override
@@ -135,15 +158,19 @@ public final class ListRulesResponseItem {
   public static final class Builder {
     private Optional<String> id = Optional.empty();
 
+    private Optional<OffsetDateTime> createdAt = Optional.empty();
+
     private Optional<String> name = Optional.empty();
 
     private Optional<String> description = Optional.empty();
 
-    private Optional<Boolean> published = Optional.empty();
-
     private Optional<String> slug = Optional.empty();
 
-    private Optional<String> updatedAt = Optional.empty();
+    private Optional<ListRulesResponseItemFolder> folder = Optional.empty();
+
+    private Optional<Map<String, Object>> requestSchema = Optional.empty();
+
+    private Optional<Map<String, Object>> responseSchema = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -153,11 +180,13 @@ public final class ListRulesResponseItem {
 
     public Builder from(ListRulesResponseItem other) {
       id(other.getId());
+      createdAt(other.getCreatedAt());
       name(other.getName());
       description(other.getDescription());
-      published(other.getPublished());
       slug(other.getSlug());
-      updatedAt(other.getUpdatedAt());
+      folder(other.getFolder());
+      requestSchema(other.getRequestSchema());
+      responseSchema(other.getResponseSchema());
       return this;
     }
 
@@ -172,6 +201,20 @@ public final class ListRulesResponseItem {
 
     public Builder id(String id) {
       this.id = Optional.of(id);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "created_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAt(Optional<OffsetDateTime> createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = Optional.of(createdAt);
       return this;
     }
 
@@ -204,20 +247,6 @@ public final class ListRulesResponseItem {
     }
 
     @JsonSetter(
-        value = "published",
-        nulls = Nulls.SKIP
-    )
-    public Builder published(Optional<Boolean> published) {
-      this.published = published;
-      return this;
-    }
-
-    public Builder published(Boolean published) {
-      this.published = Optional.of(published);
-      return this;
-    }
-
-    @JsonSetter(
         value = "slug",
         nulls = Nulls.SKIP
     )
@@ -232,21 +261,49 @@ public final class ListRulesResponseItem {
     }
 
     @JsonSetter(
-        value = "updated_at",
+        value = "folder",
         nulls = Nulls.SKIP
     )
-    public Builder updatedAt(Optional<String> updatedAt) {
-      this.updatedAt = updatedAt;
+    public Builder folder(Optional<ListRulesResponseItemFolder> folder) {
+      this.folder = folder;
       return this;
     }
 
-    public Builder updatedAt(String updatedAt) {
-      this.updatedAt = Optional.of(updatedAt);
+    public Builder folder(ListRulesResponseItemFolder folder) {
+      this.folder = Optional.of(folder);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "request_schema",
+        nulls = Nulls.SKIP
+    )
+    public Builder requestSchema(Optional<Map<String, Object>> requestSchema) {
+      this.requestSchema = requestSchema;
+      return this;
+    }
+
+    public Builder requestSchema(Map<String, Object> requestSchema) {
+      this.requestSchema = Optional.of(requestSchema);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "response_schema",
+        nulls = Nulls.SKIP
+    )
+    public Builder responseSchema(Optional<Map<String, Object>> responseSchema) {
+      this.responseSchema = responseSchema;
+      return this;
+    }
+
+    public Builder responseSchema(Map<String, Object> responseSchema) {
+      this.responseSchema = Optional.of(responseSchema);
       return this;
     }
 
     public ListRulesResponseItem build() {
-      return new ListRulesResponseItem(id, name, description, published, slug, updatedAt, additionalProperties);
+      return new ListRulesResponseItem(id, createdAt, name, description, slug, folder, requestSchema, responseSchema, additionalProperties);
     }
   }
 }
