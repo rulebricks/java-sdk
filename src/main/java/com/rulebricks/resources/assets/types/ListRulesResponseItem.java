@@ -17,6 +17,7 @@ import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,16 +39,16 @@ public final class ListRulesResponseItem {
 
   private final Optional<ListRulesResponseItemFolder> folder;
 
-  private final Optional<Map<String, Object>> requestSchema;
+  private final Optional<List<Object>> requestSchema;
 
-  private final Optional<Map<String, Object>> responseSchema;
+  private final Optional<List<Object>> responseSchema;
 
   private final Map<String, Object> additionalProperties;
 
   private ListRulesResponseItem(Optional<String> id, Optional<OffsetDateTime> createdAt,
       Optional<String> name, Optional<String> description, Optional<String> slug,
-      Optional<ListRulesResponseItemFolder> folder, Optional<Map<String, Object>> requestSchema,
-      Optional<Map<String, Object>> responseSchema, Map<String, Object> additionalProperties) {
+      Optional<ListRulesResponseItemFolder> folder, Optional<List<Object>> requestSchema,
+      Optional<List<Object>> responseSchema, Map<String, Object> additionalProperties) {
     this.id = id;
     this.createdAt = createdAt;
     this.name = name;
@@ -111,7 +112,7 @@ public final class ListRulesResponseItem {
    * @return The published request schema for the rule.
    */
   @JsonProperty("request_schema")
-  public Optional<Map<String, Object>> getRequestSchema() {
+  public Optional<List<Object>> getRequestSchema() {
     return requestSchema;
   }
 
@@ -119,7 +120,7 @@ public final class ListRulesResponseItem {
    * @return The published response schema for the rule.
    */
   @JsonProperty("response_schema")
-  public Optional<Map<String, Object>> getResponseSchema() {
+  public Optional<List<Object>> getResponseSchema() {
     return responseSchema;
   }
 
@@ -168,9 +169,9 @@ public final class ListRulesResponseItem {
 
     private Optional<ListRulesResponseItemFolder> folder = Optional.empty();
 
-    private Optional<Map<String, Object>> requestSchema = Optional.empty();
+    private Optional<List<Object>> requestSchema = Optional.empty();
 
-    private Optional<Map<String, Object>> responseSchema = Optional.empty();
+    private Optional<List<Object>> responseSchema = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -278,12 +279,12 @@ public final class ListRulesResponseItem {
         value = "request_schema",
         nulls = Nulls.SKIP
     )
-    public Builder requestSchema(Optional<Map<String, Object>> requestSchema) {
+    public Builder requestSchema(Optional<List<Object>> requestSchema) {
       this.requestSchema = requestSchema;
       return this;
     }
 
-    public Builder requestSchema(Map<String, Object> requestSchema) {
+    public Builder requestSchema(List<Object> requestSchema) {
       this.requestSchema = Optional.of(requestSchema);
       return this;
     }
@@ -292,12 +293,12 @@ public final class ListRulesResponseItem {
         value = "response_schema",
         nulls = Nulls.SKIP
     )
-    public Builder responseSchema(Optional<Map<String, Object>> responseSchema) {
+    public Builder responseSchema(Optional<List<Object>> responseSchema) {
       this.responseSchema = responseSchema;
       return this;
     }
 
-    public Builder responseSchema(Map<String, Object> responseSchema) {
+    public Builder responseSchema(List<Object> responseSchema) {
       this.responseSchema = Optional.of(responseSchema);
       return this;
     }
