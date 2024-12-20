@@ -15,11 +15,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,126 +25,21 @@ import java.util.Objects;
     builder = ImportRuleRequest.Builder.class
 )
 public final class ImportRuleRequest {
-  private final String id;
-
-  private final OffsetDateTime createdAt;
-
-  private final String slug;
-
-  private final OffsetDateTime updatedAt;
-
-  private final Map<String, Object> testRequest;
-
-  private final String name;
-
-  private final String description;
-
-  private final List<Object> requestSchema;
-
-  private final List<Object> responseSchema;
-
-  private final Map<String, Object> sampleRequest;
-
-  private final Map<String, Object> sampleResponse;
-
-  private final List<Object> conditions;
-
-  private final boolean published;
-
-  private final List<Object> history;
+  private final Map<String, Object> rule;
 
   private final Map<String, Object> additionalProperties;
 
-  private ImportRuleRequest(String id, OffsetDateTime createdAt, String slug,
-      OffsetDateTime updatedAt, Map<String, Object> testRequest, String name, String description,
-      List<Object> requestSchema, List<Object> responseSchema, Map<String, Object> sampleRequest,
-      Map<String, Object> sampleResponse, List<Object> conditions, boolean published,
-      List<Object> history, Map<String, Object> additionalProperties) {
-    this.id = id;
-    this.createdAt = createdAt;
-    this.slug = slug;
-    this.updatedAt = updatedAt;
-    this.testRequest = testRequest;
-    this.name = name;
-    this.description = description;
-    this.requestSchema = requestSchema;
-    this.responseSchema = responseSchema;
-    this.sampleRequest = sampleRequest;
-    this.sampleResponse = sampleResponse;
-    this.conditions = conditions;
-    this.published = published;
-    this.history = history;
+  private ImportRuleRequest(Map<String, Object> rule, Map<String, Object> additionalProperties) {
+    this.rule = rule;
     this.additionalProperties = additionalProperties;
   }
 
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-
-  @JsonProperty("createdAt")
-  public OffsetDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  @JsonProperty("slug")
-  public String getSlug() {
-    return slug;
-  }
-
-  @JsonProperty("updatedAt")
-  public OffsetDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  @JsonProperty("testRequest")
-  public Map<String, Object> getTestRequest() {
-    return testRequest;
-  }
-
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-
-  @JsonProperty("requestSchema")
-  public List<Object> getRequestSchema() {
-    return requestSchema;
-  }
-
-  @JsonProperty("responseSchema")
-  public List<Object> getResponseSchema() {
-    return responseSchema;
-  }
-
-  @JsonProperty("sampleRequest")
-  public Map<String, Object> getSampleRequest() {
-    return sampleRequest;
-  }
-
-  @JsonProperty("sampleResponse")
-  public Map<String, Object> getSampleResponse() {
-    return sampleResponse;
-  }
-
-  @JsonProperty("conditions")
-  public List<Object> getConditions() {
-    return conditions;
-  }
-
-  @JsonProperty("published")
-  public boolean getPublished() {
-    return published;
-  }
-
-  @JsonProperty("history")
-  public List<Object> getHistory() {
-    return history;
+  /**
+   * @return The rule data to import.
+   */
+  @JsonProperty("rule")
+  public Map<String, Object> getRule() {
+    return rule;
   }
 
   @java.lang.Override
@@ -162,12 +54,12 @@ public final class ImportRuleRequest {
   }
 
   private boolean equalTo(ImportRuleRequest other) {
-    return id.equals(other.id) && createdAt.equals(other.createdAt) && slug.equals(other.slug) && updatedAt.equals(other.updatedAt) && testRequest.equals(other.testRequest) && name.equals(other.name) && description.equals(other.description) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema) && sampleRequest.equals(other.sampleRequest) && sampleResponse.equals(other.sampleResponse) && conditions.equals(other.conditions) && published == other.published && history.equals(other.history);
+    return rule.equals(other.rule);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.createdAt, this.slug, this.updatedAt, this.testRequest, this.name, this.description, this.requestSchema, this.responseSchema, this.sampleRequest, this.sampleResponse, this.conditions, this.published, this.history);
+    return Objects.hash(this.rule);
   }
 
   @java.lang.Override
@@ -175,117 +67,15 @@ public final class ImportRuleRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static IdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface IdStage {
-    CreatedAtStage id(String id);
-
-    Builder from(ImportRuleRequest other);
-  }
-
-  public interface CreatedAtStage {
-    SlugStage createdAt(OffsetDateTime createdAt);
-  }
-
-  public interface SlugStage {
-    UpdatedAtStage slug(String slug);
-  }
-
-  public interface UpdatedAtStage {
-    NameStage updatedAt(OffsetDateTime updatedAt);
-  }
-
-  public interface NameStage {
-    DescriptionStage name(String name);
-  }
-
-  public interface DescriptionStage {
-    PublishedStage description(String description);
-  }
-
-  public interface PublishedStage {
-    _FinalStage published(boolean published);
-  }
-
-  public interface _FinalStage {
-    ImportRuleRequest build();
-
-    _FinalStage testRequest(Map<String, Object> testRequest);
-
-    _FinalStage putAllTestRequest(Map<String, Object> testRequest);
-
-    _FinalStage testRequest(String key, Object value);
-
-    _FinalStage requestSchema(List<Object> requestSchema);
-
-    _FinalStage addRequestSchema(Object requestSchema);
-
-    _FinalStage addAllRequestSchema(List<Object> requestSchema);
-
-    _FinalStage responseSchema(List<Object> responseSchema);
-
-    _FinalStage addResponseSchema(Object responseSchema);
-
-    _FinalStage addAllResponseSchema(List<Object> responseSchema);
-
-    _FinalStage sampleRequest(Map<String, Object> sampleRequest);
-
-    _FinalStage putAllSampleRequest(Map<String, Object> sampleRequest);
-
-    _FinalStage sampleRequest(String key, Object value);
-
-    _FinalStage sampleResponse(Map<String, Object> sampleResponse);
-
-    _FinalStage putAllSampleResponse(Map<String, Object> sampleResponse);
-
-    _FinalStage sampleResponse(String key, Object value);
-
-    _FinalStage conditions(List<Object> conditions);
-
-    _FinalStage addConditions(Object conditions);
-
-    _FinalStage addAllConditions(List<Object> conditions);
-
-    _FinalStage history(List<Object> history);
-
-    _FinalStage addHistory(Object history);
-
-    _FinalStage addAllHistory(List<Object> history);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements IdStage, CreatedAtStage, SlugStage, UpdatedAtStage, NameStage, DescriptionStage, PublishedStage, _FinalStage {
-    private String id;
-
-    private OffsetDateTime createdAt;
-
-    private String slug;
-
-    private OffsetDateTime updatedAt;
-
-    private String name;
-
-    private String description;
-
-    private boolean published;
-
-    private List<Object> history = new ArrayList<>();
-
-    private List<Object> conditions = new ArrayList<>();
-
-    private Map<String, Object> sampleResponse = new LinkedHashMap<>();
-
-    private Map<String, Object> sampleRequest = new LinkedHashMap<>();
-
-    private List<Object> responseSchema = new ArrayList<>();
-
-    private List<Object> requestSchema = new ArrayList<>();
-
-    private Map<String, Object> testRequest = new LinkedHashMap<>();
+  public static final class Builder {
+    private Map<String, Object> rule = new LinkedHashMap<>();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -293,238 +83,33 @@ public final class ImportRuleRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(ImportRuleRequest other) {
-      id(other.getId());
-      createdAt(other.getCreatedAt());
-      slug(other.getSlug());
-      updatedAt(other.getUpdatedAt());
-      testRequest(other.getTestRequest());
-      name(other.getName());
-      description(other.getDescription());
-      requestSchema(other.getRequestSchema());
-      responseSchema(other.getResponseSchema());
-      sampleRequest(other.getSampleRequest());
-      sampleResponse(other.getSampleResponse());
-      conditions(other.getConditions());
-      published(other.getPublished());
-      history(other.getHistory());
+      rule(other.getRule());
       return this;
     }
 
-    @java.lang.Override
-    @JsonSetter("id")
-    public CreatedAtStage id(String id) {
-      this.id = id;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("createdAt")
-    public SlugStage createdAt(OffsetDateTime createdAt) {
-      this.createdAt = createdAt;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("slug")
-    public UpdatedAtStage slug(String slug) {
-      this.slug = slug;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("updatedAt")
-    public NameStage updatedAt(OffsetDateTime updatedAt) {
-      this.updatedAt = updatedAt;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("name")
-    public DescriptionStage name(String name) {
-      this.name = name;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("description")
-    public PublishedStage description(String description) {
-      this.description = description;
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("published")
-    public _FinalStage published(boolean published) {
-      this.published = published;
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addAllHistory(List<Object> history) {
-      this.history.addAll(history);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addHistory(Object history) {
-      this.history.add(history);
-      return this;
-    }
-
-    @java.lang.Override
     @JsonSetter(
-        value = "history",
+        value = "rule",
         nulls = Nulls.SKIP
     )
-    public _FinalStage history(List<Object> history) {
-      this.history.clear();
-      this.history.addAll(history);
+    public Builder rule(Map<String, Object> rule) {
+      this.rule.clear();
+      this.rule.putAll(rule);
       return this;
     }
 
-    @java.lang.Override
-    public _FinalStage addAllConditions(List<Object> conditions) {
-      this.conditions.addAll(conditions);
+    public Builder putAllRule(Map<String, Object> rule) {
+      this.rule.putAll(rule);
       return this;
     }
 
-    @java.lang.Override
-    public _FinalStage addConditions(Object conditions) {
-      this.conditions.add(conditions);
+    public Builder rule(String key, Object value) {
+      this.rule.put(key, value);
       return this;
     }
 
-    @java.lang.Override
-    @JsonSetter(
-        value = "conditions",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage conditions(List<Object> conditions) {
-      this.conditions.clear();
-      this.conditions.addAll(conditions);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage sampleResponse(String key, Object value) {
-      this.sampleResponse.put(key, value);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage putAllSampleResponse(Map<String, Object> sampleResponse) {
-      this.sampleResponse.putAll(sampleResponse);
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter(
-        value = "sampleResponse",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage sampleResponse(Map<String, Object> sampleResponse) {
-      this.sampleResponse.clear();
-      this.sampleResponse.putAll(sampleResponse);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage sampleRequest(String key, Object value) {
-      this.sampleRequest.put(key, value);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage putAllSampleRequest(Map<String, Object> sampleRequest) {
-      this.sampleRequest.putAll(sampleRequest);
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter(
-        value = "sampleRequest",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage sampleRequest(Map<String, Object> sampleRequest) {
-      this.sampleRequest.clear();
-      this.sampleRequest.putAll(sampleRequest);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addAllResponseSchema(List<Object> responseSchema) {
-      this.responseSchema.addAll(responseSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addResponseSchema(Object responseSchema) {
-      this.responseSchema.add(responseSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter(
-        value = "responseSchema",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage responseSchema(List<Object> responseSchema) {
-      this.responseSchema.clear();
-      this.responseSchema.addAll(responseSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addAllRequestSchema(List<Object> requestSchema) {
-      this.requestSchema.addAll(requestSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage addRequestSchema(Object requestSchema) {
-      this.requestSchema.add(requestSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter(
-        value = "requestSchema",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage requestSchema(List<Object> requestSchema) {
-      this.requestSchema.clear();
-      this.requestSchema.addAll(requestSchema);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage testRequest(String key, Object value) {
-      this.testRequest.put(key, value);
-      return this;
-    }
-
-    @java.lang.Override
-    public _FinalStage putAllTestRequest(Map<String, Object> testRequest) {
-      this.testRequest.putAll(testRequest);
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter(
-        value = "testRequest",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage testRequest(Map<String, Object> testRequest) {
-      this.testRequest.clear();
-      this.testRequest.putAll(testRequest);
-      return this;
-    }
-
-    @java.lang.Override
     public ImportRuleRequest build() {
-      return new ImportRuleRequest(id, createdAt, slug, updatedAt, testRequest, name, description, requestSchema, responseSchema, sampleRequest, sampleResponse, conditions, published, history, additionalProperties);
+      return new ImportRuleRequest(rule, additionalProperties);
     }
   }
 }

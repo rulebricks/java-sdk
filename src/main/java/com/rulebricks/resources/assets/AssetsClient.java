@@ -30,7 +30,7 @@ import resources.assets.requests.ListRulesRequest;
 import resources.assets.requests.UpsertFolderRequest;
 import resources.assets.types.DeleteFolderResponse;
 import resources.assets.types.DeleteRuleResponse;
-import resources.assets.types.ImportRuleResponse;
+import resources.assets.types.ListFlowsResponseItem;
 import resources.assets.types.ListFoldersResponseItem;
 import resources.assets.types.ListRulesResponseItem;
 import resources.assets.types.UpsertFolderResponse;
@@ -125,14 +125,15 @@ public class AssetsClient {
     /**
      * Import a rule into the user's account.
      */
-    public ImportRuleResponse importRule(ImportRuleRequest request) {
+    public Map<String, Object> importRule(ImportRuleRequest request) {
       return importRule(request,null);
     }
 
     /**
      * Import a rule into the user's account.
      */
-    public ImportRuleResponse importRule(ImportRuleRequest request, RequestOptions requestOptions) {
+    public Map<String, Object> importRule(ImportRuleRequest request,
+        RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("api/v1/admin/rules/import")
@@ -153,7 +154,7 @@ public class AssetsClient {
       try {
         Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), ImportRuleResponse.class);
+          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<Map<String, Object>>() {});
         }
         throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
       }
@@ -207,14 +208,14 @@ public class AssetsClient {
       /**
        * List all flows in the organization.
        */
-      public void listFlows() {
-        listFlows(null);
+      public List<ListFlowsResponseItem> listFlows() {
+        return listFlows(null);
       }
 
       /**
        * List all flows in the organization.
        */
-      public void listFlows(RequestOptions requestOptions) {
+      public List<ListFlowsResponseItem> listFlows(RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/flows/list")
@@ -223,11 +224,12 @@ public class AssetsClient {
           .url(httpUrl)
           .method("GET", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
           .build();
         try {
           Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
           if (response.isSuccessful()) {
-            return;
+            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFlowsResponseItem>>() {});
           }
           throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
         }

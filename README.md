@@ -1,6 +1,11 @@
-# Rulebricks Java SDK
+![Banner](banner.png)
 
-This SDK allows you to easily integrate Rulebricks' powerful rule engine into your Java applications.
+<p>
+    <a href="https://search.maven.org/artifact/com.rulebricks/rulebricks-sdk-java" alt="Maven Central">
+        <img src="https://img.shields.io/maven-central/v/com.rulebricks/rulebricks-sdk-java" /></a>
+    <a href="https://github.com/rulebricks/java-sdk" alt="License">
+        <img src="https://img.shields.io/github/license/rulebricks/java-sdk" /></a>
+</p>
 
 ## Installation
 
