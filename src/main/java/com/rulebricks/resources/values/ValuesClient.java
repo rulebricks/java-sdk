@@ -4,30 +4,34 @@
 
 package resources.values;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import core.ApiError;
 import core.ClientOptions;
 import core.MediaTypes;
 import core.ObjectMappers;
+import core.QueryStringMapper;
 import core.RequestOptions;
+import core.RulebricksApiApiException;
+import core.RulebricksApiException;
+import errors.BadRequestError;
+import errors.InternalServerError;
+import errors.NotFoundError;
 import java.io.IOException;
-import java.lang.Exception;
 import java.lang.Object;
-import java.lang.RuntimeException;
 import java.lang.String;
 import java.util.List;
-import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import resources.values.requests.DeleteDynamicValueRequest;
 import resources.values.requests.ListDynamicValuesRequest;
-import resources.values.types.DeleteDynamicValueResponse;
-import resources.values.types.ListDynamicValuesResponseItem;
-import resources.values.types.UpdateRequestValue;
-import resources.values.types.UpdateResponseItem;
+import resources.values.requests.UpdateValuesRequest;
+import types.DynamicValue;
+import types.SuccessMessage;
 
 public class ValuesClient {
   protected final ClientOptions clientOptions;
@@ -39,56 +43,70 @@ public class ValuesClient {
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<ListDynamicValuesResponseItem> listDynamicValues() {
+  public List<DynamicValue> listDynamicValues() {
     return listDynamicValues(ListDynamicValuesRequest.builder().build());
   }
 
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<ListDynamicValuesResponseItem> listDynamicValues(ListDynamicValuesRequest request) {
+  public List<DynamicValue> listDynamicValues(ListDynamicValuesRequest request) {
     return listDynamicValues(request,null);
   }
 
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<ListDynamicValuesResponseItem> listDynamicValues(ListDynamicValuesRequest request,
+  public List<DynamicValue> listDynamicValues(ListDynamicValuesRequest request,
       RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/values");if (request.getName().isPresent()) {
-        httpUrl.addQueryParameter("name", request.getName().get());
+        QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json");
+        .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json");
       Request okhttpRequest = _requestBuilder.build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListDynamicValuesResponseItem>>() {});
+          return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<DynamicValue>>() {});
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        try {
+          if (response.code() == 500) {
+            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RulebricksApiException("Network error executing HTTP request", e);
       }
     }
 
     /**
      * Update existing dynamic values or add new ones for the authenticated user.
      */
-    public List<UpdateResponseItem> update(Map<String, UpdateRequestValue> request) {
-      return update(request,null);
+    public List<DynamicValue> updateValues(UpdateValuesRequest request) {
+      return updateValues(request,null);
     }
 
     /**
      * Update existing dynamic values or add new ones for the authenticated user.
      */
-    public List<UpdateResponseItem> update(Map<String, UpdateRequestValue> request,
+    public List<DynamicValue> updateValues(UpdateValuesRequest request,
         RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -98,57 +116,88 @@ public class ValuesClient {
       try {
         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
       }
-      catch(Exception e) {
-        throw new RuntimeException(e);
+      catch(JsonProcessingException e) {
+        throw new RulebricksApiException("Failed to serialize request", e);
       }
       Request okhttpRequest = new Request.Builder()
         .url(httpUrl)
         .method("POST", body)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
         .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json")
         .build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<UpdateResponseItem>>() {});
+          return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<DynamicValue>>() {});
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        try {
+          switch (response.code()) {
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RulebricksApiException("Network error executing HTTP request", e);
       }
     }
 
     /**
      * Delete a specific dynamic value for the authenticated user by its ID.
      */
-    public DeleteDynamicValueResponse deleteDynamicValue(DeleteDynamicValueRequest request) {
+    public SuccessMessage deleteDynamicValue(DeleteDynamicValueRequest request) {
       return deleteDynamicValue(request,null);
     }
 
     /**
      * Delete a specific dynamic value for the authenticated user by its ID.
      */
-    public DeleteDynamicValueResponse deleteDynamicValue(DeleteDynamicValueRequest request,
+    public SuccessMessage deleteDynamicValue(DeleteDynamicValueRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("api/v1/values");httpUrl.addQueryParameter("id", request.getId());
+        .addPathSegments("api/v1/values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
         Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("DELETE", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
-          .addHeader("Content-Type", "application/json");
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json");
         Request okhttpRequest = _requestBuilder.build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteDynamicValueResponse.class);
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SuccessMessage.class);
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
     }

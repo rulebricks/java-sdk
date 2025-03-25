@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import core.ObjectMappers;
 import java.lang.Object;
@@ -18,18 +17,18 @@ import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = DeleteRuleRequest.Builder.class
 )
 public final class DeleteRuleRequest {
-  private final Optional<String> id;
+  private final String id;
 
   private final Map<String, Object> additionalProperties;
 
-  private DeleteRuleRequest(Optional<String> id, Map<String, Object> additionalProperties) {
+  private DeleteRuleRequest(String id, Map<String, Object> additionalProperties) {
     this.id = id;
     this.additionalProperties = additionalProperties;
   }
@@ -38,7 +37,7 @@ public final class DeleteRuleRequest {
    * @return The ID of the rule to delete.
    */
   @JsonProperty("id")
-  public Optional<String> getId() {
+  public String getId() {
     return id;
   }
 
@@ -67,15 +66,25 @@ public final class DeleteRuleRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static IdStage builder() {
     return new Builder();
+  }
+
+  public interface IdStage {
+    _FinalStage id(@NotNull String id);
+
+    Builder from(DeleteRuleRequest other);
+  }
+
+  public interface _FinalStage {
+    DeleteRuleRequest build();
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> id = Optional.empty();
+  public static final class Builder implements IdStage, _FinalStage {
+    private String id;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -83,25 +92,24 @@ public final class DeleteRuleRequest {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(DeleteRuleRequest other) {
       id(other.getId());
       return this;
     }
 
-    @JsonSetter(
-        value = "id",
-        nulls = Nulls.SKIP
-    )
-    public Builder id(Optional<String> id) {
-      this.id = id;
+    /**
+     * <p>The ID of the rule to delete.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("id")
+    public _FinalStage id(@NotNull String id) {
+      this.id = Objects.requireNonNull(id, "id must not be null");
       return this;
     }
 
-    public Builder id(String id) {
-      this.id = Optional.of(id);
-      return this;
-    }
-
+    @java.lang.Override
     public DeleteRuleRequest build() {
       return new DeleteRuleRequest(id, additionalProperties);
     }

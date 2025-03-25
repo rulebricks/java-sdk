@@ -4,27 +4,31 @@
 
 package resources.users;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import core.ApiError;
 import core.ClientOptions;
 import core.MediaTypes;
 import core.ObjectMappers;
 import core.RequestOptions;
+import core.RulebricksApiApiException;
+import core.RulebricksApiException;
+import errors.BadRequestError;
+import errors.InternalServerError;
 import java.io.IOException;
-import java.lang.Exception;
 import java.lang.Object;
-import java.lang.RuntimeException;
+import java.lang.String;
 import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import resources.users.requests.CreateGroupRequest;
-import resources.users.requests.InviteRequest;
-import resources.users.types.CreateGroupResponse;
-import resources.users.types.InviteResponse;
-import resources.users.types.ListGroupsResponseItem;
+import okhttp3.ResponseBody;
+import resources.users.requests.CreateUserGroupRequest;
+import resources.users.requests.UserInviteRequest;
+import types.UserGroup;
+import types.UserInviteResponse;
 
 public class UsersClient {
   protected final ClientOptions clientOptions;
@@ -34,16 +38,16 @@ public class UsersClient {
   }
 
   /**
-   * Invite a new user to the organization or update groupspermissions for an existing user.
+   * Invite a new user to the organization or update role or access group data for an existing user.
    */
-  public InviteResponse invite(InviteRequest request) {
-    return invite(request,null);
+  public UserInviteResponse inviteUser(UserInviteRequest request) {
+    return inviteUser(request,null);
   }
 
   /**
-   * Invite a new user to the organization or update groupspermissions for an existing user.
+   * Invite a new user to the organization or update role or access group data for an existing user.
    */
-  public InviteResponse invite(InviteRequest request, RequestOptions requestOptions) {
+  public UserInviteResponse inviteUser(UserInviteRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/users/invite")
@@ -52,38 +56,53 @@ public class UsersClient {
     try {
       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
     }
-    catch(Exception e) {
-      throw new RuntimeException(e);
+    catch(JsonProcessingException e) {
+      throw new RulebricksApiException("Failed to serialize request", e);
     }
     Request okhttpRequest = new Request.Builder()
       .url(httpUrl)
       .method("POST", body)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), InviteResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), UserInviteResponse.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * List all user groups available in your Rulebricks organization.
    */
-  public List<ListGroupsResponseItem> listGroups() {
+  public List<UserGroup> listGroups() {
     return listGroups(null);
   }
 
   /**
    * List all user groups available in your Rulebricks organization.
    */
-  public List<ListGroupsResponseItem> listGroups(RequestOptions requestOptions) {
+  public List<UserGroup> listGroups(RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/users/groups")
@@ -93,31 +112,44 @@ public class UsersClient {
       .method("GET", null)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListGroupsResponseItem>>() {});
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<UserGroup>>() {});
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        if (response.code() == 500) {
+          throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Create a new user group in your Rulebricks organization.
    */
-  public CreateGroupResponse createGroup(CreateGroupRequest request) {
+  public UserGroup createGroup(CreateUserGroupRequest request) {
     return createGroup(request,null);
   }
 
   /**
    * Create a new user group in your Rulebricks organization.
    */
-  public CreateGroupResponse createGroup(CreateGroupRequest request,
-      RequestOptions requestOptions) {
+  public UserGroup createGroup(CreateUserGroupRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/users/groups")
@@ -126,24 +158,39 @@ public class UsersClient {
     try {
       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
     }
-    catch(Exception e) {
-      throw new RuntimeException(e);
+    catch(JsonProcessingException e) {
+      throw new RulebricksApiException("Failed to serialize request", e);
     }
     Request okhttpRequest = new Request.Builder()
       .url(httpUrl)
       .method("POST", body)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateGroupResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), UserGroup.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 }

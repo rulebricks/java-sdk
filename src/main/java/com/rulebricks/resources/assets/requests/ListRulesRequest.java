@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ListRulesRequest.Builder.class
 )
@@ -98,7 +98,7 @@ public final class ListRulesRequest {
     }
 
     public Builder folder(String folder) {
-      this.folder = Optional.of(folder);
+      this.folder = Optional.ofNullable(folder);
       return this;
     }
 

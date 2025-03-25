@@ -4,31 +4,30 @@
 
 package resources.tests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import core.ApiError;
 import core.ClientOptions;
 import core.MediaTypes;
 import core.ObjectMappers;
 import core.RequestOptions;
+import core.RulebricksApiApiException;
+import core.RulebricksApiException;
+import errors.BadRequestError;
+import errors.InternalServerError;
+import errors.NotFoundError;
 import java.io.IOException;
-import java.lang.Exception;
 import java.lang.Object;
-import java.lang.RuntimeException;
 import java.lang.String;
 import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import resources.tests.requests.CreateFlowTestRequest;
-import resources.tests.requests.CreateRuleTestRequest;
-import resources.tests.types.CreateFlowTestResponse;
-import resources.tests.types.CreateRuleTestResponse;
-import resources.tests.types.DeleteFlowTestResponse;
-import resources.tests.types.DeleteRuleTestResponse;
-import resources.tests.types.ListFlowTestsResponseItem;
-import resources.tests.types.ListRuleTestsResponseItem;
+import okhttp3.ResponseBody;
+import types.CreateTestRequest;
+import types.Test;
 
 public class TestsClient {
   protected final ClientOptions clientOptions;
@@ -40,14 +39,14 @@ public class TestsClient {
   /**
    * Retrieves a list of tests associated with the rule identified by the slug.
    */
-  public List<ListRuleTestsResponseItem> listRuleTests(String slug) {
+  public List<Test> listRuleTests(String slug) {
     return listRuleTests(slug,null);
   }
 
   /**
    * Retrieves a list of tests associated with the rule identified by the slug.
    */
-  public List<ListRuleTestsResponseItem> listRuleTests(String slug, RequestOptions requestOptions) {
+  public List<Test> listRuleTests(String slug, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/rules")
@@ -59,30 +58,45 @@ public class TestsClient {
       .method("GET", null)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRuleTestsResponseItem>>() {});
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<Test>>() {});
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Adds a new test to the test suite of a rule identified by the slug.
    */
-  public CreateRuleTestResponse createRuleTest(String slug, CreateRuleTestRequest request) {
+  public Test createRuleTest(String slug, CreateTestRequest request) {
     return createRuleTest(slug,request,null);
   }
 
   /**
    * Adds a new test to the test suite of a rule identified by the slug.
    */
-  public CreateRuleTestResponse createRuleTest(String slug, CreateRuleTestRequest request,
+  public Test createRuleTest(String slug, CreateTestRequest request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -94,39 +108,54 @@ public class TestsClient {
     try {
       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
     }
-    catch(Exception e) {
-      throw new RuntimeException(e);
+    catch(JsonProcessingException e) {
+      throw new RulebricksApiException("Failed to serialize request", e);
     }
     Request okhttpRequest = new Request.Builder()
       .url(httpUrl)
       .method("POST", body)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateRuleTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Test.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Deletes a test from the test suite of a rule identified by the slug.
    */
-  public DeleteRuleTestResponse deleteRuleTest(String slug, String testId) {
+  public Test deleteRuleTest(String slug, String testId) {
     return deleteRuleTest(slug,testId,null);
   }
 
   /**
    * Deletes a test from the test suite of a rule identified by the slug.
    */
-  public DeleteRuleTestResponse deleteRuleTest(String slug, String testId,
-      RequestOptions requestOptions) {
+  public Test deleteRuleTest(String slug, String testId, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/rules")
@@ -139,30 +168,45 @@ public class TestsClient {
       .method("DELETE", null)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteRuleTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Test.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Retrieves a list of tests associated with the flow identified by the slug.
    */
-  public List<ListFlowTestsResponseItem> listFlowTests(String slug) {
+  public List<Test> listFlowTests(String slug) {
     return listFlowTests(slug,null);
   }
 
   /**
    * Retrieves a list of tests associated with the flow identified by the slug.
    */
-  public List<ListFlowTestsResponseItem> listFlowTests(String slug, RequestOptions requestOptions) {
+  public List<Test> listFlowTests(String slug, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/flows")
@@ -174,30 +218,45 @@ public class TestsClient {
       .method("GET", null)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFlowTestsResponseItem>>() {});
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<Test>>() {});
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Adds a new test to the test suite of a flow identified by the slug.
    */
-  public CreateFlowTestResponse createFlowTest(String slug, CreateFlowTestRequest request) {
+  public Test createFlowTest(String slug, CreateTestRequest request) {
     return createFlowTest(slug,request,null);
   }
 
   /**
    * Adds a new test to the test suite of a flow identified by the slug.
    */
-  public CreateFlowTestResponse createFlowTest(String slug, CreateFlowTestRequest request,
+  public Test createFlowTest(String slug, CreateTestRequest request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -209,39 +268,54 @@ public class TestsClient {
     try {
       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
     }
-    catch(Exception e) {
-      throw new RuntimeException(e);
+    catch(JsonProcessingException e) {
+      throw new RulebricksApiException("Failed to serialize request", e);
     }
     Request okhttpRequest = new Request.Builder()
       .url(httpUrl)
       .method("POST", body)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), CreateFlowTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Test.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
   /**
    * Deletes a test from the test suite of a flow identified by the slug.
    */
-  public DeleteFlowTestResponse deleteFlowTest(String slug, String testId) {
+  public Test deleteFlowTest(String slug, String testId) {
     return deleteFlowTest(slug,testId,null);
   }
 
   /**
    * Deletes a test from the test suite of a flow identified by the slug.
    */
-  public DeleteFlowTestResponse deleteFlowTest(String slug, String testId,
-      RequestOptions requestOptions) {
+  public Test deleteFlowTest(String slug, String testId, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/flows")
@@ -254,16 +328,31 @@ public class TestsClient {
       .method("DELETE", null)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteFlowTestResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Test.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 }

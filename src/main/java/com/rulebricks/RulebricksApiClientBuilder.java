@@ -5,14 +5,20 @@
 import core.ClientOptions;
 import core.Environment;
 import java.lang.String;
+import okhttp3.OkHttpClient;
 
 public final class RulebricksApiClientBuilder {
   private ClientOptions.Builder clientOptionsBuilder = ClientOptions.builder();
 
+  private String apiKey = null;
+
   private Environment environment;
 
+  /**
+   * Sets apiKey
+   */
   public RulebricksApiClientBuilder apiKey(String apiKey) {
-    this.clientOptionsBuilder.addHeader("x-api-key", apiKey);
+    this.apiKey = apiKey;
     return this;
   }
 
@@ -21,7 +27,35 @@ public final class RulebricksApiClientBuilder {
     return this;
   }
 
+  /**
+   * Sets the timeout (in seconds) for the client. Defaults to 60 seconds.
+   */
+  public RulebricksApiClientBuilder timeout(int timeout) {
+    this.clientOptionsBuilder.timeout(timeout);
+    return this;
+  }
+
+  /**
+   * Sets the maximum number of retries for the client. Defaults to 2 retries.
+   */
+  public RulebricksApiClientBuilder maxRetries(int maxRetries) {
+    this.clientOptionsBuilder.maxRetries(maxRetries);
+    return this;
+  }
+
+  /**
+   * Sets the underlying OkHttp client
+   */
+  public RulebricksApiClientBuilder httpClient(OkHttpClient httpClient) {
+    this.clientOptionsBuilder.httpClient(httpClient);
+    return this;
+  }
+
   public RulebricksApiClient build() {
+    if (apiKey == null) {
+      throw new RuntimeException("Please provide apiKey");
+    }
+    this.clientOptionsBuilder.addHeader("x-api-key", this.apiKey);
     clientOptionsBuilder.environment(this.environment);
     return new RulebricksApiClient(clientOptionsBuilder.build());
   }

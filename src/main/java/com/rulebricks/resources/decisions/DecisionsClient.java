@@ -4,19 +4,26 @@
 
 package resources.decisions;
 
-import core.ApiError;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import core.ClientOptions;
 import core.ObjectMappers;
+import core.QueryStringMapper;
 import core.RequestOptions;
+import core.RulebricksApiApiException;
+import core.RulebricksApiException;
+import errors.BadRequestError;
+import errors.InternalServerError;
 import java.io.IOException;
 import java.lang.Object;
-import java.lang.RuntimeException;
+import java.lang.String;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import resources.decisions.requests.QueryRequest;
-import resources.decisions.types.QueryResponse;
+import okhttp3.ResponseBody;
+import resources.decisions.requests.QueryDecisionsRequest;
+import types.DecisionLogResponse;
 
 public class DecisionsClient {
   protected final ClientOptions clientOptions;
@@ -28,44 +35,60 @@ public class DecisionsClient {
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public QueryResponse query(QueryRequest request) {
-    return query(request,null);
+  public DecisionLogResponse queryDecisions(QueryDecisionsRequest request) {
+    return queryDecisions(request,null);
   }
 
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public QueryResponse query(QueryRequest request, RequestOptions requestOptions) {
+  public DecisionLogResponse queryDecisions(QueryDecisionsRequest request,
+      RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("api/v1/decisions/query");httpUrl.addQueryParameter("slug", request.getSlug());
+      .addPathSegments("api/v1/decisions/query");QueryStringMapper.addQueryParameter(httpUrl, "slug", request.getSlug(), false);
       if (request.getFrom().isPresent()) {
-        httpUrl.addQueryParameter("from", request.getFrom().get().toString());
+        QueryStringMapper.addQueryParameter(httpUrl, "from", request.getFrom().get().toString(), false);
       }
       if (request.getTo().isPresent()) {
-        httpUrl.addQueryParameter("to", request.getTo().get().toString());
+        QueryStringMapper.addQueryParameter(httpUrl, "to", request.getTo().get().toString(), false);
       }
       if (request.getCursor().isPresent()) {
-        httpUrl.addQueryParameter("cursor", request.getCursor().get());
+        QueryStringMapper.addQueryParameter(httpUrl, "cursor", request.getCursor().get(), false);
       }
       if (request.getLimit().isPresent()) {
-        httpUrl.addQueryParameter("limit", request.getLimit().get().toString());
+        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get().toString(), false);
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json");
+        .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json");
       Request okhttpRequest = _requestBuilder.build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), QueryResponse.class);
+          return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), DecisionLogResponse.class);
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        try {
+          switch (response.code()) {
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RulebricksApiException("Network error executing HTTP request", e);
       }
     }
   }

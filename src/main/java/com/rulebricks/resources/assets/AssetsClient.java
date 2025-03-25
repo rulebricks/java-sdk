@@ -4,37 +4,43 @@
 
 package resources.assets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import core.ApiError;
 import core.ClientOptions;
 import core.MediaTypes;
 import core.ObjectMappers;
+import core.QueryStringMapper;
 import core.RequestOptions;
+import core.RulebricksApiApiException;
+import core.RulebricksApiException;
+import errors.BadRequestError;
+import errors.ForbiddenError;
+import errors.InternalServerError;
+import errors.NotFoundError;
 import java.io.IOException;
-import java.lang.Exception;
 import java.lang.Object;
-import java.lang.RuntimeException;
 import java.lang.String;
 import java.util.List;
 import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import resources.assets.requests.DeleteFolderRequest;
 import resources.assets.requests.DeleteRuleRequest;
 import resources.assets.requests.ExportRuleRequest;
 import resources.assets.requests.ImportRuleRequest;
 import resources.assets.requests.ListRulesRequest;
 import resources.assets.requests.UpsertFolderRequest;
-import resources.assets.types.DeleteFolderResponse;
-import resources.assets.types.DeleteRuleResponse;
-import resources.assets.types.ListFlowsResponseItem;
-import resources.assets.types.ListFoldersResponseItem;
-import resources.assets.types.ListRulesResponseItem;
-import resources.assets.types.UpsertFolderResponse;
-import resources.assets.types.UsageResponse;
+import types.Error;
+import types.FlowDetail;
+import types.Folder;
+import types.RuleDetail;
+import types.SuccessMessage;
+import types.UsageStatistics;
 
 public class AssetsClient {
   protected final ClientOptions clientOptions;
@@ -46,21 +52,14 @@ public class AssetsClient {
   /**
    * Delete a specific rule by its ID.
    */
-  public DeleteRuleResponse deleteRule() {
-    return deleteRule(DeleteRuleRequest.builder().build());
-  }
-
-  /**
-   * Delete a specific rule by its ID.
-   */
-  public DeleteRuleResponse deleteRule(DeleteRuleRequest request) {
+  public SuccessMessage deleteRule(DeleteRuleRequest request) {
     return deleteRule(request,null);
   }
 
   /**
    * Delete a specific rule by its ID.
    */
-  public DeleteRuleResponse deleteRule(DeleteRuleRequest request, RequestOptions requestOptions) {
+  public SuccessMessage deleteRule(DeleteRuleRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/admin/rules/delete")
@@ -69,24 +68,40 @@ public class AssetsClient {
     try {
       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
     }
-    catch(Exception e) {
-      throw new RuntimeException(e);
+    catch(JsonProcessingException e) {
+      throw new RulebricksApiException("Failed to serialize request", e);
     }
     Request okhttpRequest = new Request.Builder()
       .url(httpUrl)
       .method("DELETE", body)
       .headers(Headers.of(clientOptions.headers(requestOptions)))
       .addHeader("Content-Type", "application/json")
+      .addHeader("Accept", "application/json")
       .build();
-    try {
-      Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+    OkHttpClient client = clientOptions.httpClient();
+    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+      client = clientOptions.httpClientWithTimeout(requestOptions);
+    }
+    try (Response response = client.newCall(okhttpRequest).execute()) {
+      ResponseBody responseBody = response.body();
       if (response.isSuccessful()) {
-        return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteRuleResponse.class);
+        return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SuccessMessage.class);
       }
-      throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+      try {
+        switch (response.code()) {
+          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+        }
+      }
+      catch (JsonProcessingException ignored) {
+        // unable to map error response, throwing generic error
+      }
+      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
     }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RulebricksApiException("Network error executing HTTP request", e);
     }
   }
 
@@ -103,22 +118,38 @@ public class AssetsClient {
   public Map<String, Object> exportRule(ExportRuleRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("api/v1/admin/rules/export");httpUrl.addQueryParameter("id", request.getId());
+      .addPathSegments("api/v1/admin/rules/export");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json");
+        .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json");
       Request okhttpRequest = _requestBuilder.build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<Map<String, Object>>() {});
+          return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<Map<String, Object>>() {});
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        try {
+          switch (response.code()) {
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RulebricksApiException("Network error executing HTTP request", e);
       }
     }
 
@@ -142,80 +173,110 @@ public class AssetsClient {
       try {
         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
       }
-      catch(Exception e) {
-        throw new RuntimeException(e);
+      catch(JsonProcessingException e) {
+        throw new RulebricksApiException("Failed to serialize request", e);
       }
       Request okhttpRequest = new Request.Builder()
         .url(httpUrl)
         .method("POST", body)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
         .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json")
         .build();
-      try {
-        Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
         if (response.isSuccessful()) {
-          return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<Map<String, Object>>() {});
+          return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<Map<String, Object>>() {});
         }
-        throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        try {
+          switch (response.code()) {
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class));
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
       }
       catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RulebricksApiException("Network error executing HTTP request", e);
       }
     }
 
     /**
      * List all rules in the organization. Optionally filter by folder name or ID.
      */
-    public List<ListRulesResponseItem> listRules() {
+    public List<RuleDetail> listRules() {
       return listRules(ListRulesRequest.builder().build());
     }
 
     /**
      * List all rules in the organization. Optionally filter by folder name or ID.
      */
-    public List<ListRulesResponseItem> listRules(ListRulesRequest request) {
+    public List<RuleDetail> listRules(ListRulesRequest request) {
       return listRules(request,null);
     }
 
     /**
      * List all rules in the organization. Optionally filter by folder name or ID.
      */
-    public List<ListRulesResponseItem> listRules(ListRulesRequest request,
-        RequestOptions requestOptions) {
+    public List<RuleDetail> listRules(ListRulesRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("api/v1/admin/rules/list");if (request.getFolder().isPresent()) {
-          httpUrl.addQueryParameter("folder", request.getFolder().get());
+          QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
         }
         Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("GET", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
-          .addHeader("Content-Type", "application/json");
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json");
         Request okhttpRequest = _requestBuilder.build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListRulesResponseItem>>() {});
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<RuleDetail>>() {});
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
 
       /**
        * List all flows in the organization.
        */
-      public List<ListFlowsResponseItem> listFlows() {
+      public List<FlowDetail> listFlows() {
         return listFlows(null);
       }
 
       /**
        * List all flows in the organization.
        */
-      public List<ListFlowsResponseItem> listFlows(RequestOptions requestOptions) {
+      public List<FlowDetail> listFlows(RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/flows/list")
@@ -225,30 +286,44 @@ public class AssetsClient {
           .method("GET", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
           .build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFlowsResponseItem>>() {});
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<FlowDetail>>() {});
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            if (response.code() == 500) {
+              throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
 
       /**
        * Get the rule execution usage of your organization.
        */
-      public UsageResponse usage() {
-        return usage(null);
+      public UsageStatistics getUsage() {
+        return getUsage(null);
       }
 
       /**
        * Get the rule execution usage of your organization.
        */
-      public UsageResponse usage(RequestOptions requestOptions) {
+      public UsageStatistics getUsage(RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/usage")
@@ -258,30 +333,36 @@ public class AssetsClient {
           .method("GET", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
           .build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), UsageResponse.class);
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), UsageStatistics.class);
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
 
       /**
        * Retrieve all rule folders for the authenticated user.
        */
-      public List<ListFoldersResponseItem> listFolders() {
+      public List<Folder> listFolders() {
         return listFolders(null);
       }
 
       /**
        * Retrieve all rule folders for the authenticated user.
        */
-      public List<ListFoldersResponseItem> listFolders(RequestOptions requestOptions) {
+      public List<Folder> listFolders(RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/folders")
@@ -291,31 +372,44 @@ public class AssetsClient {
           .method("GET", null)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
           .build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), new TypeReference<List<ListFoldersResponseItem>>() {});
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), new TypeReference<List<Folder>>() {});
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            if (response.code() == 500) {
+              throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
 
       /**
        * Create a new rule folder or update an existing one for the authenticated user.
        */
-      public UpsertFolderResponse upsertFolder(UpsertFolderRequest request) {
+      public Folder upsertFolder(UpsertFolderRequest request) {
         return upsertFolder(request,null);
       }
 
       /**
        * Create a new rule folder or update an existing one for the authenticated user.
        */
-      public UpsertFolderResponse upsertFolder(UpsertFolderRequest request,
-          RequestOptions requestOptions) {
+      public Folder upsertFolder(UpsertFolderRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/folders")
@@ -324,39 +418,53 @@ public class AssetsClient {
         try {
           body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
         }
-        catch(Exception e) {
-          throw new RuntimeException(e);
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
         }
         Request okhttpRequest = new Request.Builder()
           .url(httpUrl)
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
           .build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), UpsertFolderResponse.class);
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Folder.class);
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
 
       /**
        * Delete a specific rule folder for the authenticated user. This does not delete the rules within the folder.
        */
-      public DeleteFolderResponse deleteFolder(DeleteFolderRequest request) {
+      public Folder deleteFolder(DeleteFolderRequest request) {
         return deleteFolder(request,null);
       }
 
       /**
        * Delete a specific rule folder for the authenticated user. This does not delete the rules within the folder.
        */
-      public DeleteFolderResponse deleteFolder(DeleteFolderRequest request,
-          RequestOptions requestOptions) {
+      public Folder deleteFolder(DeleteFolderRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
           .addPathSegments("api/v1/admin/folders")
@@ -365,24 +473,40 @@ public class AssetsClient {
         try {
           body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
         }
-        catch(Exception e) {
-          throw new RuntimeException(e);
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
         }
         Request okhttpRequest = new Request.Builder()
           .url(httpUrl)
           .method("DELETE", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
           .build();
-        try {
-          Response response = clientOptions.httpClient().newCall(okhttpRequest).execute();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
           if (response.isSuccessful()) {
-            return ObjectMappers.JSON_MAPPER.readValue(response.body().string(), DeleteFolderResponse.class);
+            return ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Folder.class);
           }
-          throw new ApiError(response.code(), ObjectMappers.JSON_MAPPER.readValue(response.body().string(), Object.class));
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
         }
         catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
     }

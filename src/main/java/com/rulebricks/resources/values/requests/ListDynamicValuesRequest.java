@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ListDynamicValuesRequest.Builder.class
 )
@@ -99,7 +99,7 @@ public final class ListDynamicValuesRequest {
     }
 
     public Builder name(String name) {
-      this.name = Optional.of(name);
+      this.name = Optional.ofNullable(name);
       return this;
     }
 

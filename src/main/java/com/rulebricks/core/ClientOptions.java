@@ -4,9 +4,12 @@
 
 package core;
 
+import java.lang.Integer;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.OkHttpClient;
 
@@ -19,15 +22,17 @@ public final class ClientOptions {
 
   private final OkHttpClient httpClient;
 
+  private final int timeout;
+
   private ClientOptions(Environment environment, Map<String, String> headers,
-      Map<String, Supplier<String>> headerSuppliers, OkHttpClient httpClient) {
+      Map<String, Supplier<String>> headerSuppliers, OkHttpClient httpClient, int timeout) {
     this.environment = environment;
     this.headers = new HashMap<>();
     this.headers.putAll(headers);
-    this.headers.putAll(Map.of("X-Fern-SDK-Name", "com.rulebricks.fern:api-sdk", "X-Fern-SDK-Version", "0.0.108", "X-Fern-Language", "JAVA"));
+    this.headers.putAll(new HashMap<String,String>() {{put("X-Fern-Language", "JAVA");put("X-Fern-SDK-Name", "com.rulebricks.fern:api-sdk");put("X-Fern-SDK-Version", "0.0.149");}});
     this.headerSuppliers = headerSuppliers;
     this.httpClient = httpClient;
-    ;
+    this.timeout = timeout;
   }
 
   public Environment environment() {
@@ -45,8 +50,22 @@ public final class ClientOptions {
     return values;
   }
 
+  public int timeout(RequestOptions requestOptions) {
+    if (requestOptions == null) {
+      return this.timeout;
+    }
+    return requestOptions.getTimeout().orElse(this.timeout);
+  }
+
   public OkHttpClient httpClient() {
     return this.httpClient;
+  }
+
+  public OkHttpClient httpClientWithTimeout(RequestOptions requestOptions) {
+    if (requestOptions == null) {
+      return this.httpClient;
+    }
+    return this.httpClient.newBuilder().callTimeout(requestOptions.getTimeout().get(), requestOptions.getTimeoutTimeUnit()).connectTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS).build();
   }
 
   public static Builder builder() {
@@ -59,6 +78,12 @@ public final class ClientOptions {
     private final Map<String, String> headers = new HashMap<>();
 
     private final Map<String, Supplier<String>> headerSuppliers = new HashMap<>();
+
+    private int maxRetries = 2;
+
+    private Optional<Integer> timeout = Optional.empty();
+
+    private OkHttpClient httpClient = null;
 
     public Builder environment(Environment environment) {
       this.environment = environment;
@@ -75,11 +100,49 @@ public final class ClientOptions {
       return this;
     }
 
+    /**
+     * Override the timeout in seconds. Defaults to 60 seconds.
+     */
+    public Builder timeout(int timeout) {
+      this.timeout = Optional.of(timeout);
+      return this;
+    }
+
+    /**
+     * Override the timeout in seconds. Defaults to 60 seconds.
+     */
+    public Builder timeout(Optional<Integer> timeout) {
+      this.timeout = timeout;
+      return this;
+    }
+
+    /**
+     * Override the maximum number of retries. Defaults to 2 retries.
+     */
+    public Builder maxRetries(int maxRetries) {
+      this.maxRetries = maxRetries;
+      return this;
+    }
+
+    public Builder httpClient(OkHttpClient httpClient) {
+      this.httpClient = httpClient;
+      return this;
+    }
+
     public ClientOptions build() {
-      OkHttpClient okhttpClient = new OkHttpClient.Builder()
-              .addInterceptor(new RetryInterceptor(3))
-              .build();
-      return new ClientOptions(environment, headers, headerSuppliers, okhttpClient);
+      OkHttpClient.Builder httpClientBuilder = this.httpClient != null ? this.httpClient.newBuilder() : new OkHttpClient.Builder();
+
+      if (this.httpClient != null) {
+        timeout.ifPresent(timeout -> httpClientBuilder.callTimeout(timeout, TimeUnit.SECONDS).connectTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS));
+      }
+      else {
+        httpClientBuilder.callTimeout(this.timeout.orElse(60), TimeUnit.SECONDS).connectTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS).addInterceptor(new RetryInterceptor(this.maxRetries));
+      }
+
+      this.httpClient = httpClientBuilder.build();
+      this.timeout = Optional.of(httpClient.callTimeoutMillis() / 1000);
+
+      return new ClientOptions(environment, headers, headerSuppliers, httpClient, this.timeout.get());
     }
   }
 }
