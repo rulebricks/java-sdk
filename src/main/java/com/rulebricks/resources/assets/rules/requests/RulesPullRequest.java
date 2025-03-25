@@ -21,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = RulesExportRequest.Builder.class
+    builder = RulesPullRequest.Builder.class
 )
-public final class RulesExportRequest {
+public final class RulesPullRequest {
   private final String id;
 
   private final Map<String, Object> additionalProperties;
 
-  private RulesExportRequest(String id, Map<String, Object> additionalProperties) {
+  private RulesPullRequest(String id, Map<String, Object> additionalProperties) {
     this.id = id;
     this.additionalProperties = additionalProperties;
   }
@@ -44,7 +44,7 @@ public final class RulesExportRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof RulesExportRequest && equalTo((RulesExportRequest) other);
+    return other instanceof RulesPullRequest && equalTo((RulesPullRequest) other);
   }
 
   @JsonAnyGetter
@@ -52,7 +52,7 @@ public final class RulesExportRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(RulesExportRequest other) {
+  private boolean equalTo(RulesPullRequest other) {
     return id.equals(other.id);
   }
 
@@ -73,11 +73,11 @@ public final class RulesExportRequest {
   public interface IdStage {
     _FinalStage id(@NotNull String id);
 
-    Builder from(RulesExportRequest other);
+    Builder from(RulesPullRequest other);
   }
 
   public interface _FinalStage {
-    RulesExportRequest build();
+    RulesPullRequest build();
   }
 
   @JsonIgnoreProperties(
@@ -93,7 +93,7 @@ public final class RulesExportRequest {
     }
 
     @java.lang.Override
-    public Builder from(RulesExportRequest other) {
+    public Builder from(RulesPullRequest other) {
       id(other.getId());
       return this;
     }
@@ -110,8 +110,8 @@ public final class RulesExportRequest {
     }
 
     @java.lang.Override
-    public RulesExportRequest build() {
-      return new RulesExportRequest(id, additionalProperties);
+    public RulesPullRequest build() {
+      return new RulesPullRequest(id, additionalProperties);
     }
   }
 }

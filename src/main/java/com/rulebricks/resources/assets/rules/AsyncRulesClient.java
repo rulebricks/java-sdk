@@ -36,8 +36,8 @@ import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import resources.assets.rules.requests.DeleteRuleRequest;
 import resources.assets.rules.requests.ImportRuleRequest;
-import resources.assets.rules.requests.RulesExportRequest;
 import resources.assets.rules.requests.RulesListRequest;
+import resources.assets.rules.requests.RulesPullRequest;
 import types.Error;
 import types.RuleDetail;
 import types.SuccessMessage;
@@ -125,14 +125,14 @@ public class AsyncRulesClient {
   /**
    * Export a specific rule by its ID.
    */
-  public CompletableFuture<Map<String, Object>> export(RulesExportRequest request) {
-    return export(request,null);
+  public CompletableFuture<Map<String, Object>> pull(RulesPullRequest request) {
+    return pull(request,null);
   }
 
   /**
    * Export a specific rule by its ID.
    */
-  public CompletableFuture<Map<String, Object>> export(RulesExportRequest request,
+  public CompletableFuture<Map<String, Object>> pull(RulesPullRequest request,
       RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -190,14 +190,14 @@ public class AsyncRulesClient {
     /**
      * Import a rule into the user's account.
      */
-    public CompletableFuture<Map<String, Object>> import_(ImportRuleRequest request) {
-      return import_(request,null);
+    public CompletableFuture<Map<String, Object>> push(ImportRuleRequest request) {
+      return push(request,null);
     }
 
     /**
      * Import a rule into the user's account.
      */
-    public CompletableFuture<Map<String, Object>> import_(ImportRuleRequest request,
+    public CompletableFuture<Map<String, Object>> push(ImportRuleRequest request,
         RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
