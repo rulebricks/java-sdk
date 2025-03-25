@@ -36,14 +36,14 @@ public class FlowsClient {
   /**
    * Execute a flow by its slug.
    */
-  public Map<String, Object> executeFlow(String slug, Map<String, Object> request) {
-    return executeFlow(slug,request,null);
+  public Map<String, Object> execute(String slug, Map<String, Object> request) {
+    return execute(slug,request,null);
   }
 
   /**
    * Execute a flow by its slug.
    */
-  public Map<String, Object> executeFlow(String slug, Map<String, Object> request,
+  public Map<String, Object> execute(String slug, Map<String, Object> request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 

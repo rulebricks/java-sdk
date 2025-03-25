@@ -27,8 +27,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import resources.values.requests.DeleteDynamicValueRequest;
-import resources.values.requests.ListDynamicValuesRequest;
+import resources.values.requests.DeleteRequest;
+import resources.values.requests.ListRequest;
 import resources.values.requests.UpdateValuesRequest;
 import types.DynamicValue;
 import types.SuccessMessage;
@@ -43,22 +43,21 @@ public class ValuesClient {
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<DynamicValue> listDynamicValues() {
-    return listDynamicValues(ListDynamicValuesRequest.builder().build());
+  public List<DynamicValue> list() {
+    return list(ListRequest.builder().build());
   }
 
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<DynamicValue> listDynamicValues(ListDynamicValuesRequest request) {
-    return listDynamicValues(request,null);
+  public List<DynamicValue> list(ListRequest request) {
+    return list(request,null);
   }
 
   /**
    * Retrieve all dynamic values for the authenticated user.
    */
-  public List<DynamicValue> listDynamicValues(ListDynamicValuesRequest request,
-      RequestOptions requestOptions) {
+  public List<DynamicValue> list(ListRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/values");if (request.getName().isPresent()) {
@@ -99,15 +98,14 @@ public class ValuesClient {
     /**
      * Update existing dynamic values or add new ones for the authenticated user.
      */
-    public List<DynamicValue> updateValues(UpdateValuesRequest request) {
-      return updateValues(request,null);
+    public List<DynamicValue> update(UpdateValuesRequest request) {
+      return update(request,null);
     }
 
     /**
      * Update existing dynamic values or add new ones for the authenticated user.
      */
-    public List<DynamicValue> updateValues(UpdateValuesRequest request,
-        RequestOptions requestOptions) {
+    public List<DynamicValue> update(UpdateValuesRequest request, RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("api/v1/values")
@@ -155,15 +153,14 @@ public class ValuesClient {
     /**
      * Delete a specific dynamic value for the authenticated user by its ID.
      */
-    public SuccessMessage deleteDynamicValue(DeleteDynamicValueRequest request) {
-      return deleteDynamicValue(request,null);
+    public SuccessMessage delete(DeleteRequest request) {
+      return delete(request,null);
     }
 
     /**
      * Delete a specific dynamic value for the authenticated user by its ID.
      */
-    public SuccessMessage deleteDynamicValue(DeleteDynamicValueRequest request,
-        RequestOptions requestOptions) {
+    public SuccessMessage delete(DeleteRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("api/v1/values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);

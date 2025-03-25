@@ -22,15 +22,14 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = ListDynamicValuesRequest.Builder.class
+    builder = ListRequest.Builder.class
 )
-public final class ListDynamicValuesRequest {
+public final class ListRequest {
   private final Optional<String> name;
 
   private final Map<String, Object> additionalProperties;
 
-  private ListDynamicValuesRequest(Optional<String> name,
-      Map<String, Object> additionalProperties) {
+  private ListRequest(Optional<String> name, Map<String, Object> additionalProperties) {
     this.name = name;
     this.additionalProperties = additionalProperties;
   }
@@ -46,7 +45,7 @@ public final class ListDynamicValuesRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ListDynamicValuesRequest && equalTo((ListDynamicValuesRequest) other);
+    return other instanceof ListRequest && equalTo((ListRequest) other);
   }
 
   @JsonAnyGetter
@@ -54,7 +53,7 @@ public final class ListDynamicValuesRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(ListDynamicValuesRequest other) {
+  private boolean equalTo(ListRequest other) {
     return name.equals(other.name);
   }
 
@@ -84,7 +83,7 @@ public final class ListDynamicValuesRequest {
     private Builder() {
     }
 
-    public Builder from(ListDynamicValuesRequest other) {
+    public Builder from(ListRequest other) {
       name(other.getName());
       return this;
     }
@@ -103,8 +102,8 @@ public final class ListDynamicValuesRequest {
       return this;
     }
 
-    public ListDynamicValuesRequest build() {
-      return new ListDynamicValuesRequest(name, additionalProperties);
+    public ListRequest build() {
+      return new ListRequest(name, additionalProperties);
     }
   }
 }

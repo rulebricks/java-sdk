@@ -21,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = DeleteDynamicValueRequest.Builder.class
+    builder = DeleteRequest.Builder.class
 )
-public final class DeleteDynamicValueRequest {
+public final class DeleteRequest {
   private final String id;
 
   private final Map<String, Object> additionalProperties;
 
-  private DeleteDynamicValueRequest(String id, Map<String, Object> additionalProperties) {
+  private DeleteRequest(String id, Map<String, Object> additionalProperties) {
     this.id = id;
     this.additionalProperties = additionalProperties;
   }
@@ -44,7 +44,7 @@ public final class DeleteDynamicValueRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof DeleteDynamicValueRequest && equalTo((DeleteDynamicValueRequest) other);
+    return other instanceof DeleteRequest && equalTo((DeleteRequest) other);
   }
 
   @JsonAnyGetter
@@ -52,7 +52,7 @@ public final class DeleteDynamicValueRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(DeleteDynamicValueRequest other) {
+  private boolean equalTo(DeleteRequest other) {
     return id.equals(other.id);
   }
 
@@ -73,11 +73,11 @@ public final class DeleteDynamicValueRequest {
   public interface IdStage {
     _FinalStage id(@NotNull String id);
 
-    Builder from(DeleteDynamicValueRequest other);
+    Builder from(DeleteRequest other);
   }
 
   public interface _FinalStage {
-    DeleteDynamicValueRequest build();
+    DeleteRequest build();
   }
 
   @JsonIgnoreProperties(
@@ -93,7 +93,7 @@ public final class DeleteDynamicValueRequest {
     }
 
     @java.lang.Override
-    public Builder from(DeleteDynamicValueRequest other) {
+    public Builder from(DeleteRequest other) {
       id(other.getId());
       return this;
     }
@@ -110,8 +110,8 @@ public final class DeleteDynamicValueRequest {
     }
 
     @java.lang.Override
-    public DeleteDynamicValueRequest build() {
-      return new DeleteDynamicValueRequest(id, additionalProperties);
+    public DeleteRequest build() {
+      return new DeleteRequest(id, additionalProperties);
     }
   }
 }

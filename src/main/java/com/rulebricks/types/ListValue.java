@@ -34,12 +34,12 @@ public final class ListValue implements IDynamicValueBase {
 
   private final Optional<List<String>> accessGroups;
 
-  private final Optional<List<String>> value;
+  private final Optional<List<ListValueValueItem>> value;
 
   private final Map<String, Object> additionalProperties;
 
   private ListValue(Optional<String> id, Optional<String> name, Optional<List<RuleUsage>> usages,
-      Optional<List<String>> accessGroups, Optional<List<String>> value,
+      Optional<List<String>> accessGroups, Optional<List<ListValueValueItem>> value,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
@@ -89,7 +89,7 @@ public final class ListValue implements IDynamicValueBase {
    * @return The list value
    */
   @JsonProperty("value")
-  public Optional<List<String>> getValue() {
+  public Optional<List<ListValueValueItem>> getValue() {
     return value;
   }
 
@@ -134,7 +134,7 @@ public final class ListValue implements IDynamicValueBase {
 
     private Optional<List<String>> accessGroups = Optional.empty();
 
-    private Optional<List<String>> value = Optional.empty();
+    private Optional<List<ListValueValueItem>> value = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -211,12 +211,12 @@ public final class ListValue implements IDynamicValueBase {
         value = "value",
         nulls = Nulls.SKIP
     )
-    public Builder value(Optional<List<String>> value) {
+    public Builder value(Optional<List<ListValueValueItem>> value) {
       this.value = value;
       return this;
     }
 
-    public Builder value(List<String> value) {
+    public Builder value(List<ListValueValueItem> value) {
       this.value = Optional.ofNullable(value);
       return this;
     }

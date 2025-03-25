@@ -27,7 +27,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
-import resources.decisions.requests.QueryDecisionsRequest;
+import resources.decisions.requests.QueryRequest;
 import types.DecisionLogResponse;
 
 public class AsyncDecisionsClient {
@@ -40,14 +40,14 @@ public class AsyncDecisionsClient {
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public CompletableFuture<DecisionLogResponse> queryDecisions(QueryDecisionsRequest request) {
-    return queryDecisions(request,null);
+  public CompletableFuture<DecisionLogResponse> query(QueryRequest request) {
+    return query(request,null);
   }
 
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public CompletableFuture<DecisionLogResponse> queryDecisions(QueryDecisionsRequest request,
+  public CompletableFuture<DecisionLogResponse> query(QueryRequest request,
       RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 

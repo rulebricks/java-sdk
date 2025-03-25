@@ -25,9 +25,9 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = QueryDecisionsRequest.Builder.class
+    builder = QueryRequest.Builder.class
 )
-public final class QueryDecisionsRequest {
+public final class QueryRequest {
   private final String slug;
 
   private final Optional<OffsetDateTime> from;
@@ -40,9 +40,8 @@ public final class QueryDecisionsRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private QueryDecisionsRequest(String slug, Optional<OffsetDateTime> from,
-      Optional<OffsetDateTime> to, Optional<String> cursor, Optional<Integer> limit,
-      Map<String, Object> additionalProperties) {
+  private QueryRequest(String slug, Optional<OffsetDateTime> from, Optional<OffsetDateTime> to,
+      Optional<String> cursor, Optional<Integer> limit, Map<String, Object> additionalProperties) {
     this.slug = slug;
     this.from = from;
     this.to = to;
@@ -94,7 +93,7 @@ public final class QueryDecisionsRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof QueryDecisionsRequest && equalTo((QueryDecisionsRequest) other);
+    return other instanceof QueryRequest && equalTo((QueryRequest) other);
   }
 
   @JsonAnyGetter
@@ -102,7 +101,7 @@ public final class QueryDecisionsRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(QueryDecisionsRequest other) {
+  private boolean equalTo(QueryRequest other) {
     return slug.equals(other.slug) && from.equals(other.from) && to.equals(other.to) && cursor.equals(other.cursor) && limit.equals(other.limit);
   }
 
@@ -123,11 +122,11 @@ public final class QueryDecisionsRequest {
   public interface SlugStage {
     _FinalStage slug(@NotNull String slug);
 
-    Builder from(QueryDecisionsRequest other);
+    Builder from(QueryRequest other);
   }
 
   public interface _FinalStage {
-    QueryDecisionsRequest build();
+    QueryRequest build();
 
     _FinalStage from(Optional<OffsetDateTime> from);
 
@@ -167,7 +166,7 @@ public final class QueryDecisionsRequest {
     }
 
     @java.lang.Override
-    public Builder from(QueryDecisionsRequest other) {
+    public Builder from(QueryRequest other) {
       slug(other.getSlug());
       from(other.getFrom());
       to(other.getTo());
@@ -268,8 +267,8 @@ public final class QueryDecisionsRequest {
     }
 
     @java.lang.Override
-    public QueryDecisionsRequest build() {
-      return new QueryDecisionsRequest(slug, from, to, cursor, limit, additionalProperties);
+    public QueryRequest build() {
+      return new QueryRequest(slug, from, to, cursor, limit, additionalProperties);
     }
   }
 }

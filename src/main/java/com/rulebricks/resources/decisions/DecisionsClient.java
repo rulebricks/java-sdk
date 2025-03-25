@@ -22,7 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import resources.decisions.requests.QueryDecisionsRequest;
+import resources.decisions.requests.QueryRequest;
 import types.DecisionLogResponse;
 
 public class DecisionsClient {
@@ -35,15 +35,14 @@ public class DecisionsClient {
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public DecisionLogResponse queryDecisions(QueryDecisionsRequest request) {
-    return queryDecisions(request,null);
+  public DecisionLogResponse query(QueryRequest request) {
+    return query(request,null);
   }
 
   /**
    * Retrieve logs for a specific user and rule, with optional date range and pagination.
    */
-  public DecisionLogResponse queryDecisions(QueryDecisionsRequest request,
-      RequestOptions requestOptions) {
+  public DecisionLogResponse query(QueryRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("api/v1/decisions/query");QueryStringMapper.addQueryParameter(httpUrl, "slug", request.getSlug(), false);
