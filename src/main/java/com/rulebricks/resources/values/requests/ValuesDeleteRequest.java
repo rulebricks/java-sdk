@@ -21,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = DeleteRequest.Builder.class
+    builder = ValuesDeleteRequest.Builder.class
 )
-public final class DeleteRequest {
+public final class ValuesDeleteRequest {
   private final String id;
 
   private final Map<String, Object> additionalProperties;
 
-  private DeleteRequest(String id, Map<String, Object> additionalProperties) {
+  private ValuesDeleteRequest(String id, Map<String, Object> additionalProperties) {
     this.id = id;
     this.additionalProperties = additionalProperties;
   }
@@ -44,7 +44,7 @@ public final class DeleteRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof DeleteRequest && equalTo((DeleteRequest) other);
+    return other instanceof ValuesDeleteRequest && equalTo((ValuesDeleteRequest) other);
   }
 
   @JsonAnyGetter
@@ -52,7 +52,7 @@ public final class DeleteRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(DeleteRequest other) {
+  private boolean equalTo(ValuesDeleteRequest other) {
     return id.equals(other.id);
   }
 
@@ -73,11 +73,11 @@ public final class DeleteRequest {
   public interface IdStage {
     _FinalStage id(@NotNull String id);
 
-    Builder from(DeleteRequest other);
+    Builder from(ValuesDeleteRequest other);
   }
 
   public interface _FinalStage {
-    DeleteRequest build();
+    ValuesDeleteRequest build();
   }
 
   @JsonIgnoreProperties(
@@ -93,7 +93,7 @@ public final class DeleteRequest {
     }
 
     @java.lang.Override
-    public Builder from(DeleteRequest other) {
+    public Builder from(ValuesDeleteRequest other) {
       id(other.getId());
       return this;
     }
@@ -110,8 +110,8 @@ public final class DeleteRequest {
     }
 
     @java.lang.Override
-    public DeleteRequest build() {
-      return new DeleteRequest(id, additionalProperties);
+    public ValuesDeleteRequest build() {
+      return new ValuesDeleteRequest(id, additionalProperties);
     }
   }
 }

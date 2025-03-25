@@ -12,13 +12,18 @@ public final class RulebricksApiClientBuilder {
 
   private String apiKey = null;
 
-  private Environment environment;
+  private Environment environment = Environment.DEFAULT;
 
   /**
    * Sets apiKey
    */
   public RulebricksApiClientBuilder apiKey(String apiKey) {
     this.apiKey = apiKey;
+    return this;
+  }
+
+  public RulebricksApiClientBuilder environment(Environment environment) {
+    this.environment = environment;
     return this;
   }
 

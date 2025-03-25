@@ -7,6 +7,8 @@ package core;
 import java.lang.String;
 
 public final class Environment {
+  public static final Environment DEFAULT = new Environment("https://rulebricks.com/api/v1");
+
   private final String url;
 
   private Environment(String url) {

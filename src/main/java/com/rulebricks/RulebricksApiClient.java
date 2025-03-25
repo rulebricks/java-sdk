@@ -22,23 +22,23 @@ public class RulebricksApiClient {
 
   protected final Supplier<DecisionsClient> decisionsClient;
 
-  protected final Supplier<AssetsClient> assetsClient;
-
   protected final Supplier<UsersClient> usersClient;
 
-  protected final Supplier<TestsClient> testsClient;
+  protected final Supplier<AssetsClient> assetsClient;
 
   protected final Supplier<ValuesClient> valuesClient;
+
+  protected final Supplier<TestsClient> testsClient;
 
   public RulebricksApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rulesClient = Suppliers.memoize(() -> new RulesClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new FlowsClient(clientOptions));
     this.decisionsClient = Suppliers.memoize(() -> new DecisionsClient(clientOptions));
-    this.assetsClient = Suppliers.memoize(() -> new AssetsClient(clientOptions));
     this.usersClient = Suppliers.memoize(() -> new UsersClient(clientOptions));
-    this.testsClient = Suppliers.memoize(() -> new TestsClient(clientOptions));
+    this.assetsClient = Suppliers.memoize(() -> new AssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new ValuesClient(clientOptions));
+    this.testsClient = Suppliers.memoize(() -> new TestsClient(clientOptions));
   }
 
   public RulesClient rules() {
@@ -53,20 +53,20 @@ public class RulebricksApiClient {
     return this.decisionsClient.get();
   }
 
-  public AssetsClient assets() {
-    return this.assetsClient.get();
-  }
-
   public UsersClient users() {
     return this.usersClient.get();
   }
 
-  public TestsClient tests() {
-    return this.testsClient.get();
+  public AssetsClient assets() {
+    return this.assetsClient.get();
   }
 
   public ValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public TestsClient tests() {
+    return this.testsClient.get();
   }
 
   public static RulebricksApiClientBuilder builder() {

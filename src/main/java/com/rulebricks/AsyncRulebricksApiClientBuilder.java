@@ -12,13 +12,18 @@ public final class AsyncRulebricksApiClientBuilder {
 
   private String apiKey = null;
 
-  private Environment environment;
+  private Environment environment = Environment.DEFAULT;
 
   /**
    * Sets apiKey
    */
   public AsyncRulebricksApiClientBuilder apiKey(String apiKey) {
     this.apiKey = apiKey;
+    return this;
+  }
+
+  public AsyncRulebricksApiClientBuilder environment(Environment environment) {
+    this.environment = environment;
     return this;
   }
 

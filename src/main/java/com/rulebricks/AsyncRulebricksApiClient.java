@@ -22,23 +22,23 @@ public class AsyncRulebricksApiClient {
 
   protected final Supplier<AsyncDecisionsClient> decisionsClient;
 
-  protected final Supplier<AsyncAssetsClient> assetsClient;
-
   protected final Supplier<AsyncUsersClient> usersClient;
 
-  protected final Supplier<AsyncTestsClient> testsClient;
+  protected final Supplier<AsyncAssetsClient> assetsClient;
 
   protected final Supplier<AsyncValuesClient> valuesClient;
+
+  protected final Supplier<AsyncTestsClient> testsClient;
 
   public AsyncRulebricksApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rulesClient = Suppliers.memoize(() -> new AsyncRulesClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new AsyncFlowsClient(clientOptions));
     this.decisionsClient = Suppliers.memoize(() -> new AsyncDecisionsClient(clientOptions));
-    this.assetsClient = Suppliers.memoize(() -> new AsyncAssetsClient(clientOptions));
     this.usersClient = Suppliers.memoize(() -> new AsyncUsersClient(clientOptions));
-    this.testsClient = Suppliers.memoize(() -> new AsyncTestsClient(clientOptions));
+    this.assetsClient = Suppliers.memoize(() -> new AsyncAssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new AsyncValuesClient(clientOptions));
+    this.testsClient = Suppliers.memoize(() -> new AsyncTestsClient(clientOptions));
   }
 
   public AsyncRulesClient rules() {
@@ -53,20 +53,20 @@ public class AsyncRulebricksApiClient {
     return this.decisionsClient.get();
   }
 
-  public AsyncAssetsClient assets() {
-    return this.assetsClient.get();
-  }
-
   public AsyncUsersClient users() {
     return this.usersClient.get();
   }
 
-  public AsyncTestsClient tests() {
-    return this.testsClient.get();
+  public AsyncAssetsClient assets() {
+    return this.assetsClient.get();
   }
 
   public AsyncValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public AsyncTestsClient tests() {
+    return this.testsClient.get();
   }
 
   public static AsyncRulebricksApiClientBuilder builder() {
