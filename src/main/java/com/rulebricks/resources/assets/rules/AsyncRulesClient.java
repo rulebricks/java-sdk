@@ -38,7 +38,6 @@ import resources.assets.rules.requests.DeleteRuleRequest;
 import resources.assets.rules.requests.ImportRuleRequest;
 import resources.assets.rules.requests.RulesListRequest;
 import resources.assets.rules.requests.RulesPullRequest;
-import types.Error;
 import types.RuleDetail;
 import types.SuccessMessage;
 
@@ -235,7 +234,7 @@ public class AsyncRulesClient {
               switch (response.code()) {
                 case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;
-                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class)));
+                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;
                 case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;

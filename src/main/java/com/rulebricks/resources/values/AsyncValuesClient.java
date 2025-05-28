@@ -14,6 +14,7 @@ import core.RequestOptions;
 import core.RulebricksApiApiException;
 import core.RulebricksApiException;
 import errors.BadRequestError;
+import errors.ForbiddenError;
 import errors.InternalServerError;
 import errors.NotFoundError;
 import java.io.IOException;
@@ -46,21 +47,21 @@ public class AsyncValuesClient {
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public CompletableFuture<List<DynamicValue>> list() {
     return list(ValuesListRequest.builder().build());
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public CompletableFuture<List<DynamicValue>> list(ValuesListRequest request) {
     return list(request,null);
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public CompletableFuture<List<DynamicValue>> list(ValuesListRequest request,
       RequestOptions requestOptions) {
@@ -68,6 +69,9 @@ public class AsyncValuesClient {
 
       .addPathSegments("values");if (request.getName().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (request.getInclude().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
@@ -91,8 +95,10 @@ public class AsyncValuesClient {
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             try {
-              if (response.code() == 500) {
-                future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
+              switch (response.code()) {
+                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
+                return;
+                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;
               }
             }
@@ -116,14 +122,14 @@ public class AsyncValuesClient {
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user.
+     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
      */
     public CompletableFuture<List<DynamicValue>> update(UpdateValuesRequest request) {
       return update(request,null);
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user.
+     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
      */
     public CompletableFuture<List<DynamicValue>> update(UpdateValuesRequest request,
         RequestOptions requestOptions) {
@@ -162,6 +168,8 @@ public class AsyncValuesClient {
             try {
               switch (response.code()) {
                 case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
+                return;
+                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;
                 case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class)));
                 return;

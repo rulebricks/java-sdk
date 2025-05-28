@@ -14,6 +14,7 @@ import core.RequestOptions;
 import core.RulebricksApiApiException;
 import core.RulebricksApiException;
 import errors.BadRequestError;
+import errors.ForbiddenError;
 import errors.InternalServerError;
 import errors.NotFoundError;
 import java.io.IOException;
@@ -41,27 +42,30 @@ public class ValuesClient {
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public List<DynamicValue> list() {
     return list(ValuesListRequest.builder().build());
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public List<DynamicValue> list(ValuesListRequest request) {
     return list(request,null);
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user.
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public List<DynamicValue> list(ValuesListRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("values");if (request.getName().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (request.getInclude().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
@@ -81,8 +85,9 @@ public class ValuesClient {
         }
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         try {
-          if (response.code() == 500) {
-            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+          switch (response.code()) {
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
           }
         }
         catch (JsonProcessingException ignored) {
@@ -96,14 +101,14 @@ public class ValuesClient {
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user.
+     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
      */
     public List<DynamicValue> update(UpdateValuesRequest request) {
       return update(request,null);
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user.
+     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
      */
     public List<DynamicValue> update(UpdateValuesRequest request, RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
@@ -137,6 +142,7 @@ public class ValuesClient {
         try {
           switch (response.code()) {
             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
+            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
             case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class));
           }
         }

@@ -5,15 +5,15 @@
 package errors;
 
 import core.RulebricksApiApiException;
-import types.Error;
+import java.lang.Object;
 
 public final class ForbiddenError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Error body;
+  private final Object body;
 
-  public ForbiddenError(Error body) {
+  public ForbiddenError(Object body) {
     super("ForbiddenError", 403, body);
     this.body = body;
   }
@@ -22,7 +22,7 @@ public final class ForbiddenError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Error body() {
+  public Object body() {
     return this.body;
   }
 }

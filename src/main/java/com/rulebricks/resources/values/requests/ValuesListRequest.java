@@ -27,10 +27,14 @@ import java.util.Optional;
 public final class ValuesListRequest {
   private final Optional<String> name;
 
+  private final Optional<String> include;
+
   private final Map<String, Object> additionalProperties;
 
-  private ValuesListRequest(Optional<String> name, Map<String, Object> additionalProperties) {
+  private ValuesListRequest(Optional<String> name, Optional<String> include,
+      Map<String, Object> additionalProperties) {
     this.name = name;
+    this.include = include;
     this.additionalProperties = additionalProperties;
   }
 
@@ -40,6 +44,14 @@ public final class ValuesListRequest {
   @JsonProperty("name")
   public Optional<String> getName() {
     return name;
+  }
+
+  /**
+   * @return Comma-separated list of additional data to include. Use 'usage' to include which rules reference each value.
+   */
+  @JsonProperty("include")
+  public Optional<String> getInclude() {
+    return include;
   }
 
   @java.lang.Override
@@ -54,12 +66,12 @@ public final class ValuesListRequest {
   }
 
   private boolean equalTo(ValuesListRequest other) {
-    return name.equals(other.name);
+    return name.equals(other.name) && include.equals(other.include);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name);
+    return Objects.hash(this.name, this.include);
   }
 
   @java.lang.Override
@@ -77,6 +89,8 @@ public final class ValuesListRequest {
   public static final class Builder {
     private Optional<String> name = Optional.empty();
 
+    private Optional<String> include = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -85,6 +99,7 @@ public final class ValuesListRequest {
 
     public Builder from(ValuesListRequest other) {
       name(other.getName());
+      include(other.getInclude());
       return this;
     }
 
@@ -102,8 +117,22 @@ public final class ValuesListRequest {
       return this;
     }
 
+    @JsonSetter(
+        value = "include",
+        nulls = Nulls.SKIP
+    )
+    public Builder include(Optional<String> include) {
+      this.include = include;
+      return this;
+    }
+
+    public Builder include(String include) {
+      this.include = Optional.ofNullable(include);
+      return this;
+    }
+
     public ValuesListRequest build() {
-      return new ValuesListRequest(name, additionalProperties);
+      return new ValuesListRequest(name, include, additionalProperties);
     }
   }
 }

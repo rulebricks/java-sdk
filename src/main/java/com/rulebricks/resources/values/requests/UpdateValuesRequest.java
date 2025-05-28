@@ -21,31 +21,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import resources.values.types.UpdateValuesRequestValuesValue;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = UpdateValuesRequest.Builder.class
 )
 public final class UpdateValuesRequest {
-  private final Map<String, UpdateValuesRequestValuesValue> values;
+  private final Map<String, Object> values;
 
   private final Optional<List<String>> accessGroups;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateValuesRequest(Map<String, UpdateValuesRequestValuesValue> values,
-      Optional<List<String>> accessGroups, Map<String, Object> additionalProperties) {
+  private UpdateValuesRequest(Map<String, Object> values, Optional<List<String>> accessGroups,
+      Map<String, Object> additionalProperties) {
     this.values = values;
     this.accessGroups = accessGroups;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return A flat dictionary of keys and values to update or add.
+   * @return A dictionary of keys and values to update or add. Supports both flat key-value pairs and nested objects. Nested objects will be automatically flattened using dot notation with readable key names (e.g., 'user.contact_info.email' becomes 'User.Contact Info.Email').
    */
   @JsonProperty("values")
-  public Map<String, UpdateValuesRequestValuesValue> getValues() {
+  public Map<String, Object> getValues() {
     return values;
   }
 
@@ -90,7 +89,7 @@ public final class UpdateValuesRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Map<String, UpdateValuesRequestValuesValue> values = new LinkedHashMap<>();
+    private Map<String, Object> values = new LinkedHashMap<>();
 
     private Optional<List<String>> accessGroups = Optional.empty();
 
@@ -110,18 +109,18 @@ public final class UpdateValuesRequest {
         value = "values",
         nulls = Nulls.SKIP
     )
-    public Builder values(Map<String, UpdateValuesRequestValuesValue> values) {
+    public Builder values(Map<String, Object> values) {
       this.values.clear();
       this.values.putAll(values);
       return this;
     }
 
-    public Builder putAllValues(Map<String, UpdateValuesRequestValuesValue> values) {
+    public Builder putAllValues(Map<String, Object> values) {
       this.values.putAll(values);
       return this;
     }
 
-    public Builder values(String key, UpdateValuesRequestValuesValue value) {
+    public Builder values(String key, Object value) {
       this.values.put(key, value);
       return this;
     }

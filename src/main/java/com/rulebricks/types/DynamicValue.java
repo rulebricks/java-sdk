@@ -4,344 +4,284 @@
 
 package types;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
+@JsonDeserialize(
+    builder = DynamicValue.Builder.class
+)
 public final class DynamicValue {
-  private final Value value;
+  private final String id;
 
-  @JsonCreator(
-      mode = JsonCreator.Mode.DELEGATING
-  )
-  private DynamicValue(Value value) {
+  private final String name;
+
+  private final String type;
+
+  private final Optional<Object> value;
+
+  private final Optional<List<RuleUsage>> usages;
+
+  private final Optional<List<String>> accessGroups;
+
+  private final Map<String, Object> additionalProperties;
+
+  private DynamicValue(String id, String name, String type, Optional<Object> value,
+      Optional<List<RuleUsage>> usages, Optional<List<String>> accessGroups,
+      Map<String, Object> additionalProperties) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
     this.value = value;
+    this.usages = usages;
+    this.accessGroups = accessGroups;
+    this.additionalProperties = additionalProperties;
   }
 
-  public <T> T visit(Visitor<T> visitor) {
-    return value.visit(visitor);
+  /**
+   * @return Unique identifier for the dynamic value.
+   */
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
 
-  public static DynamicValue string(types.StringValue value) {
-    return new DynamicValue(new StringValue(value));
+  /**
+   * @return Name of the dynamic value (may include dot notation for nested properties).
+   */
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
 
-  public static DynamicValue number(types.NumberValue value) {
-    return new DynamicValue(new NumberValue(value));
+  /**
+   * @return Type identifier for the value (e.g., 'string', 'number', 'boolean', 'list', 'function', etc.)
+   */
+  @JsonProperty("type")
+  public String getType() {
+    return type;
   }
 
-  public static DynamicValue boolean_(types.BooleanValue value) {
-    return new DynamicValue(new BooleanValue(value));
+  @JsonProperty("value")
+  public Optional<Object> getValue() {
+    return value;
   }
 
-  public static DynamicValue list(types.ListValue value) {
-    return new DynamicValue(new ListValue(value));
+  /**
+   * @return Rules that use this dynamic value (only included when 'include=usage' parameter is used).
+   */
+  @JsonProperty("usages")
+  public Optional<List<RuleUsage>> getUsages() {
+    return usages;
   }
 
-  public boolean isString() {
-    return value instanceof StringValue;
+  /**
+   * @return Access groups assigned to this value.
+   */
+  @JsonProperty("accessGroups")
+  public Optional<List<String>> getAccessGroups() {
+    return accessGroups;
   }
 
-  public boolean isNumber() {
-    return value instanceof NumberValue;
+  @java.lang.Override
+  public boolean equals(Object other) {
+    if (this == other) return true;
+    return other instanceof DynamicValue && equalTo((DynamicValue) other);
   }
 
-  public boolean isBoolean() {
-    return value instanceof BooleanValue;
+  @JsonAnyGetter
+  public Map<String, Object> getAdditionalProperties() {
+    return this.additionalProperties;
   }
 
-  public boolean isList() {
-    return value instanceof ListValue;
+  private boolean equalTo(DynamicValue other) {
+    return id.equals(other.id) && name.equals(other.name) && type.equals(other.type) && value.equals(other.value) && usages.equals(other.usages) && accessGroups.equals(other.accessGroups);
   }
 
-  public boolean _isUnknown() {
-    return value instanceof _UnknownValue;
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.id, this.name, this.type, this.value, this.usages, this.accessGroups);
   }
 
-  public Optional<types.StringValue> getString() {
-    if (isString()) {
-      return Optional.of(((StringValue) value).value);
-    }
-    return Optional.empty();
+  @java.lang.Override
+  public String toString() {
+    return ObjectMappers.stringify(this);
   }
 
-  public Optional<types.NumberValue> getNumber() {
-    if (isNumber()) {
-      return Optional.of(((NumberValue) value).value);
-    }
-    return Optional.empty();
+  public static IdStage builder() {
+    return new Builder();
   }
 
-  public Optional<types.BooleanValue> getBoolean() {
-    if (isBoolean()) {
-      return Optional.of(((BooleanValue) value).value);
-    }
-    return Optional.empty();
+  public interface IdStage {
+    NameStage id(@NotNull String id);
+
+    Builder from(DynamicValue other);
   }
 
-  public Optional<types.ListValue> getList() {
-    if (isList()) {
-      return Optional.of(((ListValue) value).value);
-    }
-    return Optional.empty();
+  public interface NameStage {
+    TypeStage name(@NotNull String name);
   }
 
-  public Optional<Object> _getUnknown() {
-    if (_isUnknown()) {
-      return Optional.of(((_UnknownValue) value).value);
-    }
-    return Optional.empty();
+  public interface TypeStage {
+    _FinalStage type(@NotNull String type);
   }
 
-  @JsonValue
-  private Value getValue() {
-    return this.value;
+  public interface _FinalStage {
+    DynamicValue build();
+
+    _FinalStage value(Optional<Object> value);
+
+    _FinalStage value(Object value);
+
+    _FinalStage usages(Optional<List<RuleUsage>> usages);
+
+    _FinalStage usages(List<RuleUsage> usages);
+
+    _FinalStage accessGroups(Optional<List<String>> accessGroups);
+
+    _FinalStage accessGroups(List<String> accessGroups);
   }
 
-  public interface Visitor<T> {
-    T visitString(types.StringValue string);
-
-    T visitNumber(types.NumberValue number);
-
-    T visitBoolean(types.BooleanValue boolean_);
-
-    T visitList(types.ListValue list);
-
-    T _visitUnknown(Object unknownType);
-  }
-
-  @JsonTypeInfo(
-      use = JsonTypeInfo.Id.NAME,
-      property = "type",
-      visible = true,
-      defaultImpl = _UnknownValue.class
-  )
-  @JsonSubTypes({
-      @JsonSubTypes.Type(StringValue.class),
-      @JsonSubTypes.Type(NumberValue.class),
-      @JsonSubTypes.Type(BooleanValue.class),
-      @JsonSubTypes.Type(ListValue.class)
-  })
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  private interface Value {
-    <T> T visit(Visitor<T> visitor);
-  }
+  public static final class Builder implements IdStage, NameStage, TypeStage, _FinalStage {
+    private String id;
 
-  @JsonTypeName("string")
-  @JsonIgnoreProperties("type")
-  private static final class StringValue implements Value {
-    @JsonUnwrapped
-    private types.StringValue value;
+    private String name;
 
-    @JsonCreator(
-        mode = JsonCreator.Mode.PROPERTIES
-    )
-    private StringValue() {
-    }
-
-    private StringValue(types.StringValue value) {
-      this.value = value;
-    }
-
-    @java.lang.Override
-    public <T> T visit(Visitor<T> visitor) {
-      return visitor.visitString(value);
-    }
-
-    @java.lang.Override
-    public boolean equals(Object other) {
-      if (this == other) return true;
-      return other instanceof StringValue && equalTo((StringValue) other);
-    }
-
-    private boolean equalTo(StringValue other) {
-      return value.equals(other.value);
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      return Objects.hash(this.value);
-    }
-
-    @java.lang.Override
-    public String toString() {
-      return "DynamicValue{" + "value: " + value + "}";
-    }
-  }
-
-  @JsonTypeName("number")
-  @JsonIgnoreProperties("type")
-  private static final class NumberValue implements Value {
-    @JsonUnwrapped
-    private types.NumberValue value;
-
-    @JsonCreator(
-        mode = JsonCreator.Mode.PROPERTIES
-    )
-    private NumberValue() {
-    }
-
-    private NumberValue(types.NumberValue value) {
-      this.value = value;
-    }
-
-    @java.lang.Override
-    public <T> T visit(Visitor<T> visitor) {
-      return visitor.visitNumber(value);
-    }
-
-    @java.lang.Override
-    public boolean equals(Object other) {
-      if (this == other) return true;
-      return other instanceof NumberValue && equalTo((NumberValue) other);
-    }
-
-    private boolean equalTo(NumberValue other) {
-      return value.equals(other.value);
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      return Objects.hash(this.value);
-    }
-
-    @java.lang.Override
-    public String toString() {
-      return "DynamicValue{" + "value: " + value + "}";
-    }
-  }
-
-  @JsonTypeName("boolean")
-  @JsonIgnoreProperties("type")
-  private static final class BooleanValue implements Value {
-    @JsonUnwrapped
-    private types.BooleanValue value;
-
-    @JsonCreator(
-        mode = JsonCreator.Mode.PROPERTIES
-    )
-    private BooleanValue() {
-    }
-
-    private BooleanValue(types.BooleanValue value) {
-      this.value = value;
-    }
-
-    @java.lang.Override
-    public <T> T visit(Visitor<T> visitor) {
-      return visitor.visitBoolean(value);
-    }
-
-    @java.lang.Override
-    public boolean equals(Object other) {
-      if (this == other) return true;
-      return other instanceof BooleanValue && equalTo((BooleanValue) other);
-    }
-
-    private boolean equalTo(BooleanValue other) {
-      return value.equals(other.value);
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      return Objects.hash(this.value);
-    }
-
-    @java.lang.Override
-    public String toString() {
-      return "DynamicValue{" + "value: " + value + "}";
-    }
-  }
-
-  @JsonTypeName("list")
-  @JsonIgnoreProperties("type")
-  private static final class ListValue implements Value {
-    @JsonUnwrapped
-    private types.ListValue value;
-
-    @JsonCreator(
-        mode = JsonCreator.Mode.PROPERTIES
-    )
-    private ListValue() {
-    }
-
-    private ListValue(types.ListValue value) {
-      this.value = value;
-    }
-
-    @java.lang.Override
-    public <T> T visit(Visitor<T> visitor) {
-      return visitor.visitList(value);
-    }
-
-    @java.lang.Override
-    public boolean equals(Object other) {
-      if (this == other) return true;
-      return other instanceof ListValue && equalTo((ListValue) other);
-    }
-
-    private boolean equalTo(ListValue other) {
-      return value.equals(other.value);
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      return Objects.hash(this.value);
-    }
-
-    @java.lang.Override
-    public String toString() {
-      return "DynamicValue{" + "value: " + value + "}";
-    }
-  }
-
-  @JsonIgnoreProperties("type")
-  private static final class _UnknownValue implements Value {
     private String type;
 
-    @JsonValue
-    private Object value;
+    private Optional<List<String>> accessGroups = Optional.empty();
 
-    @JsonCreator(
-        mode = JsonCreator.Mode.PROPERTIES
+    private Optional<List<RuleUsage>> usages = Optional.empty();
+
+    private Optional<Object> value = Optional.empty();
+
+    @JsonAnySetter
+    private Map<String, Object> additionalProperties = new HashMap<>();
+
+    private Builder() {
+    }
+
+    @java.lang.Override
+    public Builder from(DynamicValue other) {
+      id(other.getId());
+      name(other.getName());
+      type(other.getType());
+      value(other.getValue());
+      usages(other.getUsages());
+      accessGroups(other.getAccessGroups());
+      return this;
+    }
+
+    /**
+     * <p>Unique identifier for the dynamic value.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("id")
+    public NameStage id(@NotNull String id) {
+      this.id = Objects.requireNonNull(id, "id must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Name of the dynamic value (may include dot notation for nested properties).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("name")
+    public TypeStage name(@NotNull String name) {
+      this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Type identifier for the value (e.g., 'string', 'number', 'boolean', 'list', 'function', etc.)</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("type")
+    public _FinalStage type(@NotNull String type) {
+      this.type = Objects.requireNonNull(type, "type must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Access groups assigned to this value.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage accessGroups(List<String> accessGroups) {
+      this.accessGroups = Optional.ofNullable(accessGroups);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "accessGroups",
+        nulls = Nulls.SKIP
     )
-    private _UnknownValue(@JsonProperty("value") Object value) {
+    public _FinalStage accessGroups(Optional<List<String>> accessGroups) {
+      this.accessGroups = accessGroups;
+      return this;
+    }
+
+    /**
+     * <p>Rules that use this dynamic value (only included when 'include=usage' parameter is used).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage usages(List<RuleUsage> usages) {
+      this.usages = Optional.ofNullable(usages);
+      return this;
     }
 
     @java.lang.Override
-    public <T> T visit(Visitor<T> visitor) {
-      return visitor._visitUnknown(value);
+    @JsonSetter(
+        value = "usages",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage usages(Optional<List<RuleUsage>> usages) {
+      this.usages = usages;
+      return this;
     }
 
     @java.lang.Override
-    public boolean equals(Object other) {
-      if (this == other) return true;
-      return other instanceof _UnknownValue && equalTo((_UnknownValue) other);
-    }
-
-    private boolean equalTo(_UnknownValue other) {
-      return type.equals(other.type) && value.equals(other.value);
+    public _FinalStage value(Object value) {
+      this.value = Optional.ofNullable(value);
+      return this;
     }
 
     @java.lang.Override
-    public int hashCode() {
-      return Objects.hash(this.type, this.value);
+    @JsonSetter(
+        value = "value",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage value(Optional<Object> value) {
+      this.value = value;
+      return this;
     }
 
     @java.lang.Override
-    public String toString() {
-      return "DynamicValue{" + "type: " + type + ", value: " + value + "}";
+    public DynamicValue build() {
+      return new DynamicValue(id, name, type, value, usages, accessGroups, additionalProperties);
     }
   }
 }
