@@ -11,20 +11,12 @@
 
 To use the Rulebricks Java SDK in your project, you will need to include it as a dependency in your build management tool.
 
-For Maven:
-
 ```xml
 <dependency>
   <groupId>com.rulebricks</groupId>
   <artifactId>rulebricks-sdk-java</artifactId>
-  <version>1.8</version>
+  <version><!-- See https://mvnrepository.com/artifact/com.rulebricks/rulebricks-sdk-java --></version>
 </dependency>
-```
-
-For Gradle:
-
-```groovy
-implementation 'com.rulebricks:rulebricks-sdk-java:1.8.0'
 ```
 
 ## Configuration
