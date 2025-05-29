@@ -26,13 +26,13 @@ import java.util.Optional;
     builder = DecisionLogResponse.Builder.class
 )
 public final class DecisionLogResponse {
-  private final Optional<List<DecisionLog>> data;
+  private final Optional<List<Map<String, Object>>> data;
 
   private final Optional<String> cursor;
 
   private final Map<String, Object> additionalProperties;
 
-  private DecisionLogResponse(Optional<List<DecisionLog>> data, Optional<String> cursor,
+  private DecisionLogResponse(Optional<List<Map<String, Object>>> data, Optional<String> cursor,
       Map<String, Object> additionalProperties) {
     this.data = data;
     this.cursor = cursor;
@@ -40,7 +40,7 @@ public final class DecisionLogResponse {
   }
 
   @JsonProperty("data")
-  public Optional<List<DecisionLog>> getData() {
+  public Optional<List<Map<String, Object>>> getData() {
     return data;
   }
 
@@ -85,7 +85,7 @@ public final class DecisionLogResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<List<DecisionLog>> data = Optional.empty();
+    private Optional<List<Map<String, Object>>> data = Optional.empty();
 
     private Optional<String> cursor = Optional.empty();
 
@@ -105,12 +105,12 @@ public final class DecisionLogResponse {
         value = "data",
         nulls = Nulls.SKIP
     )
-    public Builder data(Optional<List<DecisionLog>> data) {
+    public Builder data(Optional<List<Map<String, Object>>> data) {
       this.data = data;
       return this;
     }
 
-    public Builder data(List<DecisionLog> data) {
+    public Builder data(List<Map<String, Object>> data) {
       this.data = Optional.ofNullable(data);
       return this;
     }
