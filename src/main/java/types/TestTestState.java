@@ -35,7 +35,7 @@ public final class TestTestState {
 
   private final Optional<Map<String, Object>> response;
 
-  private final Optional<List<Map<String, TestTestStateConditionsItemValue>>> conditions;
+  private final Optional<List<Map<String, Object>>> conditions;
 
   private final Optional<Integer> httpStatus;
 
@@ -46,9 +46,8 @@ public final class TestTestState {
   private final Map<String, Object> additionalProperties;
 
   private TestTestState(Optional<Double> duration, Optional<Map<String, Object>> response,
-      Optional<List<Map<String, TestTestStateConditionsItemValue>>> conditions,
-      Optional<Integer> httpStatus, Optional<List<Integer>> successIdxs,
-      Optional<TestTestStateEvaluationError> evaluationError,
+      Optional<List<Map<String, Object>>> conditions, Optional<Integer> httpStatus,
+      Optional<List<Integer>> successIdxs, Optional<TestTestStateEvaluationError> evaluationError,
       Map<String, Object> additionalProperties) {
     this.duration = duration;
     this.response = response;
@@ -79,7 +78,7 @@ public final class TestTestState {
   }
 
   @JsonProperty("conditions")
-  public Optional<List<Map<String, TestTestStateConditionsItemValue>>> getConditions() {
+  public Optional<List<Map<String, Object>>> getConditions() {
     return conditions;
   }
 
@@ -150,7 +149,7 @@ public final class TestTestState {
 
     private Optional<Map<String, Object>> response = Optional.empty();
 
-    private Optional<List<Map<String, TestTestStateConditionsItemValue>>> conditions = Optional.empty();
+    private Optional<List<Map<String, Object>>> conditions = Optional.empty();
 
     private Optional<Integer> httpStatus = Optional.empty();
 
@@ -225,13 +224,12 @@ public final class TestTestState {
         value = "conditions",
         nulls = Nulls.SKIP
     )
-    public Builder conditions(
-        Optional<List<Map<String, TestTestStateConditionsItemValue>>> conditions) {
+    public Builder conditions(Optional<List<Map<String, Object>>> conditions) {
       this.conditions = conditions;
       return this;
     }
 
-    public Builder conditions(List<Map<String, TestTestStateConditionsItemValue>> conditions) {
+    public Builder conditions(List<Map<String, Object>> conditions) {
       this.conditions = Optional.ofNullable(conditions);
       return this;
     }
