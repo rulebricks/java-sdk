@@ -60,7 +60,6 @@ public class RetryInterceptor implements Interceptor {
 
     /**
      * Calculates the retry delay from response headers, with fallback to exponential backoff.
-     * Priority: Retry-After > X-RateLimit-Reset > Exponential Backoff
      */
     private Duration getRetryDelayFromHeaders(Response response, int retryAttempt) {
         // Check for Retry-After header first (RFC 7231), with no jitter
