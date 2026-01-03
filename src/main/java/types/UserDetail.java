@@ -40,21 +40,21 @@ public final class UserDetail {
 
   private final Optional<String> role;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Optional<OffsetDateTime> joinedAt;
 
   private final Map<String, Object> additionalProperties;
 
   private UserDetail(Optional<String> id, Optional<String> email, Optional<String> name,
-      Optional<String> apiKey, Optional<String> role, Optional<List<String>> accessGroups,
+      Optional<String> apiKey, Optional<String> role, Optional<List<String>> userGroups,
       Optional<OffsetDateTime> joinedAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.email = email;
     this.name = name;
     this.apiKey = apiKey;
     this.role = role;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.joinedAt = joinedAt;
     this.additionalProperties = additionalProperties;
   }
@@ -106,11 +106,11 @@ public final class UserDetail {
   }
 
   /**
-   * @return List of access group names the user belongs to.
+   * @return List of user group names the user belongs to.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   /**
@@ -137,7 +137,7 @@ public final class UserDetail {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("apiKey")
+  @JsonProperty("api_key")
   private Optional<String> _getApiKey() {
     return apiKey;
   }
@@ -146,7 +146,7 @@ public final class UserDetail {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("joinedAt")
+  @JsonProperty("joined_at")
   private Optional<OffsetDateTime> _getJoinedAt() {
     return joinedAt;
   }
@@ -163,12 +163,12 @@ public final class UserDetail {
   }
 
   private boolean equalTo(UserDetail other) {
-    return id.equals(other.id) && email.equals(other.email) && name.equals(other.name) && apiKey.equals(other.apiKey) && role.equals(other.role) && accessGroups.equals(other.accessGroups) && joinedAt.equals(other.joinedAt);
+    return id.equals(other.id) && email.equals(other.email) && name.equals(other.name) && apiKey.equals(other.apiKey) && role.equals(other.role) && userGroups.equals(other.userGroups) && joinedAt.equals(other.joinedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.email, this.name, this.apiKey, this.role, this.accessGroups, this.joinedAt);
+    return Objects.hash(this.id, this.email, this.name, this.apiKey, this.role, this.userGroups, this.joinedAt);
   }
 
   @java.lang.Override
@@ -194,7 +194,7 @@ public final class UserDetail {
 
     private Optional<String> role = Optional.empty();
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     private Optional<OffsetDateTime> joinedAt = Optional.empty();
 
@@ -210,7 +210,7 @@ public final class UserDetail {
       name(other.getName());
       apiKey(other.getApiKey());
       role(other.getRole());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       joinedAt(other.getJoinedAt());
       return this;
     }
@@ -283,7 +283,7 @@ public final class UserDetail {
      * <p>API key assigned to the user.</p>
      */
     @JsonSetter(
-        value = "apiKey",
+        value = "api_key",
         nulls = Nulls.SKIP
     )
     public Builder apiKey(Optional<String> apiKey) {
@@ -327,19 +327,19 @@ public final class UserDetail {
     }
 
     /**
-     * <p>List of access group names the user belongs to.</p>
+     * <p>List of user group names the user belongs to.</p>
      */
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public Builder accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
-    public Builder accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
@@ -347,7 +347,7 @@ public final class UserDetail {
      * <p>Date and time when the user joined the organization.</p>
      */
     @JsonSetter(
-        value = "joinedAt",
+        value = "joined_at",
         nulls = Nulls.SKIP
     )
     public Builder joinedAt(Optional<OffsetDateTime> joinedAt) {
@@ -374,7 +374,7 @@ public final class UserDetail {
     }
 
     public UserDetail build() {
-      return new UserDetail(id, email, name, apiKey, role, accessGroups, joinedAt, additionalProperties);
+      return new UserDetail(id, email, name, apiKey, role, userGroups, joinedAt, additionalProperties);
     }
   }
 }

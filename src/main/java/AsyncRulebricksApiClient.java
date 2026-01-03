@@ -7,6 +7,7 @@ package com.rulebricks;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.Suppliers;
 import com.rulebricks.resources.assets.AsyncAssetsClient;
+import com.rulebricks.resources.contexts.AsyncContextsClient;
 import com.rulebricks.resources.decisions.AsyncDecisionsClient;
 import com.rulebricks.resources.flows.AsyncFlowsClient;
 import com.rulebricks.resources.rules.AsyncRulesClient;
@@ -30,6 +31,8 @@ public class AsyncRulebricksApiClient {
 
   protected final Supplier<AsyncValuesClient> valuesClient;
 
+  protected final Supplier<AsyncContextsClient> contextsClient;
+
   protected final Supplier<AsyncTestsClient> testsClient;
 
   public AsyncRulebricksApiClient(ClientOptions clientOptions) {
@@ -40,6 +43,7 @@ public class AsyncRulebricksApiClient {
     this.usersClient = Suppliers.memoize(() -> new AsyncUsersClient(clientOptions));
     this.assetsClient = Suppliers.memoize(() -> new AsyncAssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new AsyncValuesClient(clientOptions));
+    this.contextsClient = Suppliers.memoize(() -> new AsyncContextsClient(clientOptions));
     this.testsClient = Suppliers.memoize(() -> new AsyncTestsClient(clientOptions));
   }
 
@@ -65,6 +69,10 @@ public class AsyncRulebricksApiClient {
 
   public AsyncValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public AsyncContextsClient contexts() {
+    return this.contextsClient.get();
   }
 
   public AsyncTestsClient tests() {

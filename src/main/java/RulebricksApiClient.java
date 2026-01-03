@@ -7,6 +7,7 @@ package com.rulebricks;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.Suppliers;
 import com.rulebricks.resources.assets.AssetsClient;
+import com.rulebricks.resources.contexts.ContextsClient;
 import com.rulebricks.resources.decisions.DecisionsClient;
 import com.rulebricks.resources.flows.FlowsClient;
 import com.rulebricks.resources.rules.RulesClient;
@@ -30,6 +31,8 @@ public class RulebricksApiClient {
 
   protected final Supplier<ValuesClient> valuesClient;
 
+  protected final Supplier<ContextsClient> contextsClient;
+
   protected final Supplier<TestsClient> testsClient;
 
   public RulebricksApiClient(ClientOptions clientOptions) {
@@ -40,6 +43,7 @@ public class RulebricksApiClient {
     this.usersClient = Suppliers.memoize(() -> new UsersClient(clientOptions));
     this.assetsClient = Suppliers.memoize(() -> new AssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new ValuesClient(clientOptions));
+    this.contextsClient = Suppliers.memoize(() -> new ContextsClient(clientOptions));
     this.testsClient = Suppliers.memoize(() -> new TestsClient(clientOptions));
   }
 
@@ -65,6 +69,10 @@ public class RulebricksApiClient {
 
   public ValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public ContextsClient contexts() {
+    return this.contextsClient.get();
   }
 
   public TestsClient tests() {

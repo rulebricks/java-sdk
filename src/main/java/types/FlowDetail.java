@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Boolean;
 import java.lang.Object;
@@ -39,10 +42,15 @@ public final class FlowDetail implements IFlowBase {
 
   private final Optional<OffsetDateTime> updatedAt;
 
+  private final Optional<FlowDetailOriginRule> originRule;
+
+  private final Optional<FlowDetailContext> context;
+
   private final Map<String, Object> additionalProperties;
 
   private FlowDetail(Optional<String> id, Optional<String> name, Optional<String> description,
       Optional<String> slug, Optional<Boolean> published, Optional<OffsetDateTime> updatedAt,
+      Optional<FlowDetailOriginRule> originRule, Optional<FlowDetailContext> context,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
@@ -50,6 +58,8 @@ public final class FlowDetail implements IFlowBase {
     this.slug = slug;
     this.published = published;
     this.updatedAt = updatedAt;
+    this.originRule = originRule;
+    this.context = context;
     this.additionalProperties = additionalProperties;
   }
 
@@ -105,6 +115,46 @@ public final class FlowDetail implements IFlowBase {
     return updatedAt;
   }
 
+  /**
+   * @return The origin rule that this flow starts from. Flows execute starting from this rule's outputs.
+   */
+  @JsonIgnore
+  public Optional<FlowDetailOriginRule> getOriginRule() {
+    if (originRule == null) {
+      return Optional.empty();
+    }
+    return originRule;
+  }
+
+  /**
+   * @return The context this flow is bound to (via its origin rule). Flows inherit context binding from their origin rule.
+   */
+  @JsonIgnore
+  public Optional<FlowDetailContext> getContext() {
+    if (context == null) {
+      return Optional.empty();
+    }
+    return context;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("origin_rule")
+  private Optional<FlowDetailOriginRule> _getOriginRule() {
+    return originRule;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("context")
+  private Optional<FlowDetailContext> _getContext() {
+    return context;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -117,12 +167,12 @@ public final class FlowDetail implements IFlowBase {
   }
 
   private boolean equalTo(FlowDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && originRule.equals(other.originRule) && context.equals(other.context);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.originRule, this.context);
   }
 
   @java.lang.Override
@@ -150,6 +200,10 @@ public final class FlowDetail implements IFlowBase {
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
 
+    private Optional<FlowDetailOriginRule> originRule = Optional.empty();
+
+    private Optional<FlowDetailContext> context = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -163,6 +217,8 @@ public final class FlowDetail implements IFlowBase {
       slug(other.getSlug());
       published(other.getPublished());
       updatedAt(other.getUpdatedAt());
+      originRule(other.getOriginRule());
+      context(other.getContext());
       return this;
     }
 
@@ -268,8 +324,68 @@ public final class FlowDetail implements IFlowBase {
       return this;
     }
 
+    /**
+     * <p>The origin rule that this flow starts from. Flows execute starting from this rule's outputs.</p>
+     */
+    @JsonSetter(
+        value = "origin_rule",
+        nulls = Nulls.SKIP
+    )
+    public Builder originRule(Optional<FlowDetailOriginRule> originRule) {
+      this.originRule = originRule;
+      return this;
+    }
+
+    public Builder originRule(FlowDetailOriginRule originRule) {
+      this.originRule = Optional.ofNullable(originRule);
+      return this;
+    }
+
+    public Builder originRule(Nullable<FlowDetailOriginRule> originRule) {
+      if (originRule.isNull()) {
+        this.originRule = null;
+      }
+      else if (originRule.isEmpty()) {
+        this.originRule = Optional.empty();
+      }
+      else {
+        this.originRule = Optional.of(originRule.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>The context this flow is bound to (via its origin rule). Flows inherit context binding from their origin rule.</p>
+     */
+    @JsonSetter(
+        value = "context",
+        nulls = Nulls.SKIP
+    )
+    public Builder context(Optional<FlowDetailContext> context) {
+      this.context = context;
+      return this;
+    }
+
+    public Builder context(FlowDetailContext context) {
+      this.context = Optional.ofNullable(context);
+      return this;
+    }
+
+    public Builder context(Nullable<FlowDetailContext> context) {
+      if (context.isNull()) {
+        this.context = null;
+      }
+      else if (context.isEmpty()) {
+        this.context = Optional.empty();
+      }
+      else {
+        this.context = Optional.of(context.get());
+      }
+      return this;
+    }
+
     public FlowDetail build() {
-      return new FlowDetail(id, name, description, slug, published, updatedAt, additionalProperties);
+      return new FlowDetail(id, name, description, slug, published, updatedAt, originRule, context, additionalProperties);
     }
   }
 }

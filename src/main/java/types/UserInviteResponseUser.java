@@ -30,15 +30,15 @@ public final class UserInviteResponseUser {
 
   private final Optional<String> role;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
   private UserInviteResponseUser(Optional<String> email, Optional<String> role,
-      Optional<List<String>> accessGroups, Map<String, Object> additionalProperties) {
+      Optional<List<String>> userGroups, Map<String, Object> additionalProperties) {
     this.email = email;
     this.role = role;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -59,11 +59,11 @@ public final class UserInviteResponseUser {
   }
 
   /**
-   * @return Access groups assigned to the user.
+   * @return User groups assigned to the user.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -78,12 +78,12 @@ public final class UserInviteResponseUser {
   }
 
   private boolean equalTo(UserInviteResponseUser other) {
-    return email.equals(other.email) && role.equals(other.role) && accessGroups.equals(other.accessGroups);
+    return email.equals(other.email) && role.equals(other.role) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.email, this.role, this.accessGroups);
+    return Objects.hash(this.email, this.role, this.userGroups);
   }
 
   @java.lang.Override
@@ -103,7 +103,7 @@ public final class UserInviteResponseUser {
 
     private Optional<String> role = Optional.empty();
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -114,7 +114,7 @@ public final class UserInviteResponseUser {
     public Builder from(UserInviteResponseUser other) {
       email(other.getEmail());
       role(other.getRole());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -153,24 +153,24 @@ public final class UserInviteResponseUser {
     }
 
     /**
-     * <p>Access groups assigned to the user.</p>
+     * <p>User groups assigned to the user.</p>
      */
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public Builder accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
-    public Builder accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
     public UserInviteResponseUser build() {
-      return new UserInviteResponseUser(email, role, accessGroups, additionalProperties);
+      return new UserInviteResponseUser(email, role, userGroups, additionalProperties);
     }
   }
 }

@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
@@ -37,7 +40,11 @@ public final class RuleDetail implements IRuleBase {
 
   private final Optional<OffsetDateTime> createdAt;
 
+  private final Optional<OffsetDateTime> updatedAt;
+
   private final Optional<Folder> folder;
+
+  private final Optional<RuleDetailContext> context;
 
   private final Optional<List<SchemaField>> requestSchema;
 
@@ -46,7 +53,8 @@ public final class RuleDetail implements IRuleBase {
   private final Map<String, Object> additionalProperties;
 
   private RuleDetail(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<String> slug, Optional<OffsetDateTime> createdAt, Optional<Folder> folder,
+      Optional<String> slug, Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
+      Optional<Folder> folder, Optional<RuleDetailContext> context,
       Optional<List<SchemaField>> requestSchema, Optional<List<SchemaField>> responseSchema,
       Map<String, Object> additionalProperties) {
     this.id = id;
@@ -54,7 +62,9 @@ public final class RuleDetail implements IRuleBase {
     this.description = description;
     this.slug = slug;
     this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
     this.folder = folder;
+    this.context = context;
     this.requestSchema = requestSchema;
     this.responseSchema = responseSchema;
     this.additionalProperties = additionalProperties;
@@ -104,9 +114,28 @@ public final class RuleDetail implements IRuleBase {
     return createdAt;
   }
 
+  /**
+   * @return The date this rule was last updated.
+   */
+  @JsonProperty("updated_at")
+  public Optional<OffsetDateTime> getUpdatedAt() {
+    return updatedAt;
+  }
+
   @JsonProperty("folder")
   public Optional<Folder> getFolder() {
     return folder;
+  }
+
+  /**
+   * @return The context this rule is bound to (if any). Rules bound to a context have their inputs/outputs mapped to context fields.
+   */
+  @JsonIgnore
+  public Optional<RuleDetailContext> getContext() {
+    if (context == null) {
+      return Optional.empty();
+    }
+    return context;
   }
 
   /**
@@ -125,6 +154,15 @@ public final class RuleDetail implements IRuleBase {
     return responseSchema;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("context")
+  private Optional<RuleDetailContext> _getContext() {
+    return context;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -137,12 +175,12 @@ public final class RuleDetail implements IRuleBase {
   }
 
   private boolean equalTo(RuleDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && folder.equals(other.folder) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && folder.equals(other.folder) && context.equals(other.context) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.folder, this.requestSchema, this.responseSchema);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.updatedAt, this.folder, this.context, this.requestSchema, this.responseSchema);
   }
 
   @java.lang.Override
@@ -168,7 +206,11 @@ public final class RuleDetail implements IRuleBase {
 
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
+    private Optional<OffsetDateTime> updatedAt = Optional.empty();
+
     private Optional<Folder> folder = Optional.empty();
+
+    private Optional<RuleDetailContext> context = Optional.empty();
 
     private Optional<List<SchemaField>> requestSchema = Optional.empty();
 
@@ -186,7 +228,9 @@ public final class RuleDetail implements IRuleBase {
       description(other.getDescription());
       slug(other.getSlug());
       createdAt(other.getCreatedAt());
+      updatedAt(other.getUpdatedAt());
       folder(other.getFolder());
+      context(other.getContext());
       requestSchema(other.getRequestSchema());
       responseSchema(other.getResponseSchema());
       return this;
@@ -277,6 +321,23 @@ public final class RuleDetail implements IRuleBase {
       return this;
     }
 
+    /**
+     * <p>The date this rule was last updated.</p>
+     */
+    @JsonSetter(
+        value = "updated_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder updatedAt(Optional<OffsetDateTime> updatedAt) {
+      this.updatedAt = updatedAt;
+      return this;
+    }
+
+    public Builder updatedAt(OffsetDateTime updatedAt) {
+      this.updatedAt = Optional.ofNullable(updatedAt);
+      return this;
+    }
+
     @JsonSetter(
         value = "folder",
         nulls = Nulls.SKIP
@@ -288,6 +349,36 @@ public final class RuleDetail implements IRuleBase {
 
     public Builder folder(Folder folder) {
       this.folder = Optional.ofNullable(folder);
+      return this;
+    }
+
+    /**
+     * <p>The context this rule is bound to (if any). Rules bound to a context have their inputs/outputs mapped to context fields.</p>
+     */
+    @JsonSetter(
+        value = "context",
+        nulls = Nulls.SKIP
+    )
+    public Builder context(Optional<RuleDetailContext> context) {
+      this.context = context;
+      return this;
+    }
+
+    public Builder context(RuleDetailContext context) {
+      this.context = Optional.ofNullable(context);
+      return this;
+    }
+
+    public Builder context(Nullable<RuleDetailContext> context) {
+      if (context.isNull()) {
+        this.context = null;
+      }
+      else if (context.isEmpty()) {
+        this.context = Optional.empty();
+      }
+      else {
+        this.context = Optional.of(context.get());
+      }
       return this;
     }
 
@@ -326,7 +417,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     public RuleDetail build() {
-      return new RuleDetail(id, name, description, slug, createdAt, folder, requestSchema, responseSchema, additionalProperties);
+      return new RuleDetail(id, name, description, slug, createdAt, updatedAt, folder, context, requestSchema, responseSchema, additionalProperties);
     }
   }
 }

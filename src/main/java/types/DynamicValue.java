@@ -33,23 +33,23 @@ public final class DynamicValue {
 
   private final String type;
 
-  private final Optional<Object> value;
+  private final Optional<DynamicValueValue> value;
 
   private final Optional<List<RuleUsage>> usages;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
-  private DynamicValue(String id, String name, String type, Optional<Object> value,
-      Optional<List<RuleUsage>> usages, Optional<List<String>> accessGroups,
+  private DynamicValue(String id, String name, String type, Optional<DynamicValueValue> value,
+      Optional<List<RuleUsage>> usages, Optional<List<String>> userGroups,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.type = type;
     this.value = value;
     this.usages = usages;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -81,7 +81,7 @@ public final class DynamicValue {
    * @return The actual value - can be any valid JSON type
    */
   @JsonProperty("value")
-  public Optional<Object> getValue() {
+  public Optional<DynamicValueValue> getValue() {
     return value;
   }
 
@@ -94,11 +94,11 @@ public final class DynamicValue {
   }
 
   /**
-   * @return Access groups assigned to this value.
+   * @return User groups assigned to this value.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -113,12 +113,12 @@ public final class DynamicValue {
   }
 
   private boolean equalTo(DynamicValue other) {
-    return id.equals(other.id) && name.equals(other.name) && type.equals(other.type) && value.equals(other.value) && usages.equals(other.usages) && accessGroups.equals(other.accessGroups);
+    return id.equals(other.id) && name.equals(other.name) && type.equals(other.type) && value.equals(other.value) && usages.equals(other.usages) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.type, this.value, this.usages, this.accessGroups);
+    return Objects.hash(this.id, this.name, this.type, this.value, this.usages, this.userGroups);
   }
 
   @java.lang.Override
@@ -159,9 +159,9 @@ public final class DynamicValue {
     /**
      * <p>The actual value - can be any valid JSON type</p>
      */
-    _FinalStage value(Optional<Object> value);
+    _FinalStage value(Optional<DynamicValueValue> value);
 
-    _FinalStage value(Object value);
+    _FinalStage value(DynamicValueValue value);
 
     /**
      * <p>Rules that use this dynamic value (only included when 'include=usage' parameter is used).</p>
@@ -171,11 +171,11 @@ public final class DynamicValue {
     _FinalStage usages(List<RuleUsage> usages);
 
     /**
-     * <p>Access groups assigned to this value.</p>
+     * <p>User groups assigned to this value.</p>
      */
-    _FinalStage accessGroups(Optional<List<String>> accessGroups);
+    _FinalStage userGroups(Optional<List<String>> userGroups);
 
-    _FinalStage accessGroups(List<String> accessGroups);
+    _FinalStage userGroups(List<String> userGroups);
   }
 
   @JsonIgnoreProperties(
@@ -188,11 +188,11 @@ public final class DynamicValue {
 
     private String type;
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     private Optional<List<RuleUsage>> usages = Optional.empty();
 
-    private Optional<Object> value = Optional.empty();
+    private Optional<DynamicValueValue> value = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -207,7 +207,7 @@ public final class DynamicValue {
       type(other.getType());
       value(other.getValue());
       usages(other.getUsages());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -248,25 +248,25 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>Access groups assigned to this value.</p>
+     * <p>User groups assigned to this value.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public _FinalStage userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
     /**
-     * <p>Access groups assigned to this value.</p>
+     * <p>User groups assigned to this value.</p>
      */
     @java.lang.Override
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public _FinalStage accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public _FinalStage userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
@@ -298,7 +298,7 @@ public final class DynamicValue {
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage value(Object value) {
+    public _FinalStage value(DynamicValueValue value) {
       this.value = Optional.ofNullable(value);
       return this;
     }
@@ -311,14 +311,14 @@ public final class DynamicValue {
         value = "value",
         nulls = Nulls.SKIP
     )
-    public _FinalStage value(Optional<Object> value) {
+    public _FinalStage value(Optional<DynamicValueValue> value) {
       this.value = value;
       return this;
     }
 
     @java.lang.Override
     public DynamicValue build() {
-      return new DynamicValue(id, name, type, value, usages, accessGroups, additionalProperties);
+      return new DynamicValue(id, name, type, value, usages, userGroups, additionalProperties);
     }
   }
 }

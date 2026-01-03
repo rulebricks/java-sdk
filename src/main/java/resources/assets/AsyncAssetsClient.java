@@ -9,7 +9,11 @@ import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
 import com.rulebricks.resources.assets.flows.AsyncFlowsClient;
 import com.rulebricks.resources.assets.folders.AsyncFoldersClient;
+import com.rulebricks.resources.assets.requests.ExportManifestRequest;
+import com.rulebricks.resources.assets.requests.ImportManifestRequest;
 import com.rulebricks.resources.assets.rules.AsyncRulesClient;
+import com.rulebricks.resources.assets.types.ExportAssetsResponse;
+import com.rulebricks.types.ImportManifestResponse;
 import com.rulebricks.types.UsageStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -52,6 +56,43 @@ public class AsyncAssetsClient {
    */
   public CompletableFuture<UsageStatistics> getUsage(RequestOptions requestOptions) {
     return this.rawClient.getUsage(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Import rules, flows, contexts, and values from an RBM manifest file.
+   */
+  public CompletableFuture<ImportManifestResponse> import_(ImportManifestRequest request) {
+    return this.rawClient.import_(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Import rules, flows, contexts, and values from an RBM manifest file.
+   */
+  public CompletableFuture<ImportManifestResponse> import_(ImportManifestRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.import_(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   */
+  public CompletableFuture<ExportAssetsResponse> export() {
+    return this.rawClient.export().thenApply(response -> response.body());
+  }
+
+  /**
+   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   */
+  public CompletableFuture<ExportAssetsResponse> export(ExportManifestRequest request) {
+    return this.rawClient.export(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   */
+  public CompletableFuture<ExportAssetsResponse> export(ExportManifestRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.export(request, requestOptions).thenApply(response -> response.body());
   }
 
   public AsyncRulesClient rules() {

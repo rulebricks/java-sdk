@@ -72,7 +72,7 @@ public final class Folder {
   /**
    * @return Timestamp of when the folder was last updated.
    */
-  @JsonProperty("updatedAt")
+  @JsonProperty("updated_at")
   public Optional<OffsetDateTime> getUpdatedAt() {
     return updatedAt;
   }
@@ -187,7 +187,7 @@ public final class Folder {
      * <p>Timestamp of when the folder was last updated.</p>
      */
     @JsonSetter(
-        value = "updatedAt",
+        value = "updated_at",
         nulls = Nulls.SKIP
     )
     public Builder updatedAt(Optional<OffsetDateTime> updatedAt) {

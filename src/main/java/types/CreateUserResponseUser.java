@@ -37,20 +37,20 @@ public final class CreateUserResponseUser {
 
   private final Optional<String> role;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Optional<String> apiKey;
 
   private final Map<String, Object> additionalProperties;
 
   private CreateUserResponseUser(Optional<String> id, Optional<String> email, Optional<String> name,
-      Optional<String> role, Optional<List<String>> accessGroups, Optional<String> apiKey,
+      Optional<String> role, Optional<List<String>> userGroups, Optional<String> apiKey,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.email = email;
     this.name = name;
     this.role = role;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.apiKey = apiKey;
     this.additionalProperties = additionalProperties;
   }
@@ -91,11 +91,11 @@ public final class CreateUserResponseUser {
   }
 
   /**
-   * @return Access groups assigned to the user.
+   * @return User groups assigned to the user.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   /**
@@ -122,7 +122,7 @@ public final class CreateUserResponseUser {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("apiKey")
+  @JsonProperty("api_key")
   private Optional<String> _getApiKey() {
     return apiKey;
   }
@@ -139,12 +139,12 @@ public final class CreateUserResponseUser {
   }
 
   private boolean equalTo(CreateUserResponseUser other) {
-    return id.equals(other.id) && email.equals(other.email) && name.equals(other.name) && role.equals(other.role) && accessGroups.equals(other.accessGroups) && apiKey.equals(other.apiKey);
+    return id.equals(other.id) && email.equals(other.email) && name.equals(other.name) && role.equals(other.role) && userGroups.equals(other.userGroups) && apiKey.equals(other.apiKey);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.email, this.name, this.role, this.accessGroups, this.apiKey);
+    return Objects.hash(this.id, this.email, this.name, this.role, this.userGroups, this.apiKey);
   }
 
   @java.lang.Override
@@ -168,7 +168,7 @@ public final class CreateUserResponseUser {
 
     private Optional<String> role = Optional.empty();
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     private Optional<String> apiKey = Optional.empty();
 
@@ -183,7 +183,7 @@ public final class CreateUserResponseUser {
       email(other.getEmail());
       name(other.getName());
       role(other.getRole());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       apiKey(other.getApiKey());
       return this;
     }
@@ -270,19 +270,19 @@ public final class CreateUserResponseUser {
     }
 
     /**
-     * <p>Access groups assigned to the user.</p>
+     * <p>User groups assigned to the user.</p>
      */
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public Builder accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
-    public Builder accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
@@ -290,7 +290,7 @@ public final class CreateUserResponseUser {
      * <p>API key generated for the user.</p>
      */
     @JsonSetter(
-        value = "apiKey",
+        value = "api_key",
         nulls = Nulls.SKIP
     )
     public Builder apiKey(Optional<String> apiKey) {
@@ -317,7 +317,7 @@ public final class CreateUserResponseUser {
     }
 
     public CreateUserResponseUser build() {
-      return new CreateUserResponseUser(id, email, name, role, accessGroups, apiKey, additionalProperties);
+      return new CreateUserResponseUser(id, email, name, role, userGroups, apiKey, additionalProperties);
     }
   }
 }

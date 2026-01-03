@@ -35,18 +35,18 @@ public final class CreateUserRequest {
 
   private final Optional<String> role;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
   private CreateUserRequest(String email, String password, Optional<String> name,
-      Optional<String> role, Optional<List<String>> accessGroups,
+      Optional<String> role, Optional<List<String>> userGroups,
       Map<String, Object> additionalProperties) {
     this.email = email;
     this.password = password;
     this.name = name;
     this.role = role;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -83,11 +83,11 @@ public final class CreateUserRequest {
   }
 
   /**
-   * @return List of access group names or IDs to assign to the user.
+   * @return List of user group names or IDs to assign to the user.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -102,12 +102,12 @@ public final class CreateUserRequest {
   }
 
   private boolean equalTo(CreateUserRequest other) {
-    return email.equals(other.email) && password.equals(other.password) && name.equals(other.name) && role.equals(other.role) && accessGroups.equals(other.accessGroups);
+    return email.equals(other.email) && password.equals(other.password) && name.equals(other.name) && role.equals(other.role) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.email, this.password, this.name, this.role, this.accessGroups);
+    return Objects.hash(this.email, this.password, this.name, this.role, this.userGroups);
   }
 
   @java.lang.Override
@@ -153,11 +153,11 @@ public final class CreateUserRequest {
     _FinalStage role(String role);
 
     /**
-     * <p>List of access group names or IDs to assign to the user.</p>
+     * <p>List of user group names or IDs to assign to the user.</p>
      */
-    _FinalStage accessGroups(Optional<List<String>> accessGroups);
+    _FinalStage userGroups(Optional<List<String>> userGroups);
 
-    _FinalStage accessGroups(List<String> accessGroups);
+    _FinalStage userGroups(List<String> userGroups);
   }
 
   @JsonIgnoreProperties(
@@ -168,7 +168,7 @@ public final class CreateUserRequest {
 
     private String password;
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     private Optional<String> role = Optional.empty();
 
@@ -186,7 +186,7 @@ public final class CreateUserRequest {
       password(other.getPassword());
       name(other.getName());
       role(other.getRole());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -215,25 +215,25 @@ public final class CreateUserRequest {
     }
 
     /**
-     * <p>List of access group names or IDs to assign to the user.</p>
+     * <p>List of user group names or IDs to assign to the user.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public _FinalStage userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
     /**
-     * <p>List of access group names or IDs to assign to the user.</p>
+     * <p>List of user group names or IDs to assign to the user.</p>
      */
     @java.lang.Override
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public _FinalStage accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public _FinalStage userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
@@ -285,7 +285,7 @@ public final class CreateUserRequest {
 
     @java.lang.Override
     public CreateUserRequest build() {
-      return new CreateUserRequest(email, password, name, role, accessGroups, additionalProperties);
+      return new CreateUserRequest(email, password, name, role, userGroups, additionalProperties);
     }
   }
 }

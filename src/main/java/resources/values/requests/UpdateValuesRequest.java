@@ -29,14 +29,14 @@ import java.util.Optional;
 public final class UpdateValuesRequest {
   private final Map<String, Object> values;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateValuesRequest(Map<String, Object> values, Optional<List<String>> accessGroups,
+  private UpdateValuesRequest(Map<String, Object> values, Optional<List<String>> userGroups,
       Map<String, Object> additionalProperties) {
     this.values = values;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -51,9 +51,9 @@ public final class UpdateValuesRequest {
   /**
    * @return Optional array of access group names or IDs. If omitted and user belongs to access groups, values will be assigned to all user's access groups. Required if values should be restricted to specific access groups.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -68,12 +68,12 @@ public final class UpdateValuesRequest {
   }
 
   private boolean equalTo(UpdateValuesRequest other) {
-    return values.equals(other.values) && accessGroups.equals(other.accessGroups);
+    return values.equals(other.values) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.values, this.accessGroups);
+    return Objects.hash(this.values, this.userGroups);
   }
 
   @java.lang.Override
@@ -91,7 +91,7 @@ public final class UpdateValuesRequest {
   public static final class Builder {
     private Map<String, Object> values = new LinkedHashMap<>();
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -101,7 +101,7 @@ public final class UpdateValuesRequest {
 
     public Builder from(UpdateValuesRequest other) {
       values(other.getValues());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -136,21 +136,21 @@ public final class UpdateValuesRequest {
      * <p>Optional array of access group names or IDs. If omitted and user belongs to access groups, values will be assigned to all user's access groups. Required if values should be restricted to specific access groups.</p>
      */
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public Builder accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
-    public Builder accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
     public UpdateValuesRequest build() {
-      return new UpdateValuesRequest(values, accessGroups, additionalProperties);
+      return new UpdateValuesRequest(values, userGroups, additionalProperties);
     }
   }
 }

@@ -32,15 +32,15 @@ public final class UserInviteRequest {
 
   private final Optional<UserInviteRequestRole> role;
 
-  private final Optional<List<String>> accessGroups;
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
   private UserInviteRequest(String email, Optional<UserInviteRequestRole> role,
-      Optional<List<String>> accessGroups, Map<String, Object> additionalProperties) {
+      Optional<List<String>> userGroups, Map<String, Object> additionalProperties) {
     this.email = email;
     this.role = role;
-    this.accessGroups = accessGroups;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -61,11 +61,11 @@ public final class UserInviteRequest {
   }
 
   /**
-   * @return List of access group names or IDs to assign to the user. All specified groups must exist in your organization.
+   * @return List of user group names or IDs to assign to the user. All specified groups must exist in your organization.
    */
-  @JsonProperty("accessGroups")
-  public Optional<List<String>> getAccessGroups() {
-    return accessGroups;
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -80,12 +80,12 @@ public final class UserInviteRequest {
   }
 
   private boolean equalTo(UserInviteRequest other) {
-    return email.equals(other.email) && role.equals(other.role) && accessGroups.equals(other.accessGroups);
+    return email.equals(other.email) && role.equals(other.role) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.email, this.role, this.accessGroups);
+    return Objects.hash(this.email, this.role, this.userGroups);
   }
 
   @java.lang.Override
@@ -117,11 +117,11 @@ public final class UserInviteRequest {
     _FinalStage role(UserInviteRequestRole role);
 
     /**
-     * <p>List of access group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
+     * <p>List of user group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
      */
-    _FinalStage accessGroups(Optional<List<String>> accessGroups);
+    _FinalStage userGroups(Optional<List<String>> userGroups);
 
-    _FinalStage accessGroups(List<String> accessGroups);
+    _FinalStage userGroups(List<String> userGroups);
   }
 
   @JsonIgnoreProperties(
@@ -130,7 +130,7 @@ public final class UserInviteRequest {
   public static final class Builder implements EmailStage, _FinalStage {
     private String email;
 
-    private Optional<List<String>> accessGroups = Optional.empty();
+    private Optional<List<String>> userGroups = Optional.empty();
 
     private Optional<UserInviteRequestRole> role = Optional.empty();
 
@@ -144,7 +144,7 @@ public final class UserInviteRequest {
     public Builder from(UserInviteRequest other) {
       email(other.getEmail());
       role(other.getRole());
-      accessGroups(other.getAccessGroups());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -161,25 +161,25 @@ public final class UserInviteRequest {
     }
 
     /**
-     * <p>List of access group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
+     * <p>List of user group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage accessGroups(List<String> accessGroups) {
-      this.accessGroups = Optional.ofNullable(accessGroups);
+    public _FinalStage userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
       return this;
     }
 
     /**
-     * <p>List of access group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
+     * <p>List of user group names or IDs to assign to the user. All specified groups must exist in your organization.</p>
      */
     @java.lang.Override
     @JsonSetter(
-        value = "accessGroups",
+        value = "user_groups",
         nulls = Nulls.SKIP
     )
-    public _FinalStage accessGroups(Optional<List<String>> accessGroups) {
-      this.accessGroups = accessGroups;
+    public _FinalStage userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
       return this;
     }
 
@@ -208,7 +208,7 @@ public final class UserInviteRequest {
 
     @java.lang.Override
     public UserInviteRequest build() {
-      return new UserInviteRequest(email, role, accessGroups, additionalProperties);
+      return new UserInviteRequest(email, role, userGroups, additionalProperties);
     }
   }
 }
