@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -25,28 +26,45 @@ import java.util.Optional;
     builder = ExportManifestPreviewResponse.Builder.class
 )
 public final class ExportManifestPreviewResponse {
-  private final Optional<ExportManifestPreviewResponseCounts> counts;
+  private final Optional<Boolean> success;
 
-  private final Optional<ExportManifestPreviewResponseItems> items;
+  private final Optional<ExportManifestPreviewResponsePreview> preview;
+
+  private final Optional<String> error;
 
   private final Map<String, Object> additionalProperties;
 
-  private ExportManifestPreviewResponse(Optional<ExportManifestPreviewResponseCounts> counts,
-      Optional<ExportManifestPreviewResponseItems> items,
+  private ExportManifestPreviewResponse(Optional<Boolean> success,
+      Optional<ExportManifestPreviewResponsePreview> preview, Optional<String> error,
       Map<String, Object> additionalProperties) {
-    this.counts = counts;
-    this.items = items;
+    this.success = success;
+    this.preview = preview;
+    this.error = error;
     this.additionalProperties = additionalProperties;
   }
 
-  @JsonProperty("counts")
-  public Optional<ExportManifestPreviewResponseCounts> getCounts() {
-    return counts;
+  /**
+   * @return Whether the preview completed successfully.
+   */
+  @JsonProperty("success")
+  public Optional<Boolean> getSuccess() {
+    return success;
   }
 
-  @JsonProperty("items")
-  public Optional<ExportManifestPreviewResponseItems> getItems() {
-    return items;
+  /**
+   * @return Preview of assets that would be exported.
+   */
+  @JsonProperty("preview")
+  public Optional<ExportManifestPreviewResponsePreview> getPreview() {
+    return preview;
+  }
+
+  /**
+   * @return Error message if preview failed.
+   */
+  @JsonProperty("error")
+  public Optional<String> getError() {
+    return error;
   }
 
   @java.lang.Override
@@ -61,12 +79,12 @@ public final class ExportManifestPreviewResponse {
   }
 
   private boolean equalTo(ExportManifestPreviewResponse other) {
-    return counts.equals(other.counts) && items.equals(other.items);
+    return success.equals(other.success) && preview.equals(other.preview) && error.equals(other.error);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.counts, this.items);
+    return Objects.hash(this.success, this.preview, this.error);
   }
 
   @java.lang.Override
@@ -82,9 +100,11 @@ public final class ExportManifestPreviewResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<ExportManifestPreviewResponseCounts> counts = Optional.empty();
+    private Optional<Boolean> success = Optional.empty();
 
-    private Optional<ExportManifestPreviewResponseItems> items = Optional.empty();
+    private Optional<ExportManifestPreviewResponsePreview> preview = Optional.empty();
+
+    private Optional<String> error = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -93,41 +113,65 @@ public final class ExportManifestPreviewResponse {
     }
 
     public Builder from(ExportManifestPreviewResponse other) {
-      counts(other.getCounts());
-      items(other.getItems());
+      success(other.getSuccess());
+      preview(other.getPreview());
+      error(other.getError());
       return this;
     }
 
+    /**
+     * <p>Whether the preview completed successfully.</p>
+     */
     @JsonSetter(
-        value = "counts",
+        value = "success",
         nulls = Nulls.SKIP
     )
-    public Builder counts(Optional<ExportManifestPreviewResponseCounts> counts) {
-      this.counts = counts;
+    public Builder success(Optional<Boolean> success) {
+      this.success = success;
       return this;
     }
 
-    public Builder counts(ExportManifestPreviewResponseCounts counts) {
-      this.counts = Optional.ofNullable(counts);
+    public Builder success(Boolean success) {
+      this.success = Optional.ofNullable(success);
       return this;
     }
 
+    /**
+     * <p>Preview of assets that would be exported.</p>
+     */
     @JsonSetter(
-        value = "items",
+        value = "preview",
         nulls = Nulls.SKIP
     )
-    public Builder items(Optional<ExportManifestPreviewResponseItems> items) {
-      this.items = items;
+    public Builder preview(Optional<ExportManifestPreviewResponsePreview> preview) {
+      this.preview = preview;
       return this;
     }
 
-    public Builder items(ExportManifestPreviewResponseItems items) {
-      this.items = Optional.ofNullable(items);
+    public Builder preview(ExportManifestPreviewResponsePreview preview) {
+      this.preview = Optional.ofNullable(preview);
+      return this;
+    }
+
+    /**
+     * <p>Error message if preview failed.</p>
+     */
+    @JsonSetter(
+        value = "error",
+        nulls = Nulls.SKIP
+    )
+    public Builder error(Optional<String> error) {
+      this.error = error;
+      return this;
+    }
+
+    public Builder error(String error) {
+      this.error = Optional.ofNullable(error);
       return this;
     }
 
     public ExportManifestPreviewResponse build() {
-      return new ExportManifestPreviewResponse(counts, items, additionalProperties);
+      return new ExportManifestPreviewResponse(success, preview, error, additionalProperties);
     }
   }
 }

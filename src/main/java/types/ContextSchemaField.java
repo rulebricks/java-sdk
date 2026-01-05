@@ -154,7 +154,7 @@ public final class ContextSchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("defaultValue")
+  @JsonProperty("default_value")
   private Optional<Object> _getDefaultValue() {
     return defaultValue;
   }
@@ -163,7 +163,7 @@ public final class ContextSchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("sourceRule")
+  @JsonProperty("source_rule")
   private Optional<String> _getSourceRule() {
     return sourceRule;
   }
@@ -172,7 +172,7 @@ public final class ContextSchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("sourceFlow")
+  @JsonProperty("source_flow")
   private Optional<String> _getSourceFlow() {
     return sourceFlow;
   }
@@ -181,7 +181,7 @@ public final class ContextSchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("sourceField")
+  @JsonProperty("source_field")
   private Optional<String> _getSourceField() {
     return sourceField;
   }
@@ -328,7 +328,7 @@ public final class ContextSchemaField {
      * <p>Default value for this field.</p>
      */
     @JsonSetter(
-        value = "defaultValue",
+        value = "default_value",
         nulls = Nulls.SKIP
     )
     public Builder defaultValue(Optional<Object> defaultValue) {
@@ -375,7 +375,7 @@ public final class ContextSchemaField {
      * <p>The rule ID that derives this field (if derived).</p>
      */
     @JsonSetter(
-        value = "sourceRule",
+        value = "source_rule",
         nulls = Nulls.SKIP
     )
     public Builder sourceRule(Optional<String> sourceRule) {
@@ -405,7 +405,7 @@ public final class ContextSchemaField {
      * <p>The flow ID that derives this field (if derived).</p>
      */
     @JsonSetter(
-        value = "sourceFlow",
+        value = "source_flow",
         nulls = Nulls.SKIP
     )
     public Builder sourceFlow(Optional<String> sourceFlow) {
@@ -435,7 +435,7 @@ public final class ContextSchemaField {
      * <p>The source field key in the rule/flow output.</p>
      */
     @JsonSetter(
-        value = "sourceField",
+        value = "source_field",
         nulls = Nulls.SKIP
     )
     public Builder sourceField(Optional<String> sourceField) {

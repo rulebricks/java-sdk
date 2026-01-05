@@ -5,6 +5,7 @@
 package com.rulebricks.types;
 
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface IContextRelationshipBase {
@@ -17,4 +18,6 @@ public interface IContextRelationshipBase {
   Optional<String> getName();
 
   Optional<String> getDescription();
+
+  Optional<OffsetDateTime> getCreatedAt();
 }

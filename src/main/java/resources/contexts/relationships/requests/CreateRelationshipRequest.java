@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
-import com.rulebricks.resources.contexts.relationships.types.CreateRelationshipRequestType;
+import com.rulebricks.resources.contexts.relationships.types.CreateRelationshipRequestRelationType;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -27,11 +27,11 @@ import org.jetbrains.annotations.NotNull;
     builder = CreateRelationshipRequest.Builder.class
 )
 public final class CreateRelationshipRequest {
-  private final String targetContextId;
+  private final String toContextId;
 
-  private final CreateRelationshipRequestType type;
+  private final CreateRelationshipRequestRelationType relationType;
 
-  private final String foreignKey;
+  private final String foreignKeyFact;
 
   private final Optional<String> name;
 
@@ -39,12 +39,13 @@ public final class CreateRelationshipRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateRelationshipRequest(String targetContextId, CreateRelationshipRequestType type,
-      String foreignKey, Optional<String> name, Optional<String> description,
+  private CreateRelationshipRequest(String toContextId,
+      CreateRelationshipRequestRelationType relationType, String foreignKeyFact,
+      Optional<String> name, Optional<String> description,
       Map<String, Object> additionalProperties) {
-    this.targetContextId = targetContextId;
-    this.type = type;
-    this.foreignKey = foreignKey;
+    this.toContextId = toContextId;
+    this.relationType = relationType;
+    this.foreignKeyFact = foreignKeyFact;
     this.name = name;
     this.description = description;
     this.additionalProperties = additionalProperties;
@@ -53,25 +54,25 @@ public final class CreateRelationshipRequest {
   /**
    * @return The ID of the target context.
    */
-  @JsonProperty("targetContextId")
-  public String getTargetContextId() {
-    return targetContextId;
+  @JsonProperty("to_context_id")
+  public String getToContextId() {
+    return toContextId;
   }
 
   /**
    * @return The type of relationship.
    */
-  @JsonProperty("type")
-  public CreateRelationshipRequestType getType() {
-    return type;
+  @JsonProperty("relation_type")
+  public CreateRelationshipRequestRelationType getRelationType() {
+    return relationType;
   }
 
   /**
    * @return The field key to use as the foreign key.
    */
-  @JsonProperty("foreignKey")
-  public String getForeignKey() {
-    return foreignKey;
+  @JsonProperty("foreign_key_fact")
+  public String getForeignKeyFact() {
+    return foreignKeyFact;
   }
 
   /**
@@ -102,12 +103,12 @@ public final class CreateRelationshipRequest {
   }
 
   private boolean equalTo(CreateRelationshipRequest other) {
-    return targetContextId.equals(other.targetContextId) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description);
+    return toContextId.equals(other.toContextId) && relationType.equals(other.relationType) && foreignKeyFact.equals(other.foreignKeyFact) && name.equals(other.name) && description.equals(other.description);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.targetContextId, this.type, this.foreignKey, this.name, this.description);
+    return Objects.hash(this.toContextId, this.relationType, this.foreignKeyFact, this.name, this.description);
   }
 
   @java.lang.Override
@@ -115,31 +116,31 @@ public final class CreateRelationshipRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static TargetContextIdStage builder() {
+  public static ToContextIdStage builder() {
     return new Builder();
   }
 
-  public interface TargetContextIdStage {
+  public interface ToContextIdStage {
     /**
      * <p>The ID of the target context.</p>
      */
-    TypeStage targetContextId(@NotNull String targetContextId);
+    RelationTypeStage toContextId(@NotNull String toContextId);
 
     Builder from(CreateRelationshipRequest other);
   }
 
-  public interface TypeStage {
+  public interface RelationTypeStage {
     /**
      * <p>The type of relationship.</p>
      */
-    ForeignKeyStage type(@NotNull CreateRelationshipRequestType type);
+    ForeignKeyFactStage relationType(@NotNull CreateRelationshipRequestRelationType relationType);
   }
 
-  public interface ForeignKeyStage {
+  public interface ForeignKeyFactStage {
     /**
      * <p>The field key to use as the foreign key.</p>
      */
-    _FinalStage foreignKey(@NotNull String foreignKey);
+    _FinalStage foreignKeyFact(@NotNull String foreignKeyFact);
   }
 
   public interface _FinalStage {
@@ -163,12 +164,12 @@ public final class CreateRelationshipRequest {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements TargetContextIdStage, TypeStage, ForeignKeyStage, _FinalStage {
-    private String targetContextId;
+  public static final class Builder implements ToContextIdStage, RelationTypeStage, ForeignKeyFactStage, _FinalStage {
+    private String toContextId;
 
-    private CreateRelationshipRequestType type;
+    private CreateRelationshipRequestRelationType relationType;
 
-    private String foreignKey;
+    private String foreignKeyFact;
 
     private Optional<String> description = Optional.empty();
 
@@ -182,9 +183,9 @@ public final class CreateRelationshipRequest {
 
     @java.lang.Override
     public Builder from(CreateRelationshipRequest other) {
-      targetContextId(other.getTargetContextId());
-      type(other.getType());
-      foreignKey(other.getForeignKey());
+      toContextId(other.getToContextId());
+      relationType(other.getRelationType());
+      foreignKeyFact(other.getForeignKeyFact());
       name(other.getName());
       description(other.getDescription());
       return this;
@@ -196,9 +197,9 @@ public final class CreateRelationshipRequest {
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    @JsonSetter("targetContextId")
-    public TypeStage targetContextId(@NotNull String targetContextId) {
-      this.targetContextId = Objects.requireNonNull(targetContextId, "targetContextId must not be null");
+    @JsonSetter("to_context_id")
+    public RelationTypeStage toContextId(@NotNull String toContextId) {
+      this.toContextId = Objects.requireNonNull(toContextId, "toContextId must not be null");
       return this;
     }
 
@@ -208,9 +209,10 @@ public final class CreateRelationshipRequest {
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    @JsonSetter("type")
-    public ForeignKeyStage type(@NotNull CreateRelationshipRequestType type) {
-      this.type = Objects.requireNonNull(type, "type must not be null");
+    @JsonSetter("relation_type")
+    public ForeignKeyFactStage relationType(
+        @NotNull CreateRelationshipRequestRelationType relationType) {
+      this.relationType = Objects.requireNonNull(relationType, "relationType must not be null");
       return this;
     }
 
@@ -220,9 +222,9 @@ public final class CreateRelationshipRequest {
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    @JsonSetter("foreignKey")
-    public _FinalStage foreignKey(@NotNull String foreignKey) {
-      this.foreignKey = Objects.requireNonNull(foreignKey, "foreignKey must not be null");
+    @JsonSetter("foreign_key_fact")
+    public _FinalStage foreignKeyFact(@NotNull String foreignKeyFact) {
+      this.foreignKeyFact = Objects.requireNonNull(foreignKeyFact, "foreignKeyFact must not be null");
       return this;
     }
 
@@ -274,7 +276,7 @@ public final class CreateRelationshipRequest {
 
     @java.lang.Override
     public CreateRelationshipRequest build() {
-      return new CreateRelationshipRequest(targetContextId, type, foreignKey, name, description, additionalProperties);
+      return new CreateRelationshipRequest(toContextId, relationType, foreignKeyFact, name, description, additionalProperties);
     }
   }
 }

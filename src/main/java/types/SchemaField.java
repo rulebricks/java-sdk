@@ -136,7 +136,7 @@ public final class SchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("defaultValue")
+  @JsonProperty("default_value")
   private Optional<SchemaFieldDefaultValue> _getDefaultValue() {
     return defaultValue;
   }
@@ -145,7 +145,7 @@ public final class SchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("defaultComputedValue")
+  @JsonProperty("default_computed_value")
   private Optional<String> _getDefaultComputedValue() {
     return defaultComputedValue;
   }
@@ -306,7 +306,7 @@ public final class SchemaField {
      * <p>Default value for this field.</p>
      */
     @JsonSetter(
-        value = "defaultValue",
+        value = "default_value",
         nulls = Nulls.SKIP
     )
     public Builder defaultValue(Optional<SchemaFieldDefaultValue> defaultValue) {
@@ -336,7 +336,7 @@ public final class SchemaField {
      * <p>Computed default value for this field.</p>
      */
     @JsonSetter(
-        value = "defaultComputedValue",
+        value = "default_computed_value",
         nulls = Nulls.SKIP
     )
     public Builder defaultComputedValue(Optional<String> defaultComputedValue) {

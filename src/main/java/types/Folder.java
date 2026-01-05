@@ -17,6 +17,7 @@ import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,16 +33,23 @@ public final class Folder {
 
   private final Optional<String> description;
 
+  private final Optional<OffsetDateTime> createdAt;
+
   private final Optional<OffsetDateTime> updatedAt;
+
+  private final Optional<List<String>> userGroups;
 
   private final Map<String, Object> additionalProperties;
 
   private Folder(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<OffsetDateTime> updatedAt, Map<String, Object> additionalProperties) {
+      Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
+      Optional<List<String>> userGroups, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.userGroups = userGroups;
     this.additionalProperties = additionalProperties;
   }
 
@@ -70,11 +78,27 @@ public final class Folder {
   }
 
   /**
+   * @return Timestamp of when the folder was created.
+   */
+  @JsonProperty("created_at")
+  public Optional<OffsetDateTime> getCreatedAt() {
+    return createdAt;
+  }
+
+  /**
    * @return Timestamp of when the folder was last updated.
    */
   @JsonProperty("updated_at")
   public Optional<OffsetDateTime> getUpdatedAt() {
     return updatedAt;
+  }
+
+  /**
+   * @return User groups that can view this folder.
+   */
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
   }
 
   @java.lang.Override
@@ -89,12 +113,12 @@ public final class Folder {
   }
 
   private boolean equalTo(Folder other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.description, this.createdAt, this.updatedAt, this.userGroups);
   }
 
   @java.lang.Override
@@ -116,7 +140,11 @@ public final class Folder {
 
     private Optional<String> description = Optional.empty();
 
+    private Optional<OffsetDateTime> createdAt = Optional.empty();
+
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
+
+    private Optional<List<String>> userGroups = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -128,7 +156,9 @@ public final class Folder {
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
+      createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
+      userGroups(other.getUserGroups());
       return this;
     }
 
@@ -184,6 +214,23 @@ public final class Folder {
     }
 
     /**
+     * <p>Timestamp of when the folder was created.</p>
+     */
+    @JsonSetter(
+        value = "created_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAt(Optional<OffsetDateTime> createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = Optional.ofNullable(createdAt);
+      return this;
+    }
+
+    /**
      * <p>Timestamp of when the folder was last updated.</p>
      */
     @JsonSetter(
@@ -200,8 +247,25 @@ public final class Folder {
       return this;
     }
 
+    /**
+     * <p>User groups that can view this folder.</p>
+     */
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
     public Folder build() {
-      return new Folder(id, name, description, updatedAt, additionalProperties);
+      return new Folder(id, name, description, createdAt, updatedAt, userGroups, additionalProperties);
     }
   }
 }

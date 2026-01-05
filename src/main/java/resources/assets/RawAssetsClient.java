@@ -16,7 +16,7 @@ import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
 import com.rulebricks.resources.assets.requests.ImportManifestRequest;
-import com.rulebricks.resources.assets.types.ExportAssetsResponse;
+import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
 import com.rulebricks.types.ImportManifestResponse;
 import com.rulebricks.types.UsageStatistics;
 import java.io.IOException;
@@ -77,16 +77,17 @@ public class RawAssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public RulebricksApiHttpResponse<ImportManifestResponse> import_(ImportManifestRequest request) {
-    return import_(request,null);
+  public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(
+      ImportManifestRequest request) {
+    return importRbm(request,null);
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public RulebricksApiHttpResponse<ImportManifestResponse> import_(ImportManifestRequest request,
+  public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(ImportManifestRequest request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -134,23 +135,17 @@ public class RawAssetsClient {
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public RulebricksApiHttpResponse<ExportAssetsResponse> export() {
-    return export(ExportManifestRequest.builder().build());
+  public RulebricksApiHttpResponse<ExportRbmAssetsResponse> exportRbm(
+      ExportManifestRequest request) {
+    return exportRbm(request,null);
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public RulebricksApiHttpResponse<ExportAssetsResponse> export(ExportManifestRequest request) {
-    return export(request,null);
-  }
-
-  /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
-   */
-  public RulebricksApiHttpResponse<ExportAssetsResponse> export(ExportManifestRequest request,
+  public RulebricksApiHttpResponse<ExportRbmAssetsResponse> exportRbm(ExportManifestRequest request,
       RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -178,7 +173,7 @@ public class RawAssetsClient {
       ResponseBody responseBody = response.body();
       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
       if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ExportAssetsResponse.class), response);
+        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ExportRbmAssetsResponse.class), response);
       }
       try {
         switch (response.code()) {

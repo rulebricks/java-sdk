@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
 import java.lang.Double;
 import java.lang.Object;
 import java.lang.String;
@@ -38,18 +39,28 @@ public final class UsageStatistics {
 
   private final Optional<Double> monthlyExecutionsRemaining;
 
+  private final Optional<Boolean> unlimitedPlan;
+
+  private final Optional<Double> daysRemainingInPeriod;
+
+  private final Optional<Double> dailyAverageUsage;
+
   private final Map<String, Object> additionalProperties;
 
   private UsageStatistics(Optional<String> plan, Optional<String> monthlyPeriodStart,
       Optional<String> monthlyPeriodEnd, Optional<Double> monthlyExecutionsUsage,
       Optional<Double> monthlyExecutionsLimit, Optional<Double> monthlyExecutionsRemaining,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> unlimitedPlan, Optional<Double> daysRemainingInPeriod,
+      Optional<Double> dailyAverageUsage, Map<String, Object> additionalProperties) {
     this.plan = plan;
     this.monthlyPeriodStart = monthlyPeriodStart;
     this.monthlyPeriodEnd = monthlyPeriodEnd;
     this.monthlyExecutionsUsage = monthlyExecutionsUsage;
     this.monthlyExecutionsLimit = monthlyExecutionsLimit;
     this.monthlyExecutionsRemaining = monthlyExecutionsRemaining;
+    this.unlimitedPlan = unlimitedPlan;
+    this.daysRemainingInPeriod = daysRemainingInPeriod;
+    this.dailyAverageUsage = dailyAverageUsage;
     this.additionalProperties = additionalProperties;
   }
 
@@ -62,7 +73,7 @@ public final class UsageStatistics {
   }
 
   /**
-   * @return The start date of the current monthly period.
+   * @return The start date of the current monthly period (MM-DD-YYYY).
    */
   @JsonProperty("monthly_period_start")
   public Optional<String> getMonthlyPeriodStart() {
@@ -70,7 +81,7 @@ public final class UsageStatistics {
   }
 
   /**
-   * @return The end date of the current monthly period.
+   * @return The end date of the current monthly period (MM-DD-YYYY).
    */
   @JsonProperty("monthly_period_end")
   public Optional<String> getMonthlyPeriodEnd() {
@@ -86,7 +97,7 @@ public final class UsageStatistics {
   }
 
   /**
-   * @return The total number of rule executions allowed this month.
+   * @return The total number of rule executions allowed this month. -1 indicates unlimited.
    */
   @JsonProperty("monthly_executions_limit")
   public Optional<Double> getMonthlyExecutionsLimit() {
@@ -94,11 +105,35 @@ public final class UsageStatistics {
   }
 
   /**
-   * @return The number of rule executions remaining this month.
+   * @return The number of rule executions remaining this month. -1 indicates unlimited.
    */
   @JsonProperty("monthly_executions_remaining")
   public Optional<Double> getMonthlyExecutionsRemaining() {
     return monthlyExecutionsRemaining;
+  }
+
+  /**
+   * @return Whether the plan has unlimited executions (true when monthly_executions_limit is -1).
+   */
+  @JsonProperty("unlimited_plan")
+  public Optional<Boolean> getUnlimitedPlan() {
+    return unlimitedPlan;
+  }
+
+  /**
+   * @return Number of days remaining in the current billing period.
+   */
+  @JsonProperty("days_remaining_in_period")
+  public Optional<Double> getDaysRemainingInPeriod() {
+    return daysRemainingInPeriod;
+  }
+
+  /**
+   * @return Average number of executions per day in the current period.
+   */
+  @JsonProperty("daily_average_usage")
+  public Optional<Double> getDailyAverageUsage() {
+    return dailyAverageUsage;
   }
 
   @java.lang.Override
@@ -113,12 +148,12 @@ public final class UsageStatistics {
   }
 
   private boolean equalTo(UsageStatistics other) {
-    return plan.equals(other.plan) && monthlyPeriodStart.equals(other.monthlyPeriodStart) && monthlyPeriodEnd.equals(other.monthlyPeriodEnd) && monthlyExecutionsUsage.equals(other.monthlyExecutionsUsage) && monthlyExecutionsLimit.equals(other.monthlyExecutionsLimit) && monthlyExecutionsRemaining.equals(other.monthlyExecutionsRemaining);
+    return plan.equals(other.plan) && monthlyPeriodStart.equals(other.monthlyPeriodStart) && monthlyPeriodEnd.equals(other.monthlyPeriodEnd) && monthlyExecutionsUsage.equals(other.monthlyExecutionsUsage) && monthlyExecutionsLimit.equals(other.monthlyExecutionsLimit) && monthlyExecutionsRemaining.equals(other.monthlyExecutionsRemaining) && unlimitedPlan.equals(other.unlimitedPlan) && daysRemainingInPeriod.equals(other.daysRemainingInPeriod) && dailyAverageUsage.equals(other.dailyAverageUsage);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.plan, this.monthlyPeriodStart, this.monthlyPeriodEnd, this.monthlyExecutionsUsage, this.monthlyExecutionsLimit, this.monthlyExecutionsRemaining);
+    return Objects.hash(this.plan, this.monthlyPeriodStart, this.monthlyPeriodEnd, this.monthlyExecutionsUsage, this.monthlyExecutionsLimit, this.monthlyExecutionsRemaining, this.unlimitedPlan, this.daysRemainingInPeriod, this.dailyAverageUsage);
   }
 
   @java.lang.Override
@@ -146,6 +181,12 @@ public final class UsageStatistics {
 
     private Optional<Double> monthlyExecutionsRemaining = Optional.empty();
 
+    private Optional<Boolean> unlimitedPlan = Optional.empty();
+
+    private Optional<Double> daysRemainingInPeriod = Optional.empty();
+
+    private Optional<Double> dailyAverageUsage = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -159,6 +200,9 @@ public final class UsageStatistics {
       monthlyExecutionsUsage(other.getMonthlyExecutionsUsage());
       monthlyExecutionsLimit(other.getMonthlyExecutionsLimit());
       monthlyExecutionsRemaining(other.getMonthlyExecutionsRemaining());
+      unlimitedPlan(other.getUnlimitedPlan());
+      daysRemainingInPeriod(other.getDaysRemainingInPeriod());
+      dailyAverageUsage(other.getDailyAverageUsage());
       return this;
     }
 
@@ -180,7 +224,7 @@ public final class UsageStatistics {
     }
 
     /**
-     * <p>The start date of the current monthly period.</p>
+     * <p>The start date of the current monthly period (MM-DD-YYYY).</p>
      */
     @JsonSetter(
         value = "monthly_period_start",
@@ -197,7 +241,7 @@ public final class UsageStatistics {
     }
 
     /**
-     * <p>The end date of the current monthly period.</p>
+     * <p>The end date of the current monthly period (MM-DD-YYYY).</p>
      */
     @JsonSetter(
         value = "monthly_period_end",
@@ -231,7 +275,7 @@ public final class UsageStatistics {
     }
 
     /**
-     * <p>The total number of rule executions allowed this month.</p>
+     * <p>The total number of rule executions allowed this month. -1 indicates unlimited.</p>
      */
     @JsonSetter(
         value = "monthly_executions_limit",
@@ -248,7 +292,7 @@ public final class UsageStatistics {
     }
 
     /**
-     * <p>The number of rule executions remaining this month.</p>
+     * <p>The number of rule executions remaining this month. -1 indicates unlimited.</p>
      */
     @JsonSetter(
         value = "monthly_executions_remaining",
@@ -264,8 +308,59 @@ public final class UsageStatistics {
       return this;
     }
 
+    /**
+     * <p>Whether the plan has unlimited executions (true when monthly_executions_limit is -1).</p>
+     */
+    @JsonSetter(
+        value = "unlimited_plan",
+        nulls = Nulls.SKIP
+    )
+    public Builder unlimitedPlan(Optional<Boolean> unlimitedPlan) {
+      this.unlimitedPlan = unlimitedPlan;
+      return this;
+    }
+
+    public Builder unlimitedPlan(Boolean unlimitedPlan) {
+      this.unlimitedPlan = Optional.ofNullable(unlimitedPlan);
+      return this;
+    }
+
+    /**
+     * <p>Number of days remaining in the current billing period.</p>
+     */
+    @JsonSetter(
+        value = "days_remaining_in_period",
+        nulls = Nulls.SKIP
+    )
+    public Builder daysRemainingInPeriod(Optional<Double> daysRemainingInPeriod) {
+      this.daysRemainingInPeriod = daysRemainingInPeriod;
+      return this;
+    }
+
+    public Builder daysRemainingInPeriod(Double daysRemainingInPeriod) {
+      this.daysRemainingInPeriod = Optional.ofNullable(daysRemainingInPeriod);
+      return this;
+    }
+
+    /**
+     * <p>Average number of executions per day in the current period.</p>
+     */
+    @JsonSetter(
+        value = "daily_average_usage",
+        nulls = Nulls.SKIP
+    )
+    public Builder dailyAverageUsage(Optional<Double> dailyAverageUsage) {
+      this.dailyAverageUsage = dailyAverageUsage;
+      return this;
+    }
+
+    public Builder dailyAverageUsage(Double dailyAverageUsage) {
+      this.dailyAverageUsage = Optional.ofNullable(dailyAverageUsage);
+      return this;
+    }
+
     public UsageStatistics build() {
-      return new UsageStatistics(plan, monthlyPeriodStart, monthlyPeriodEnd, monthlyExecutionsUsage, monthlyExecutionsLimit, monthlyExecutionsRemaining, additionalProperties);
+      return new UsageStatistics(plan, monthlyPeriodStart, monthlyPeriodEnd, monthlyExecutionsUsage, monthlyExecutionsLimit, monthlyExecutionsRemaining, unlimitedPlan, daysRemainingInPeriod, dailyAverageUsage, additionalProperties);
     }
   }
 }

@@ -6,13 +6,17 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -26,49 +30,68 @@ import java.util.Optional;
     builder = ImportManifestResponse.Builder.class
 )
 public final class ImportManifestResponse {
-  private final Optional<String> message;
+  private final Optional<Boolean> success;
 
-  private final Optional<ImportManifestResponseImported> imported;
+  private final Optional<List<ImportManifestResponseCreatedItem>> created;
 
-  private final Optional<ImportManifestResponseSkipped> skipped;
+  private final Optional<List<ImportManifestResponseUpdatedItem>> updated;
+
+  private final Optional<List<ImportManifestResponseSkippedItem>> skipped;
 
   private final Optional<List<ImportManifestResponseErrorsItem>> errors;
 
+  private final Optional<List<String>> warnings;
+
+  private final Optional<ImportManifestResponseOrganizationCreated> organizationCreated;
+
   private final Map<String, Object> additionalProperties;
 
-  private ImportManifestResponse(Optional<String> message,
-      Optional<ImportManifestResponseImported> imported,
-      Optional<ImportManifestResponseSkipped> skipped,
-      Optional<List<ImportManifestResponseErrorsItem>> errors,
+  private ImportManifestResponse(Optional<Boolean> success,
+      Optional<List<ImportManifestResponseCreatedItem>> created,
+      Optional<List<ImportManifestResponseUpdatedItem>> updated,
+      Optional<List<ImportManifestResponseSkippedItem>> skipped,
+      Optional<List<ImportManifestResponseErrorsItem>> errors, Optional<List<String>> warnings,
+      Optional<ImportManifestResponseOrganizationCreated> organizationCreated,
       Map<String, Object> additionalProperties) {
-    this.message = message;
-    this.imported = imported;
+    this.success = success;
+    this.created = created;
+    this.updated = updated;
     this.skipped = skipped;
     this.errors = errors;
+    this.warnings = warnings;
+    this.organizationCreated = organizationCreated;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Success message.
+   * @return Whether the import completed successfully.
    */
-  @JsonProperty("message")
-  public Optional<String> getMessage() {
-    return message;
+  @JsonProperty("success")
+  public Optional<Boolean> getSuccess() {
+    return success;
   }
 
   /**
-   * @return Count of imported assets by type.
+   * @return Assets that were created during import.
    */
-  @JsonProperty("imported")
-  public Optional<ImportManifestResponseImported> getImported() {
-    return imported;
+  @JsonProperty("created")
+  public Optional<List<ImportManifestResponseCreatedItem>> getCreated() {
+    return created;
   }
 
   /**
-   * @return Count of skipped assets by type (already exist and overwrite=false).
+   * @return Assets that were updated during import.
+   */
+  @JsonProperty("updated")
+  public Optional<List<ImportManifestResponseUpdatedItem>> getUpdated() {
+    return updated;
+  }
+
+  /**
+   * @return Assets that were skipped during import.
    */
   @JsonProperty("skipped")
-  public Optional<ImportManifestResponseSkipped> getSkipped() {
+  public Optional<List<ImportManifestResponseSkippedItem>> getSkipped() {
     return skipped;
   }
 
@@ -78,6 +101,34 @@ public final class ImportManifestResponse {
   @JsonProperty("errors")
   public Optional<List<ImportManifestResponseErrorsItem>> getErrors() {
     return errors;
+  }
+
+  /**
+   * @return Non-fatal warnings from import validation.
+   */
+  @JsonProperty("warnings")
+  public Optional<List<String>> getWarnings() {
+    return warnings;
+  }
+
+  /**
+   * @return IDs of any organizational folders created during import.
+   */
+  @JsonIgnore
+  public Optional<ImportManifestResponseOrganizationCreated> getOrganizationCreated() {
+    if (organizationCreated == null) {
+      return Optional.empty();
+    }
+    return organizationCreated;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("organization_created")
+  private Optional<ImportManifestResponseOrganizationCreated> _getOrganizationCreated() {
+    return organizationCreated;
   }
 
   @java.lang.Override
@@ -92,12 +143,12 @@ public final class ImportManifestResponse {
   }
 
   private boolean equalTo(ImportManifestResponse other) {
-    return message.equals(other.message) && imported.equals(other.imported) && skipped.equals(other.skipped) && errors.equals(other.errors);
+    return success.equals(other.success) && created.equals(other.created) && updated.equals(other.updated) && skipped.equals(other.skipped) && errors.equals(other.errors) && warnings.equals(other.warnings) && organizationCreated.equals(other.organizationCreated);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.message, this.imported, this.skipped, this.errors);
+    return Objects.hash(this.success, this.created, this.updated, this.skipped, this.errors, this.warnings, this.organizationCreated);
   }
 
   @java.lang.Override
@@ -113,13 +164,19 @@ public final class ImportManifestResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<String> message = Optional.empty();
+    private Optional<Boolean> success = Optional.empty();
 
-    private Optional<ImportManifestResponseImported> imported = Optional.empty();
+    private Optional<List<ImportManifestResponseCreatedItem>> created = Optional.empty();
 
-    private Optional<ImportManifestResponseSkipped> skipped = Optional.empty();
+    private Optional<List<ImportManifestResponseUpdatedItem>> updated = Optional.empty();
+
+    private Optional<List<ImportManifestResponseSkippedItem>> skipped = Optional.empty();
 
     private Optional<List<ImportManifestResponseErrorsItem>> errors = Optional.empty();
+
+    private Optional<List<String>> warnings = Optional.empty();
+
+    private Optional<ImportManifestResponseOrganizationCreated> organizationCreated = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -128,60 +185,80 @@ public final class ImportManifestResponse {
     }
 
     public Builder from(ImportManifestResponse other) {
-      message(other.getMessage());
-      imported(other.getImported());
+      success(other.getSuccess());
+      created(other.getCreated());
+      updated(other.getUpdated());
       skipped(other.getSkipped());
       errors(other.getErrors());
+      warnings(other.getWarnings());
+      organizationCreated(other.getOrganizationCreated());
       return this;
     }
 
     /**
-     * <p>Success message.</p>
+     * <p>Whether the import completed successfully.</p>
      */
     @JsonSetter(
-        value = "message",
+        value = "success",
         nulls = Nulls.SKIP
     )
-    public Builder message(Optional<String> message) {
-      this.message = message;
+    public Builder success(Optional<Boolean> success) {
+      this.success = success;
       return this;
     }
 
-    public Builder message(String message) {
-      this.message = Optional.ofNullable(message);
+    public Builder success(Boolean success) {
+      this.success = Optional.ofNullable(success);
       return this;
     }
 
     /**
-     * <p>Count of imported assets by type.</p>
+     * <p>Assets that were created during import.</p>
      */
     @JsonSetter(
-        value = "imported",
+        value = "created",
         nulls = Nulls.SKIP
     )
-    public Builder imported(Optional<ImportManifestResponseImported> imported) {
-      this.imported = imported;
+    public Builder created(Optional<List<ImportManifestResponseCreatedItem>> created) {
+      this.created = created;
       return this;
     }
 
-    public Builder imported(ImportManifestResponseImported imported) {
-      this.imported = Optional.ofNullable(imported);
+    public Builder created(List<ImportManifestResponseCreatedItem> created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
     /**
-     * <p>Count of skipped assets by type (already exist and overwrite=false).</p>
+     * <p>Assets that were updated during import.</p>
+     */
+    @JsonSetter(
+        value = "updated",
+        nulls = Nulls.SKIP
+    )
+    public Builder updated(Optional<List<ImportManifestResponseUpdatedItem>> updated) {
+      this.updated = updated;
+      return this;
+    }
+
+    public Builder updated(List<ImportManifestResponseUpdatedItem> updated) {
+      this.updated = Optional.ofNullable(updated);
+      return this;
+    }
+
+    /**
+     * <p>Assets that were skipped during import.</p>
      */
     @JsonSetter(
         value = "skipped",
         nulls = Nulls.SKIP
     )
-    public Builder skipped(Optional<ImportManifestResponseSkipped> skipped) {
+    public Builder skipped(Optional<List<ImportManifestResponseSkippedItem>> skipped) {
       this.skipped = skipped;
       return this;
     }
 
-    public Builder skipped(ImportManifestResponseSkipped skipped) {
+    public Builder skipped(List<ImportManifestResponseSkippedItem> skipped) {
       this.skipped = Optional.ofNullable(skipped);
       return this;
     }
@@ -203,8 +280,58 @@ public final class ImportManifestResponse {
       return this;
     }
 
+    /**
+     * <p>Non-fatal warnings from import validation.</p>
+     */
+    @JsonSetter(
+        value = "warnings",
+        nulls = Nulls.SKIP
+    )
+    public Builder warnings(Optional<List<String>> warnings) {
+      this.warnings = warnings;
+      return this;
+    }
+
+    public Builder warnings(List<String> warnings) {
+      this.warnings = Optional.ofNullable(warnings);
+      return this;
+    }
+
+    /**
+     * <p>IDs of any organizational folders created during import.</p>
+     */
+    @JsonSetter(
+        value = "organization_created",
+        nulls = Nulls.SKIP
+    )
+    public Builder organizationCreated(
+        Optional<ImportManifestResponseOrganizationCreated> organizationCreated) {
+      this.organizationCreated = organizationCreated;
+      return this;
+    }
+
+    public Builder organizationCreated(
+        ImportManifestResponseOrganizationCreated organizationCreated) {
+      this.organizationCreated = Optional.ofNullable(organizationCreated);
+      return this;
+    }
+
+    public Builder organizationCreated(
+        Nullable<ImportManifestResponseOrganizationCreated> organizationCreated) {
+      if (organizationCreated.isNull()) {
+        this.organizationCreated = null;
+      }
+      else if (organizationCreated.isEmpty()) {
+        this.organizationCreated = Optional.empty();
+      }
+      else {
+        this.organizationCreated = Optional.of(organizationCreated.get());
+      }
+      return this;
+    }
+
     public ImportManifestResponse build() {
-      return new ImportManifestResponse(message, imported, skipped, errors, additionalProperties);
+      return new ImportManifestResponse(success, created, updated, skipped, errors, warnings, organizationCreated, additionalProperties);
     }
   }
 }

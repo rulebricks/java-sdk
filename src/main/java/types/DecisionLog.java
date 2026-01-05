@@ -39,9 +39,9 @@ public final class DecisionLog {
 
   private final Optional<Integer> status;
 
-  private final Optional<Map<String, Object>> request;
+  private final Optional<DecisionLogRequest> request;
 
-  private final Optional<Map<String, Object>> response;
+  private final Optional<DecisionLogResponse> response;
 
   private final Optional<Map<String, Object>> decision;
 
@@ -52,8 +52,8 @@ public final class DecisionLog {
   private final Map<String, Object> additionalProperties;
 
   private DecisionLog(Optional<OffsetDateTime> timestamp, Optional<String> name,
-      Optional<String> endpoint, Optional<Integer> status, Optional<Map<String, Object>> request,
-      Optional<Map<String, Object>> response, Optional<Map<String, Object>> decision,
+      Optional<String> endpoint, Optional<Integer> status, Optional<DecisionLogRequest> request,
+      Optional<DecisionLogResponse> response, Optional<Map<String, Object>> decision,
       Optional<String> error, Optional<Boolean> abbreviated,
       Map<String, Object> additionalProperties) {
     this.timestamp = timestamp;
@@ -113,10 +113,10 @@ public final class DecisionLog {
   }
 
   /**
-   * @return The request payload sent to the rule/flow.
+   * @return The request payload sent to the rule/flow. Can be an object for single requests or an array for bulk operations.
    */
   @JsonIgnore
-  public Optional<Map<String, Object>> getRequest() {
+  public Optional<DecisionLogRequest> getRequest() {
     if (request == null) {
       return Optional.empty();
     }
@@ -124,10 +124,10 @@ public final class DecisionLog {
   }
 
   /**
-   * @return The response payload returned by the rule/flow.
+   * @return The response payload returned by the rule/flow. Can be an object for single responses or an array for bulk operations.
    */
   @JsonIgnore
-  public Optional<Map<String, Object>> getResponse() {
+  public Optional<DecisionLogResponse> getResponse() {
     if (response == null) {
       return Optional.empty();
     }
@@ -205,7 +205,7 @@ public final class DecisionLog {
       valueFilter = NullableNonemptyFilter.class
   )
   @JsonProperty("request")
-  private Optional<Map<String, Object>> _getRequest() {
+  private Optional<DecisionLogRequest> _getRequest() {
     return request;
   }
 
@@ -214,7 +214,7 @@ public final class DecisionLog {
       valueFilter = NullableNonemptyFilter.class
   )
   @JsonProperty("response")
-  private Optional<Map<String, Object>> _getResponse() {
+  private Optional<DecisionLogResponse> _getResponse() {
     return response;
   }
 
@@ -277,9 +277,9 @@ public final class DecisionLog {
 
     private Optional<Integer> status = Optional.empty();
 
-    private Optional<Map<String, Object>> request = Optional.empty();
+    private Optional<DecisionLogRequest> request = Optional.empty();
 
-    private Optional<Map<String, Object>> response = Optional.empty();
+    private Optional<DecisionLogResponse> response = Optional.empty();
 
     private Optional<Map<String, Object>> decision = Optional.empty();
 
@@ -427,23 +427,23 @@ public final class DecisionLog {
     }
 
     /**
-     * <p>The request payload sent to the rule/flow.</p>
+     * <p>The request payload sent to the rule/flow. Can be an object for single requests or an array for bulk operations.</p>
      */
     @JsonSetter(
         value = "request",
         nulls = Nulls.SKIP
     )
-    public Builder request(Optional<Map<String, Object>> request) {
+    public Builder request(Optional<DecisionLogRequest> request) {
       this.request = request;
       return this;
     }
 
-    public Builder request(Map<String, Object> request) {
+    public Builder request(DecisionLogRequest request) {
       this.request = Optional.ofNullable(request);
       return this;
     }
 
-    public Builder request(Nullable<Map<String, Object>> request) {
+    public Builder request(Nullable<DecisionLogRequest> request) {
       if (request.isNull()) {
         this.request = null;
       }
@@ -457,23 +457,23 @@ public final class DecisionLog {
     }
 
     /**
-     * <p>The response payload returned by the rule/flow.</p>
+     * <p>The response payload returned by the rule/flow. Can be an object for single responses or an array for bulk operations.</p>
      */
     @JsonSetter(
         value = "response",
         nulls = Nulls.SKIP
     )
-    public Builder response(Optional<Map<String, Object>> response) {
+    public Builder response(Optional<DecisionLogResponse> response) {
       this.response = response;
       return this;
     }
 
-    public Builder response(Map<String, Object> response) {
+    public Builder response(DecisionLogResponse response) {
       this.response = Optional.ofNullable(response);
       return this;
     }
 
-    public Builder response(Nullable<Map<String, Object>> response) {
+    public Builder response(Nullable<DecisionLogResponse> response) {
       if (response.isNull()) {
         this.response = null;
       }

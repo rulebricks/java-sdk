@@ -7,15 +7,15 @@ package com.rulebricks.resources.contexts;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
-import com.rulebricks.resources.contexts.admin.AdminClient;
+import com.rulebricks.resources.contexts.objects.ObjectsClient;
 import com.rulebricks.resources.contexts.relationships.RelationshipsClient;
-import com.rulebricks.resources.contexts.requests.CascadeContextRequest;
-import com.rulebricks.resources.contexts.requests.DeleteInstanceContextsRequest;
+import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
+import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
+import com.rulebricks.resources.contexts.requests.ExecuteContextsRequest;
+import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
-import com.rulebricks.resources.contexts.requests.GetInstanceContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextFlowRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextRuleRequest;
+import com.rulebricks.resources.contexts.requests.SolveContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
 import com.rulebricks.types.ContextInstanceHistory;
@@ -33,14 +33,14 @@ public class ContextsClient {
 
   private final RawContextsClient rawClient;
 
-  protected final Supplier<AdminClient> adminClient;
+  protected final Supplier<ObjectsClient> objectsClient;
 
   protected final Supplier<RelationshipsClient> relationshipsClient;
 
   public ContextsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new RawContextsClient(clientOptions);
-    this.adminClient = Suppliers.memoize(() -> new AdminClient(clientOptions));
+    this.objectsClient = Suppliers.memoize(() -> new ObjectsClient(clientOptions));
     this.relationshipsClient = Suppliers.memoize(() -> new RelationshipsClient(clientOptions));
   }
 
@@ -54,24 +54,23 @@ public class ContextsClient {
   /**
    * Retrieve the current state of a context instance.
    */
-  public ContextInstanceState getInstance(String slug, String instance) {
-    return this.rawClient.getInstance(slug, instance).body();
+  public ContextInstanceState get(String slug, String instance) {
+    return this.rawClient.get(slug, instance).body();
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public ContextInstanceState getInstance(String slug, String instance,
-      GetInstanceContextsRequest request) {
-    return this.rawClient.getInstance(slug, instance, request).body();
+  public ContextInstanceState get(String slug, String instance, GetContextsRequest request) {
+    return this.rawClient.get(slug, instance, request).body();
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public ContextInstanceState getInstance(String slug, String instance,
-      GetInstanceContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.getInstance(slug, instance, request, requestOptions).body();
+  public ContextInstanceState get(String slug, String instance, GetContextsRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.get(slug, instance, request, requestOptions).body();
   }
 
   /**
@@ -93,24 +92,24 @@ public class ContextsClient {
   /**
    * Delete a specific context instance and its history.
    */
-  public DeleteContextInstanceResponse deleteInstance(String slug, String instance) {
-    return this.rawClient.deleteInstance(slug, instance).body();
+  public DeleteContextInstanceResponse delete(String slug, String instance) {
+    return this.rawClient.delete(slug, instance).body();
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public DeleteContextInstanceResponse deleteInstance(String slug, String instance,
-      DeleteInstanceContextsRequest request) {
-    return this.rawClient.deleteInstance(slug, instance, request).body();
+  public DeleteContextInstanceResponse delete(String slug, String instance,
+      DeleteContextsRequest request) {
+    return this.rawClient.delete(slug, instance, request).body();
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public DeleteContextInstanceResponse deleteInstance(String slug, String instance,
-      DeleteInstanceContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.deleteInstance(slug, instance, request, requestOptions).body();
+  public DeleteContextInstanceResponse delete(String slug, String instance,
+      DeleteContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, instance, request, requestOptions).body();
   }
 
   /**
@@ -162,15 +161,8 @@ public class ContextsClient {
   /**
    * Execute a specific rule using the context instance's state as input.
    */
-  public SolveContextRuleResponse solve(String slug, String instance, String ruleSlug) {
-    return this.rawClient.solve(slug, instance, ruleSlug).body();
-  }
-
-  /**
-   * Execute a specific rule using the context instance's state as input.
-   */
   public SolveContextRuleResponse solve(String slug, String instance, String ruleSlug,
-      SolveContextRuleRequest request) {
+      SolveContextsRequest request) {
     return this.rawClient.solve(slug, instance, ruleSlug, request).body();
   }
 
@@ -178,45 +170,31 @@ public class ContextsClient {
    * Execute a specific rule using the context instance's state as input.
    */
   public SolveContextRuleResponse solve(String slug, String instance, String ruleSlug,
-      SolveContextRuleRequest request, RequestOptions requestOptions) {
+      SolveContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.solve(slug, instance, ruleSlug, request, requestOptions).body();
   }
 
   /**
    * Trigger re-evaluation of all bound rules and flows for the instance.
    */
-  public CascadeContextResponse cascade(String slug, String instance) {
-    return this.rawClient.cascade(slug, instance).body();
-  }
-
-  /**
-   * Trigger re-evaluation of all bound rules and flows for the instance.
-   */
   public CascadeContextResponse cascade(String slug, String instance,
-      CascadeContextRequest request) {
+      CascadeContextsRequest request) {
     return this.rawClient.cascade(slug, instance, request).body();
   }
 
   /**
    * Trigger re-evaluation of all bound rules and flows for the instance.
    */
-  public CascadeContextResponse cascade(String slug, String instance, CascadeContextRequest request,
-      RequestOptions requestOptions) {
+  public CascadeContextResponse cascade(String slug, String instance,
+      CascadeContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.cascade(slug, instance, request, requestOptions).body();
   }
 
   /**
    * Execute a specific flow using the context instance's state as input.
    */
-  public SolveContextFlowResponse execute(String slug, String instance, String flowSlug) {
-    return this.rawClient.execute(slug, instance, flowSlug).body();
-  }
-
-  /**
-   * Execute a specific flow using the context instance's state as input.
-   */
   public SolveContextFlowResponse execute(String slug, String instance, String flowSlug,
-      SolveContextFlowRequest request) {
+      ExecuteContextsRequest request) {
     return this.rawClient.execute(slug, instance, flowSlug, request).body();
   }
 
@@ -224,12 +202,12 @@ public class ContextsClient {
    * Execute a specific flow using the context instance's state as input.
    */
   public SolveContextFlowResponse execute(String slug, String instance, String flowSlug,
-      SolveContextFlowRequest request, RequestOptions requestOptions) {
+      ExecuteContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.execute(slug, instance, flowSlug, request, requestOptions).body();
   }
 
-  public AdminClient admin() {
-    return this.adminClient.get();
+  public ObjectsClient objects() {
+    return this.objectsClient.get();
   }
 
   public RelationshipsClient relationships() {

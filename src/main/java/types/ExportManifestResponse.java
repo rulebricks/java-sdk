@@ -13,11 +13,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
-import java.time.OffsetDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,64 +26,45 @@ import java.util.Optional;
     builder = ExportManifestResponse.Builder.class
 )
 public final class ExportManifestResponse {
-  private final Optional<String> version;
+  private final Optional<Boolean> success;
 
-  private final Optional<OffsetDateTime> exportedAt;
+  private final Optional<ExportManifestResponseManifest> manifest;
 
-  private final Optional<List<Map<String, Object>>> rules;
-
-  private final Optional<List<Map<String, Object>>> flows;
-
-  private final Optional<List<Map<String, Object>>> contexts;
-
-  private final Optional<List<Map<String, Object>>> values;
+  private final Optional<String> error;
 
   private final Map<String, Object> additionalProperties;
 
-  private ExportManifestResponse(Optional<String> version, Optional<OffsetDateTime> exportedAt,
-      Optional<List<Map<String, Object>>> rules, Optional<List<Map<String, Object>>> flows,
-      Optional<List<Map<String, Object>>> contexts, Optional<List<Map<String, Object>>> values,
+  private ExportManifestResponse(Optional<Boolean> success,
+      Optional<ExportManifestResponseManifest> manifest, Optional<String> error,
       Map<String, Object> additionalProperties) {
-    this.version = version;
-    this.exportedAt = exportedAt;
-    this.rules = rules;
-    this.flows = flows;
-    this.contexts = contexts;
-    this.values = values;
+    this.success = success;
+    this.manifest = manifest;
+    this.error = error;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Manifest format version.
+   * @return Whether the export completed successfully.
    */
-  @JsonProperty("version")
-  public Optional<String> getVersion() {
-    return version;
+  @JsonProperty("success")
+  public Optional<Boolean> getSuccess() {
+    return success;
   }
 
-  @JsonProperty("exported_at")
-  public Optional<OffsetDateTime> getExportedAt() {
-    return exportedAt;
+  /**
+   * @return The exported manifest data.
+   */
+  @JsonProperty("manifest")
+  public Optional<ExportManifestResponseManifest> getManifest() {
+    return manifest;
   }
 
-  @JsonProperty("rules")
-  public Optional<List<Map<String, Object>>> getRules() {
-    return rules;
-  }
-
-  @JsonProperty("flows")
-  public Optional<List<Map<String, Object>>> getFlows() {
-    return flows;
-  }
-
-  @JsonProperty("contexts")
-  public Optional<List<Map<String, Object>>> getContexts() {
-    return contexts;
-  }
-
-  @JsonProperty("values")
-  public Optional<List<Map<String, Object>>> getValues() {
-    return values;
+  /**
+   * @return Error message if export failed.
+   */
+  @JsonProperty("error")
+  public Optional<String> getError() {
+    return error;
   }
 
   @java.lang.Override
@@ -99,12 +79,12 @@ public final class ExportManifestResponse {
   }
 
   private boolean equalTo(ExportManifestResponse other) {
-    return version.equals(other.version) && exportedAt.equals(other.exportedAt) && rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && values.equals(other.values);
+    return success.equals(other.success) && manifest.equals(other.manifest) && error.equals(other.error);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.version, this.exportedAt, this.rules, this.flows, this.contexts, this.values);
+    return Objects.hash(this.success, this.manifest, this.error);
   }
 
   @java.lang.Override
@@ -120,17 +100,11 @@ public final class ExportManifestResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<String> version = Optional.empty();
+    private Optional<Boolean> success = Optional.empty();
 
-    private Optional<OffsetDateTime> exportedAt = Optional.empty();
+    private Optional<ExportManifestResponseManifest> manifest = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> rules = Optional.empty();
-
-    private Optional<List<Map<String, Object>>> flows = Optional.empty();
-
-    private Optional<List<Map<String, Object>>> contexts = Optional.empty();
-
-    private Optional<List<Map<String, Object>>> values = Optional.empty();
+    private Optional<String> error = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -139,104 +113,65 @@ public final class ExportManifestResponse {
     }
 
     public Builder from(ExportManifestResponse other) {
-      version(other.getVersion());
-      exportedAt(other.getExportedAt());
-      rules(other.getRules());
-      flows(other.getFlows());
-      contexts(other.getContexts());
-      values(other.getValues());
+      success(other.getSuccess());
+      manifest(other.getManifest());
+      error(other.getError());
       return this;
     }
 
     /**
-     * <p>Manifest format version.</p>
+     * <p>Whether the export completed successfully.</p>
      */
     @JsonSetter(
-        value = "version",
+        value = "success",
         nulls = Nulls.SKIP
     )
-    public Builder version(Optional<String> version) {
-      this.version = version;
+    public Builder success(Optional<Boolean> success) {
+      this.success = success;
       return this;
     }
 
-    public Builder version(String version) {
-      this.version = Optional.ofNullable(version);
+    public Builder success(Boolean success) {
+      this.success = Optional.ofNullable(success);
       return this;
     }
 
+    /**
+     * <p>The exported manifest data.</p>
+     */
     @JsonSetter(
-        value = "exported_at",
+        value = "manifest",
         nulls = Nulls.SKIP
     )
-    public Builder exportedAt(Optional<OffsetDateTime> exportedAt) {
-      this.exportedAt = exportedAt;
+    public Builder manifest(Optional<ExportManifestResponseManifest> manifest) {
+      this.manifest = manifest;
       return this;
     }
 
-    public Builder exportedAt(OffsetDateTime exportedAt) {
-      this.exportedAt = Optional.ofNullable(exportedAt);
+    public Builder manifest(ExportManifestResponseManifest manifest) {
+      this.manifest = Optional.ofNullable(manifest);
       return this;
     }
 
+    /**
+     * <p>Error message if export failed.</p>
+     */
     @JsonSetter(
-        value = "rules",
+        value = "error",
         nulls = Nulls.SKIP
     )
-    public Builder rules(Optional<List<Map<String, Object>>> rules) {
-      this.rules = rules;
+    public Builder error(Optional<String> error) {
+      this.error = error;
       return this;
     }
 
-    public Builder rules(List<Map<String, Object>> rules) {
-      this.rules = Optional.ofNullable(rules);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "flows",
-        nulls = Nulls.SKIP
-    )
-    public Builder flows(Optional<List<Map<String, Object>>> flows) {
-      this.flows = flows;
-      return this;
-    }
-
-    public Builder flows(List<Map<String, Object>> flows) {
-      this.flows = Optional.ofNullable(flows);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "contexts",
-        nulls = Nulls.SKIP
-    )
-    public Builder contexts(Optional<List<Map<String, Object>>> contexts) {
-      this.contexts = contexts;
-      return this;
-    }
-
-    public Builder contexts(List<Map<String, Object>> contexts) {
-      this.contexts = Optional.ofNullable(contexts);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "values",
-        nulls = Nulls.SKIP
-    )
-    public Builder values(Optional<List<Map<String, Object>>> values) {
-      this.values = values;
-      return this;
-    }
-
-    public Builder values(List<Map<String, Object>> values) {
-      this.values = Optional.ofNullable(values);
+    public Builder error(String error) {
+      this.error = Optional.ofNullable(error);
       return this;
     }
 
     public ExportManifestResponse build() {
-      return new ExportManifestResponse(version, exportedAt, rules, flows, contexts, values, additionalProperties);
+      return new ExportManifestResponse(success, manifest, error, additionalProperties);
     }
   }
 }

@@ -13,8 +13,9 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.resources.assets.types.ImportManifestRequestConflictStrategy;
+import com.rulebricks.resources.assets.types.ImportManifestRequestLegacyRuleMappingValue;
 import com.rulebricks.resources.assets.types.ImportManifestRequestManifest;
-import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -30,14 +31,23 @@ import org.jetbrains.annotations.NotNull;
 public final class ImportManifestRequest {
   private final ImportManifestRequestManifest manifest;
 
-  private final Optional<Boolean> overwrite;
+  private final Optional<ImportManifestRequestConflictStrategy> conflictStrategy;
+
+  private final Optional<String> targetFolderName;
+
+  private final Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> legacyRuleMapping;
 
   private final Map<String, Object> additionalProperties;
 
-  private ImportManifestRequest(ImportManifestRequestManifest manifest, Optional<Boolean> overwrite,
+  private ImportManifestRequest(ImportManifestRequestManifest manifest,
+      Optional<ImportManifestRequestConflictStrategy> conflictStrategy,
+      Optional<String> targetFolderName,
+      Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> legacyRuleMapping,
       Map<String, Object> additionalProperties) {
     this.manifest = manifest;
-    this.overwrite = overwrite;
+    this.conflictStrategy = conflictStrategy;
+    this.targetFolderName = targetFolderName;
+    this.legacyRuleMapping = legacyRuleMapping;
     this.additionalProperties = additionalProperties;
   }
 
@@ -50,11 +60,27 @@ public final class ImportManifestRequest {
   }
 
   /**
-   * @return Whether to overwrite existing assets with the same ID/slug.
+   * @return How to handle conflicts with existing assets. 'update' overwrites, 'skip' ignores, 'error' fails.
    */
-  @JsonProperty("overwrite")
-  public Optional<Boolean> getOverwrite() {
-    return overwrite;
+  @JsonProperty("conflict_strategy")
+  public Optional<ImportManifestRequestConflictStrategy> getConflictStrategy() {
+    return conflictStrategy;
+  }
+
+  /**
+   * @return Optional folder name to place imported assets into. Created if it doesn't exist.
+   */
+  @JsonProperty("target_folder_name")
+  public Optional<String> getTargetFolderName() {
+    return targetFolderName;
+  }
+
+  /**
+   * @return Optional mapping for legacy flow imports to reuse existing rules.
+   */
+  @JsonProperty("legacy_rule_mapping")
+  public Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> getLegacyRuleMapping() {
+    return legacyRuleMapping;
   }
 
   @java.lang.Override
@@ -69,12 +95,12 @@ public final class ImportManifestRequest {
   }
 
   private boolean equalTo(ImportManifestRequest other) {
-    return manifest.equals(other.manifest) && overwrite.equals(other.overwrite);
+    return manifest.equals(other.manifest) && conflictStrategy.equals(other.conflictStrategy) && targetFolderName.equals(other.targetFolderName) && legacyRuleMapping.equals(other.legacyRuleMapping);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.manifest, this.overwrite);
+    return Objects.hash(this.manifest, this.conflictStrategy, this.targetFolderName, this.legacyRuleMapping);
   }
 
   @java.lang.Override
@@ -99,11 +125,27 @@ public final class ImportManifestRequest {
     ImportManifestRequest build();
 
     /**
-     * <p>Whether to overwrite existing assets with the same ID/slug.</p>
+     * <p>How to handle conflicts with existing assets. 'update' overwrites, 'skip' ignores, 'error' fails.</p>
      */
-    _FinalStage overwrite(Optional<Boolean> overwrite);
+    _FinalStage conflictStrategy(Optional<ImportManifestRequestConflictStrategy> conflictStrategy);
 
-    _FinalStage overwrite(Boolean overwrite);
+    _FinalStage conflictStrategy(ImportManifestRequestConflictStrategy conflictStrategy);
+
+    /**
+     * <p>Optional folder name to place imported assets into. Created if it doesn't exist.</p>
+     */
+    _FinalStage targetFolderName(Optional<String> targetFolderName);
+
+    _FinalStage targetFolderName(String targetFolderName);
+
+    /**
+     * <p>Optional mapping for legacy flow imports to reuse existing rules.</p>
+     */
+    _FinalStage legacyRuleMapping(
+        Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> legacyRuleMapping);
+
+    _FinalStage legacyRuleMapping(
+        Map<String, ImportManifestRequestLegacyRuleMappingValue> legacyRuleMapping);
   }
 
   @JsonIgnoreProperties(
@@ -112,7 +154,11 @@ public final class ImportManifestRequest {
   public static final class Builder implements ManifestStage, _FinalStage {
     private ImportManifestRequestManifest manifest;
 
-    private Optional<Boolean> overwrite = Optional.empty();
+    private Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> legacyRuleMapping = Optional.empty();
+
+    private Optional<String> targetFolderName = Optional.empty();
+
+    private Optional<ImportManifestRequestConflictStrategy> conflictStrategy = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -123,7 +169,9 @@ public final class ImportManifestRequest {
     @java.lang.Override
     public Builder from(ImportManifestRequest other) {
       manifest(other.getManifest());
-      overwrite(other.getOverwrite());
+      conflictStrategy(other.getConflictStrategy());
+      targetFolderName(other.getTargetFolderName());
+      legacyRuleMapping(other.getLegacyRuleMapping());
       return this;
     }
 
@@ -140,31 +188,80 @@ public final class ImportManifestRequest {
     }
 
     /**
-     * <p>Whether to overwrite existing assets with the same ID/slug.</p>
+     * <p>Optional mapping for legacy flow imports to reuse existing rules.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage overwrite(Boolean overwrite) {
-      this.overwrite = Optional.ofNullable(overwrite);
+    public _FinalStage legacyRuleMapping(
+        Map<String, ImportManifestRequestLegacyRuleMappingValue> legacyRuleMapping) {
+      this.legacyRuleMapping = Optional.ofNullable(legacyRuleMapping);
       return this;
     }
 
     /**
-     * <p>Whether to overwrite existing assets with the same ID/slug.</p>
+     * <p>Optional mapping for legacy flow imports to reuse existing rules.</p>
      */
     @java.lang.Override
     @JsonSetter(
-        value = "overwrite",
+        value = "legacy_rule_mapping",
         nulls = Nulls.SKIP
     )
-    public _FinalStage overwrite(Optional<Boolean> overwrite) {
-      this.overwrite = overwrite;
+    public _FinalStage legacyRuleMapping(
+        Optional<Map<String, ImportManifestRequestLegacyRuleMappingValue>> legacyRuleMapping) {
+      this.legacyRuleMapping = legacyRuleMapping;
+      return this;
+    }
+
+    /**
+     * <p>Optional folder name to place imported assets into. Created if it doesn't exist.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage targetFolderName(String targetFolderName) {
+      this.targetFolderName = Optional.ofNullable(targetFolderName);
+      return this;
+    }
+
+    /**
+     * <p>Optional folder name to place imported assets into. Created if it doesn't exist.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "target_folder_name",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage targetFolderName(Optional<String> targetFolderName) {
+      this.targetFolderName = targetFolderName;
+      return this;
+    }
+
+    /**
+     * <p>How to handle conflicts with existing assets. 'update' overwrites, 'skip' ignores, 'error' fails.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage conflictStrategy(ImportManifestRequestConflictStrategy conflictStrategy) {
+      this.conflictStrategy = Optional.ofNullable(conflictStrategy);
+      return this;
+    }
+
+    /**
+     * <p>How to handle conflicts with existing assets. 'update' overwrites, 'skip' ignores, 'error' fails.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "conflict_strategy",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage conflictStrategy(
+        Optional<ImportManifestRequestConflictStrategy> conflictStrategy) {
+      this.conflictStrategy = conflictStrategy;
       return this;
     }
 
     @java.lang.Override
     public ImportManifestRequest build() {
-      return new ImportManifestRequest(manifest, overwrite, additionalProperties);
+      return new ImportManifestRequest(manifest, conflictStrategy, targetFolderName, legacyRuleMapping, additionalProperties);
     }
   }
 }

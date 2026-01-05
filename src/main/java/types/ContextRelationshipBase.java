@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,16 +36,19 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
 
   private final Optional<String> description;
 
+  private final Optional<OffsetDateTime> createdAt;
+
   private final Map<String, Object> additionalProperties;
 
   private ContextRelationshipBase(Optional<String> id, Optional<ContextRelationshipBaseType> type,
       Optional<String> foreignKey, Optional<String> name, Optional<String> description,
-      Map<String, Object> additionalProperties) {
+      Optional<OffsetDateTime> createdAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.type = type;
     this.foreignKey = foreignKey;
     this.name = name;
     this.description = description;
+    this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
 
@@ -68,7 +72,7 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
   /**
    * @return The field key used as the foreign key.
    */
-  @JsonProperty("foreignKey")
+  @JsonProperty("foreign_key")
   @java.lang.Override
   public Optional<String> getForeignKey() {
     return foreignKey;
@@ -92,6 +96,15 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
     return description;
   }
 
+  /**
+   * @return When the relationship was created.
+   */
+  @JsonProperty("created_at")
+  @java.lang.Override
+  public Optional<OffsetDateTime> getCreatedAt() {
+    return createdAt;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -104,12 +117,12 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
   }
 
   private boolean equalTo(ContextRelationshipBase other) {
-    return id.equals(other.id) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description);
+    return id.equals(other.id) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.type, this.foreignKey, this.name, this.description);
+    return Objects.hash(this.id, this.type, this.foreignKey, this.name, this.description, this.createdAt);
   }
 
   @java.lang.Override
@@ -135,6 +148,8 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
 
     private Optional<String> description = Optional.empty();
 
+    private Optional<OffsetDateTime> createdAt = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -147,6 +162,7 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
       foreignKey(other.getForeignKey());
       name(other.getName());
       description(other.getDescription());
+      createdAt(other.getCreatedAt());
       return this;
     }
 
@@ -188,7 +204,7 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
      * <p>The field key used as the foreign key.</p>
      */
     @JsonSetter(
-        value = "foreignKey",
+        value = "foreign_key",
         nulls = Nulls.SKIP
     )
     public Builder foreignKey(Optional<String> foreignKey) {
@@ -235,8 +251,25 @@ public final class ContextRelationshipBase implements IContextRelationshipBase {
       return this;
     }
 
+    /**
+     * <p>When the relationship was created.</p>
+     */
+    @JsonSetter(
+        value = "created_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAt(Optional<OffsetDateTime> createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = Optional.ofNullable(createdAt);
+      return this;
+    }
+
     public ContextRelationshipBase build() {
-      return new ContextRelationshipBase(id, type, foreignKey, name, description, additionalProperties);
+      return new ContextRelationshipBase(id, type, foreignKey, name, description, createdAt, additionalProperties);
     }
   }
 }

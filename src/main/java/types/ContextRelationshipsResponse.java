@@ -26,18 +26,30 @@ import java.util.Optional;
     builder = ContextRelationshipsResponse.Builder.class
 )
 public final class ContextRelationshipsResponse {
+  private final Optional<ContextRelationshipsResponseContext> context;
+
   private final Optional<List<ContextRelationshipOutgoing>> outgoing;
 
   private final Optional<List<ContextRelationshipIncoming>> incoming;
 
   private final Map<String, Object> additionalProperties;
 
-  private ContextRelationshipsResponse(Optional<List<ContextRelationshipOutgoing>> outgoing,
+  private ContextRelationshipsResponse(Optional<ContextRelationshipsResponseContext> context,
+      Optional<List<ContextRelationshipOutgoing>> outgoing,
       Optional<List<ContextRelationshipIncoming>> incoming,
       Map<String, Object> additionalProperties) {
+    this.context = context;
     this.outgoing = outgoing;
     this.incoming = incoming;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return The context these relationships belong to.
+   */
+  @JsonProperty("context")
+  public Optional<ContextRelationshipsResponseContext> getContext() {
+    return context;
   }
 
   @JsonProperty("outgoing")
@@ -62,12 +74,12 @@ public final class ContextRelationshipsResponse {
   }
 
   private boolean equalTo(ContextRelationshipsResponse other) {
-    return outgoing.equals(other.outgoing) && incoming.equals(other.incoming);
+    return context.equals(other.context) && outgoing.equals(other.outgoing) && incoming.equals(other.incoming);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.outgoing, this.incoming);
+    return Objects.hash(this.context, this.outgoing, this.incoming);
   }
 
   @java.lang.Override
@@ -83,6 +95,8 @@ public final class ContextRelationshipsResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<ContextRelationshipsResponseContext> context = Optional.empty();
+
     private Optional<List<ContextRelationshipOutgoing>> outgoing = Optional.empty();
 
     private Optional<List<ContextRelationshipIncoming>> incoming = Optional.empty();
@@ -94,8 +108,26 @@ public final class ContextRelationshipsResponse {
     }
 
     public Builder from(ContextRelationshipsResponse other) {
+      context(other.getContext());
       outgoing(other.getOutgoing());
       incoming(other.getIncoming());
+      return this;
+    }
+
+    /**
+     * <p>The context these relationships belong to.</p>
+     */
+    @JsonSetter(
+        value = "context",
+        nulls = Nulls.SKIP
+    )
+    public Builder context(Optional<ContextRelationshipsResponseContext> context) {
+      this.context = context;
+      return this;
+    }
+
+    public Builder context(ContextRelationshipsResponseContext context) {
+      this.context = Optional.ofNullable(context);
       return this;
     }
 
@@ -128,7 +160,7 @@ public final class ContextRelationshipsResponse {
     }
 
     public ContextRelationshipsResponse build() {
-      return new ContextRelationshipsResponse(outgoing, incoming, additionalProperties);
+      return new ContextRelationshipsResponse(context, outgoing, incoming, additionalProperties);
     }
   }
 }

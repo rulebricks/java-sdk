@@ -7,15 +7,15 @@ package com.rulebricks.resources.contexts;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
-import com.rulebricks.resources.contexts.admin.AsyncAdminClient;
+import com.rulebricks.resources.contexts.objects.AsyncObjectsClient;
 import com.rulebricks.resources.contexts.relationships.AsyncRelationshipsClient;
-import com.rulebricks.resources.contexts.requests.CascadeContextRequest;
-import com.rulebricks.resources.contexts.requests.DeleteInstanceContextsRequest;
+import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
+import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
+import com.rulebricks.resources.contexts.requests.ExecuteContextsRequest;
+import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
-import com.rulebricks.resources.contexts.requests.GetInstanceContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextFlowRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextRuleRequest;
+import com.rulebricks.resources.contexts.requests.SolveContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
 import com.rulebricks.types.ContextInstanceHistory;
@@ -34,14 +34,14 @@ public class AsyncContextsClient {
 
   private final AsyncRawContextsClient rawClient;
 
-  protected final Supplier<AsyncAdminClient> adminClient;
+  protected final Supplier<AsyncObjectsClient> objectsClient;
 
   protected final Supplier<AsyncRelationshipsClient> relationshipsClient;
 
   public AsyncContextsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new AsyncRawContextsClient(clientOptions);
-    this.adminClient = Suppliers.memoize(() -> new AsyncAdminClient(clientOptions));
+    this.objectsClient = Suppliers.memoize(() -> new AsyncObjectsClient(clientOptions));
     this.relationshipsClient = Suppliers.memoize(() -> new AsyncRelationshipsClient(clientOptions));
   }
 
@@ -55,24 +55,24 @@ public class AsyncContextsClient {
   /**
    * Retrieve the current state of a context instance.
    */
-  public CompletableFuture<ContextInstanceState> getInstance(String slug, String instance) {
-    return this.rawClient.getInstance(slug, instance).thenApply(response -> response.body());
+  public CompletableFuture<ContextInstanceState> get(String slug, String instance) {
+    return this.rawClient.get(slug, instance).thenApply(response -> response.body());
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public CompletableFuture<ContextInstanceState> getInstance(String slug, String instance,
-      GetInstanceContextsRequest request) {
-    return this.rawClient.getInstance(slug, instance, request).thenApply(response -> response.body());
+  public CompletableFuture<ContextInstanceState> get(String slug, String instance,
+      GetContextsRequest request) {
+    return this.rawClient.get(slug, instance, request).thenApply(response -> response.body());
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public CompletableFuture<ContextInstanceState> getInstance(String slug, String instance,
-      GetInstanceContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.getInstance(slug, instance, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<ContextInstanceState> get(String slug, String instance,
+      GetContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.get(slug, instance, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
@@ -94,25 +94,24 @@ public class AsyncContextsClient {
   /**
    * Delete a specific context instance and its history.
    */
-  public CompletableFuture<DeleteContextInstanceResponse> deleteInstance(String slug,
-      String instance) {
-    return this.rawClient.deleteInstance(slug, instance).thenApply(response -> response.body());
+  public CompletableFuture<DeleteContextInstanceResponse> delete(String slug, String instance) {
+    return this.rawClient.delete(slug, instance).thenApply(response -> response.body());
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public CompletableFuture<DeleteContextInstanceResponse> deleteInstance(String slug,
-      String instance, DeleteInstanceContextsRequest request) {
-    return this.rawClient.deleteInstance(slug, instance, request).thenApply(response -> response.body());
+  public CompletableFuture<DeleteContextInstanceResponse> delete(String slug, String instance,
+      DeleteContextsRequest request) {
+    return this.rawClient.delete(slug, instance, request).thenApply(response -> response.body());
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public CompletableFuture<DeleteContextInstanceResponse> deleteInstance(String slug,
-      String instance, DeleteInstanceContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.deleteInstance(slug, instance, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<DeleteContextInstanceResponse> delete(String slug, String instance,
+      DeleteContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, instance, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
@@ -166,15 +165,7 @@ public class AsyncContextsClient {
    * Execute a specific rule using the context instance's state as input.
    */
   public CompletableFuture<SolveContextRuleResponse> solve(String slug, String instance,
-      String ruleSlug) {
-    return this.rawClient.solve(slug, instance, ruleSlug).thenApply(response -> response.body());
-  }
-
-  /**
-   * Execute a specific rule using the context instance's state as input.
-   */
-  public CompletableFuture<SolveContextRuleResponse> solve(String slug, String instance,
-      String ruleSlug, SolveContextRuleRequest request) {
+      String ruleSlug, SolveContextsRequest request) {
     return this.rawClient.solve(slug, instance, ruleSlug, request).thenApply(response -> response.body());
   }
 
@@ -182,22 +173,15 @@ public class AsyncContextsClient {
    * Execute a specific rule using the context instance's state as input.
    */
   public CompletableFuture<SolveContextRuleResponse> solve(String slug, String instance,
-      String ruleSlug, SolveContextRuleRequest request, RequestOptions requestOptions) {
+      String ruleSlug, SolveContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.solve(slug, instance, ruleSlug, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
    * Trigger re-evaluation of all bound rules and flows for the instance.
    */
-  public CompletableFuture<CascadeContextResponse> cascade(String slug, String instance) {
-    return this.rawClient.cascade(slug, instance).thenApply(response -> response.body());
-  }
-
-  /**
-   * Trigger re-evaluation of all bound rules and flows for the instance.
-   */
   public CompletableFuture<CascadeContextResponse> cascade(String slug, String instance,
-      CascadeContextRequest request) {
+      CascadeContextsRequest request) {
     return this.rawClient.cascade(slug, instance, request).thenApply(response -> response.body());
   }
 
@@ -205,7 +189,7 @@ public class AsyncContextsClient {
    * Trigger re-evaluation of all bound rules and flows for the instance.
    */
   public CompletableFuture<CascadeContextResponse> cascade(String slug, String instance,
-      CascadeContextRequest request, RequestOptions requestOptions) {
+      CascadeContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.cascade(slug, instance, request, requestOptions).thenApply(response -> response.body());
   }
 
@@ -213,15 +197,7 @@ public class AsyncContextsClient {
    * Execute a specific flow using the context instance's state as input.
    */
   public CompletableFuture<SolveContextFlowResponse> execute(String slug, String instance,
-      String flowSlug) {
-    return this.rawClient.execute(slug, instance, flowSlug).thenApply(response -> response.body());
-  }
-
-  /**
-   * Execute a specific flow using the context instance's state as input.
-   */
-  public CompletableFuture<SolveContextFlowResponse> execute(String slug, String instance,
-      String flowSlug, SolveContextFlowRequest request) {
+      String flowSlug, ExecuteContextsRequest request) {
     return this.rawClient.execute(slug, instance, flowSlug, request).thenApply(response -> response.body());
   }
 
@@ -229,12 +205,12 @@ public class AsyncContextsClient {
    * Execute a specific flow using the context instance's state as input.
    */
   public CompletableFuture<SolveContextFlowResponse> execute(String slug, String instance,
-      String flowSlug, SolveContextFlowRequest request, RequestOptions requestOptions) {
+      String flowSlug, ExecuteContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.execute(slug, instance, flowSlug, request, requestOptions).thenApply(response -> response.body());
   }
 
-  public AsyncAdminClient admin() {
-    return this.adminClient.get();
+  public AsyncObjectsClient objects() {
+    return this.objectsClient.get();
   }
 
   public AsyncRelationshipsClient relationships() {

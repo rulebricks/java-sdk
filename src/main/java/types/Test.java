@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.Nullable;
 import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
@@ -41,9 +42,9 @@ public final class Test {
 
   private final boolean critical;
 
-  private final boolean error;
+  private final Optional<Boolean> error;
 
-  private final boolean success;
+  private final Optional<Boolean> success;
 
   private final Optional<TestTestState> testState;
 
@@ -52,8 +53,9 @@ public final class Test {
   private final Map<String, Object> additionalProperties;
 
   private Test(String id, String name, Map<String, Object> request, Map<String, Object> response,
-      boolean critical, boolean error, boolean success, Optional<TestTestState> testState,
-      Optional<OffsetDateTime> lastExecuted, Map<String, Object> additionalProperties) {
+      boolean critical, Optional<Boolean> error, Optional<Boolean> success,
+      Optional<TestTestState> testState, Optional<OffsetDateTime> lastExecuted,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.request = request;
@@ -107,18 +109,24 @@ public final class Test {
   }
 
   /**
-   * @return Indicates if the test resulted in an error.
+   * @return Indicates if the test resulted in an error. Null if test has not been executed.
    */
-  @JsonProperty("error")
-  public boolean getError() {
+  @JsonIgnore
+  public Optional<Boolean> getError() {
+    if (error == null) {
+      return Optional.empty();
+    }
     return error;
   }
 
   /**
-   * @return Indicates if the test was successful.
+   * @return Indicates if the test was successful. Null if test has not been executed.
    */
-  @JsonProperty("success")
-  public boolean getSuccess() {
+  @JsonIgnore
+  public Optional<Boolean> getSuccess() {
+    if (success == null) {
+      return Optional.empty();
+    }
     return success;
   }
 
@@ -148,7 +156,25 @@ public final class Test {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("testState")
+  @JsonProperty("error")
+  private Optional<Boolean> _getError() {
+    return error;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("success")
+  private Optional<Boolean> _getSuccess() {
+    return success;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("test_state")
   private Optional<TestTestState> _getTestState() {
     return testState;
   }
@@ -157,7 +183,7 @@ public final class Test {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("lastExecuted")
+  @JsonProperty("last_executed")
   private Optional<OffsetDateTime> _getLastExecuted() {
     return lastExecuted;
   }
@@ -174,7 +200,7 @@ public final class Test {
   }
 
   private boolean equalTo(Test other) {
-    return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical && error == other.error && success == other.success && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
+    return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical && error.equals(other.error) && success.equals(other.success) && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
   }
 
   @java.lang.Override
@@ -211,21 +237,7 @@ public final class Test {
     /**
      * <p>Indicates whether the test is critical.</p>
      */
-    ErrorStage critical(boolean critical);
-  }
-
-  public interface ErrorStage {
-    /**
-     * <p>Indicates if the test resulted in an error.</p>
-     */
-    SuccessStage error(boolean error);
-  }
-
-  public interface SuccessStage {
-    /**
-     * <p>Indicates if the test was successful.</p>
-     */
-    _FinalStage success(boolean success);
+    _FinalStage critical(boolean critical);
   }
 
   public interface _FinalStage {
@@ -250,6 +262,24 @@ public final class Test {
     _FinalStage response(String key, Object value);
 
     /**
+     * <p>Indicates if the test resulted in an error. Null if test has not been executed.</p>
+     */
+    _FinalStage error(Optional<Boolean> error);
+
+    _FinalStage error(Boolean error);
+
+    _FinalStage error(Nullable<Boolean> error);
+
+    /**
+     * <p>Indicates if the test was successful. Null if test has not been executed.</p>
+     */
+    _FinalStage success(Optional<Boolean> success);
+
+    _FinalStage success(Boolean success);
+
+    _FinalStage success(Nullable<Boolean> success);
+
+    /**
      * <p>The state of the test after execution.</p>
      */
     _FinalStage testState(Optional<TestTestState> testState);
@@ -271,20 +301,20 @@ public final class Test {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements IdStage, NameStage, CriticalStage, ErrorStage, SuccessStage, _FinalStage {
+  public static final class Builder implements IdStage, NameStage, CriticalStage, _FinalStage {
     private String id;
 
     private String name;
 
     private boolean critical;
 
-    private boolean error;
-
-    private boolean success;
-
     private Optional<OffsetDateTime> lastExecuted = Optional.empty();
 
     private Optional<TestTestState> testState = Optional.empty();
+
+    private Optional<Boolean> success = Optional.empty();
+
+    private Optional<Boolean> error = Optional.empty();
 
     private Map<String, Object> response = new LinkedHashMap<>();
 
@@ -341,32 +371,8 @@ public final class Test {
      */
     @java.lang.Override
     @JsonSetter("critical")
-    public ErrorStage critical(boolean critical) {
+    public _FinalStage critical(boolean critical) {
       this.critical = critical;
-      return this;
-    }
-
-    /**
-     * <p>Indicates if the test resulted in an error.</p>
-     * <p>Indicates if the test resulted in an error.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("error")
-    public SuccessStage error(boolean error) {
-      this.error = error;
-      return this;
-    }
-
-    /**
-     * <p>Indicates if the test was successful.</p>
-     * <p>Indicates if the test was successful.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("success")
-    public _FinalStage success(boolean success) {
-      this.success = success;
       return this;
     }
 
@@ -403,7 +409,7 @@ public final class Test {
      */
     @java.lang.Override
     @JsonSetter(
-        value = "lastExecuted",
+        value = "last_executed",
         nulls = Nulls.SKIP
     )
     public _FinalStage lastExecuted(Optional<OffsetDateTime> lastExecuted) {
@@ -444,11 +450,93 @@ public final class Test {
      */
     @java.lang.Override
     @JsonSetter(
-        value = "testState",
+        value = "test_state",
         nulls = Nulls.SKIP
     )
     public _FinalStage testState(Optional<TestTestState> testState) {
       this.testState = testState;
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test was successful. Null if test has not been executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage success(Nullable<Boolean> success) {
+      if (success.isNull()) {
+        this.success = null;
+      }
+      else if (success.isEmpty()) {
+        this.success = Optional.empty();
+      }
+      else {
+        this.success = Optional.of(success.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test was successful. Null if test has not been executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage success(Boolean success) {
+      this.success = Optional.ofNullable(success);
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test was successful. Null if test has not been executed.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "success",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage success(Optional<Boolean> success) {
+      this.success = success;
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test resulted in an error. Null if test has not been executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage error(Nullable<Boolean> error) {
+      if (error.isNull()) {
+        this.error = null;
+      }
+      else if (error.isEmpty()) {
+        this.error = Optional.empty();
+      }
+      else {
+        this.error = Optional.of(error.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test resulted in an error. Null if test has not been executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage error(Boolean error) {
+      this.error = Optional.ofNullable(error);
+      return this;
+    }
+
+    /**
+     * <p>Indicates if the test resulted in an error. Null if test has not been executed.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "error",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage error(Optional<Boolean> error) {
+      this.error = error;
       return this;
     }
 

@@ -41,14 +41,14 @@ public class RawUsersClient {
   }
 
   /**
-   * Invite a new user to the organization or update role or access group data for an existing user.
+   * Invite a new user to the organization or update role or user group data for an existing user.
    */
   public RulebricksApiHttpResponse<UserInviteResponse> invite(UserInviteRequest request) {
     return invite(request,null);
   }
 
   /**
-   * Invite a new user to the organization or update role or access group data for an existing user.
+   * Invite a new user to the organization or update role or user group data for an existing user.
    */
   public RulebricksApiHttpResponse<UserInviteResponse> invite(UserInviteRequest request,
       RequestOptions requestOptions) {
@@ -98,14 +98,14 @@ public class RawUsersClient {
   }
 
   /**
-   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, access groups, and join date.
+   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, user groups, and join date.
    */
   public RulebricksApiHttpResponse<List<UserDetail>> list() {
     return list(null);
   }
 
   /**
-   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, access groups, and join date.
+   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, user groups, and join date.
    */
   public RulebricksApiHttpResponse<List<UserDetail>> list(RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()

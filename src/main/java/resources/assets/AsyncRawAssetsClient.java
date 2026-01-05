@@ -16,7 +16,7 @@ import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
 import com.rulebricks.resources.assets.requests.ImportManifestRequest;
-import com.rulebricks.resources.assets.types.ExportAssetsResponse;
+import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
 import com.rulebricks.types.ImportManifestResponse;
 import com.rulebricks.types.UsageStatistics;
 import java.io.IOException;
@@ -96,17 +96,17 @@ public class AsyncRawAssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public CompletableFuture<RulebricksApiHttpResponse<ImportManifestResponse>> import_(
+  public CompletableFuture<RulebricksApiHttpResponse<ImportManifestResponse>> importRbm(
       ImportManifestRequest request) {
-    return import_(request,null);
+    return importRbm(request,null);
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public CompletableFuture<RulebricksApiHttpResponse<ImportManifestResponse>> import_(
+  public CompletableFuture<RulebricksApiHttpResponse<ImportManifestResponse>> importRbm(
       ImportManifestRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -169,24 +169,17 @@ public class AsyncRawAssetsClient {
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public CompletableFuture<RulebricksApiHttpResponse<ExportAssetsResponse>> export() {
-    return export(ExportManifestRequest.builder().build());
-  }
-
-  /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
-   */
-  public CompletableFuture<RulebricksApiHttpResponse<ExportAssetsResponse>> export(
+  public CompletableFuture<RulebricksApiHttpResponse<ExportRbmAssetsResponse>> exportRbm(
       ExportManifestRequest request) {
-    return export(request,null);
+    return exportRbm(request,null);
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public CompletableFuture<RulebricksApiHttpResponse<ExportAssetsResponse>> export(
+  public CompletableFuture<RulebricksApiHttpResponse<ExportRbmAssetsResponse>> exportRbm(
       ExportManifestRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -210,14 +203,14 @@ public class AsyncRawAssetsClient {
     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
       client = clientOptions.httpClientWithTimeout(requestOptions);
     }
-    CompletableFuture<RulebricksApiHttpResponse<ExportAssetsResponse>> future = new CompletableFuture<>();
+    CompletableFuture<RulebricksApiHttpResponse<ExportRbmAssetsResponse>> future = new CompletableFuture<>();
     client.newCall(okhttpRequest).enqueue(new Callback() {
       @Override
       public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
         try (ResponseBody responseBody = response.body()) {
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ExportAssetsResponse.class), response));
+            future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ExportRbmAssetsResponse.class), response));
             return;
           }
           try {

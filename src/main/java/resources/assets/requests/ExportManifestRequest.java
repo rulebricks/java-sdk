@@ -13,92 +13,96 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.resources.assets.types.ExportManifestRequestRootType;
 import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ExportManifestRequest.Builder.class
 )
 public final class ExportManifestRequest {
-  private final Optional<List<String>> rules;
+  private final ExportManifestRequestRootType rootType;
 
-  private final Optional<List<String>> flows;
+  private final List<String> rootIds;
 
-  private final Optional<List<String>> contexts;
+  private final Optional<Boolean> includeDownstream;
 
-  private final Optional<List<String>> values;
+  private final Optional<String> manifestName;
 
-  private final Optional<Boolean> includeAll;
+  private final Optional<String> manifestDescription;
 
-  private final Optional<Boolean> preview;
+  private final Optional<Boolean> previewOnly;
 
   private final Map<String, Object> additionalProperties;
 
-  private ExportManifestRequest(Optional<List<String>> rules, Optional<List<String>> flows,
-      Optional<List<String>> contexts, Optional<List<String>> values, Optional<Boolean> includeAll,
-      Optional<Boolean> preview, Map<String, Object> additionalProperties) {
-    this.rules = rules;
-    this.flows = flows;
-    this.contexts = contexts;
-    this.values = values;
-    this.includeAll = includeAll;
-    this.preview = preview;
+  private ExportManifestRequest(ExportManifestRequestRootType rootType, List<String> rootIds,
+      Optional<Boolean> includeDownstream, Optional<String> manifestName,
+      Optional<String> manifestDescription, Optional<Boolean> previewOnly,
+      Map<String, Object> additionalProperties) {
+    this.rootType = rootType;
+    this.rootIds = rootIds;
+    this.includeDownstream = includeDownstream;
+    this.manifestName = manifestName;
+    this.manifestDescription = manifestDescription;
+    this.previewOnly = previewOnly;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Rule IDs or slugs to export.
+   * @return The type of root asset to export. All dependencies will be included.
    */
-  @JsonProperty("rules")
-  public Optional<List<String>> getRules() {
-    return rules;
+  @JsonProperty("root_type")
+  public ExportManifestRequestRootType getRootType() {
+    return rootType;
   }
 
   /**
-   * @return Flow IDs or slugs to export.
+   * @return Array of IDs for the root assets to export. Dependencies are automatically resolved.
    */
-  @JsonProperty("flows")
-  public Optional<List<String>> getFlows() {
-    return flows;
+  @JsonProperty("root_ids")
+  public List<String> getRootIds() {
+    return rootIds;
   }
 
   /**
-   * @return Context IDs or slugs to export.
+   * @return For context exports, whether to include rules and flows bound to the context.
    */
-  @JsonProperty("contexts")
-  public Optional<List<String>> getContexts() {
-    return contexts;
+  @JsonProperty("include_downstream")
+  public Optional<Boolean> getIncludeDownstream() {
+    return includeDownstream;
   }
 
   /**
-   * @return Value IDs or names to export.
+   * @return Optional name for the exported manifest.
    */
-  @JsonProperty("values")
-  public Optional<List<String>> getValues() {
-    return values;
+  @JsonProperty("manifest_name")
+  public Optional<String> getManifestName() {
+    return manifestName;
   }
 
   /**
-   * @return Export all assets of specified types.
+   * @return Optional description for the exported manifest.
    */
-  @JsonProperty("includeAll")
-  public Optional<Boolean> getIncludeAll() {
-    return includeAll;
+  @JsonProperty("manifest_description")
+  public Optional<String> getManifestDescription() {
+    return manifestDescription;
   }
 
   /**
-   * @return Return a preview of what would be exported without the full data.
+   * @return If true, returns a preview of what would be exported without the full data.
    */
-  @JsonProperty("preview")
-  public Optional<Boolean> getPreview() {
-    return preview;
+  @JsonProperty("preview_only")
+  public Optional<Boolean> getPreviewOnly() {
+    return previewOnly;
   }
 
   @java.lang.Override
@@ -113,12 +117,12 @@ public final class ExportManifestRequest {
   }
 
   private boolean equalTo(ExportManifestRequest other) {
-    return rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && values.equals(other.values) && includeAll.equals(other.includeAll) && preview.equals(other.preview);
+    return rootType.equals(other.rootType) && rootIds.equals(other.rootIds) && includeDownstream.equals(other.includeDownstream) && manifestName.equals(other.manifestName) && manifestDescription.equals(other.manifestDescription) && previewOnly.equals(other.previewOnly);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.rules, this.flows, this.contexts, this.values, this.includeAll, this.preview);
+    return Objects.hash(this.rootType, this.rootIds, this.includeDownstream, this.manifestName, this.manifestDescription, this.previewOnly);
   }
 
   @java.lang.Override
@@ -126,25 +130,75 @@ public final class ExportManifestRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static RootTypeStage builder() {
     return new Builder();
+  }
+
+  public interface RootTypeStage {
+    /**
+     * <p>The type of root asset to export. All dependencies will be included.</p>
+     */
+    _FinalStage rootType(@NotNull ExportManifestRequestRootType rootType);
+
+    Builder from(ExportManifestRequest other);
+  }
+
+  public interface _FinalStage {
+    ExportManifestRequest build();
+
+    /**
+     * <p>Array of IDs for the root assets to export. Dependencies are automatically resolved.</p>
+     */
+    _FinalStage rootIds(List<String> rootIds);
+
+    _FinalStage addRootIds(String rootIds);
+
+    _FinalStage addAllRootIds(List<String> rootIds);
+
+    /**
+     * <p>For context exports, whether to include rules and flows bound to the context.</p>
+     */
+    _FinalStage includeDownstream(Optional<Boolean> includeDownstream);
+
+    _FinalStage includeDownstream(Boolean includeDownstream);
+
+    /**
+     * <p>Optional name for the exported manifest.</p>
+     */
+    _FinalStage manifestName(Optional<String> manifestName);
+
+    _FinalStage manifestName(String manifestName);
+
+    /**
+     * <p>Optional description for the exported manifest.</p>
+     */
+    _FinalStage manifestDescription(Optional<String> manifestDescription);
+
+    _FinalStage manifestDescription(String manifestDescription);
+
+    /**
+     * <p>If true, returns a preview of what would be exported without the full data.</p>
+     */
+    _FinalStage previewOnly(Optional<Boolean> previewOnly);
+
+    _FinalStage previewOnly(Boolean previewOnly);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<List<String>> rules = Optional.empty();
+  public static final class Builder implements RootTypeStage, _FinalStage {
+    private ExportManifestRequestRootType rootType;
 
-    private Optional<List<String>> flows = Optional.empty();
+    private Optional<Boolean> previewOnly = Optional.empty();
 
-    private Optional<List<String>> contexts = Optional.empty();
+    private Optional<String> manifestDescription = Optional.empty();
 
-    private Optional<List<String>> values = Optional.empty();
+    private Optional<String> manifestName = Optional.empty();
 
-    private Optional<Boolean> includeAll = Optional.empty();
+    private Optional<Boolean> includeDownstream = Optional.empty();
 
-    private Optional<Boolean> preview = Optional.empty();
+    private List<String> rootIds = new ArrayList<>();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -152,120 +206,162 @@ public final class ExportManifestRequest {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(ExportManifestRequest other) {
-      rules(other.getRules());
-      flows(other.getFlows());
-      contexts(other.getContexts());
-      values(other.getValues());
-      includeAll(other.getIncludeAll());
-      preview(other.getPreview());
+      rootType(other.getRootType());
+      rootIds(other.getRootIds());
+      includeDownstream(other.getIncludeDownstream());
+      manifestName(other.getManifestName());
+      manifestDescription(other.getManifestDescription());
+      previewOnly(other.getPreviewOnly());
       return this;
     }
 
     /**
-     * <p>Rule IDs or slugs to export.</p>
+     * <p>The type of root asset to export. All dependencies will be included.</p>
+     * <p>The type of root asset to export. All dependencies will be included.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "rules",
-        nulls = Nulls.SKIP
-    )
-    public Builder rules(Optional<List<String>> rules) {
-      this.rules = rules;
-      return this;
-    }
-
-    public Builder rules(List<String> rules) {
-      this.rules = Optional.ofNullable(rules);
+    @java.lang.Override
+    @JsonSetter("root_type")
+    public _FinalStage rootType(@NotNull ExportManifestRequestRootType rootType) {
+      this.rootType = Objects.requireNonNull(rootType, "rootType must not be null");
       return this;
     }
 
     /**
-     * <p>Flow IDs or slugs to export.</p>
+     * <p>If true, returns a preview of what would be exported without the full data.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "flows",
-        nulls = Nulls.SKIP
-    )
-    public Builder flows(Optional<List<String>> flows) {
-      this.flows = flows;
-      return this;
-    }
-
-    public Builder flows(List<String> flows) {
-      this.flows = Optional.ofNullable(flows);
+    @java.lang.Override
+    public _FinalStage previewOnly(Boolean previewOnly) {
+      this.previewOnly = Optional.ofNullable(previewOnly);
       return this;
     }
 
     /**
-     * <p>Context IDs or slugs to export.</p>
+     * <p>If true, returns a preview of what would be exported without the full data.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "contexts",
+        value = "preview_only",
         nulls = Nulls.SKIP
     )
-    public Builder contexts(Optional<List<String>> contexts) {
-      this.contexts = contexts;
-      return this;
-    }
-
-    public Builder contexts(List<String> contexts) {
-      this.contexts = Optional.ofNullable(contexts);
+    public _FinalStage previewOnly(Optional<Boolean> previewOnly) {
+      this.previewOnly = previewOnly;
       return this;
     }
 
     /**
-     * <p>Value IDs or names to export.</p>
+     * <p>Optional description for the exported manifest.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "values",
-        nulls = Nulls.SKIP
-    )
-    public Builder values(Optional<List<String>> values) {
-      this.values = values;
-      return this;
-    }
-
-    public Builder values(List<String> values) {
-      this.values = Optional.ofNullable(values);
+    @java.lang.Override
+    public _FinalStage manifestDescription(String manifestDescription) {
+      this.manifestDescription = Optional.ofNullable(manifestDescription);
       return this;
     }
 
     /**
-     * <p>Export all assets of specified types.</p>
+     * <p>Optional description for the exported manifest.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "includeAll",
+        value = "manifest_description",
         nulls = Nulls.SKIP
     )
-    public Builder includeAll(Optional<Boolean> includeAll) {
-      this.includeAll = includeAll;
-      return this;
-    }
-
-    public Builder includeAll(Boolean includeAll) {
-      this.includeAll = Optional.ofNullable(includeAll);
+    public _FinalStage manifestDescription(Optional<String> manifestDescription) {
+      this.manifestDescription = manifestDescription;
       return this;
     }
 
     /**
-     * <p>Return a preview of what would be exported without the full data.</p>
+     * <p>Optional name for the exported manifest.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
+    @java.lang.Override
+    public _FinalStage manifestName(String manifestName) {
+      this.manifestName = Optional.ofNullable(manifestName);
+      return this;
+    }
+
+    /**
+     * <p>Optional name for the exported manifest.</p>
+     */
+    @java.lang.Override
     @JsonSetter(
-        value = "preview",
+        value = "manifest_name",
         nulls = Nulls.SKIP
     )
-    public Builder preview(Optional<Boolean> preview) {
-      this.preview = preview;
+    public _FinalStage manifestName(Optional<String> manifestName) {
+      this.manifestName = manifestName;
       return this;
     }
 
-    public Builder preview(Boolean preview) {
-      this.preview = Optional.ofNullable(preview);
+    /**
+     * <p>For context exports, whether to include rules and flows bound to the context.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage includeDownstream(Boolean includeDownstream) {
+      this.includeDownstream = Optional.ofNullable(includeDownstream);
       return this;
     }
 
+    /**
+     * <p>For context exports, whether to include rules and flows bound to the context.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "include_downstream",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage includeDownstream(Optional<Boolean> includeDownstream) {
+      this.includeDownstream = includeDownstream;
+      return this;
+    }
+
+    /**
+     * <p>Array of IDs for the root assets to export. Dependencies are automatically resolved.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage addAllRootIds(List<String> rootIds) {
+      if (rootIds != null) {
+        this.rootIds.addAll(rootIds);
+      }
+      return this;
+    }
+
+    /**
+     * <p>Array of IDs for the root assets to export. Dependencies are automatically resolved.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage addRootIds(String rootIds) {
+      this.rootIds.add(rootIds);
+      return this;
+    }
+
+    /**
+     * <p>Array of IDs for the root assets to export. Dependencies are automatically resolved.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "root_ids",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rootIds(List<String> rootIds) {
+      this.rootIds.clear();
+      if (rootIds != null) {
+        this.rootIds.addAll(rootIds);
+      }
+      return this;
+    }
+
+    @java.lang.Override
     public ExportManifestRequest build() {
-      return new ExportManifestRequest(rules, flows, contexts, values, includeAll, preview, additionalProperties);
+      return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, additionalProperties);
     }
   }
 }

@@ -27,11 +27,14 @@ import java.util.Optional;
 public final class DeleteRelationshipResponse {
   private final Optional<String> message;
 
+  private final Optional<String> id;
+
   private final Map<String, Object> additionalProperties;
 
-  private DeleteRelationshipResponse(Optional<String> message,
+  private DeleteRelationshipResponse(Optional<String> message, Optional<String> id,
       Map<String, Object> additionalProperties) {
     this.message = message;
+    this.id = id;
     this.additionalProperties = additionalProperties;
   }
 
@@ -41,6 +44,14 @@ public final class DeleteRelationshipResponse {
   @JsonProperty("message")
   public Optional<String> getMessage() {
     return message;
+  }
+
+  /**
+   * @return The ID of the deleted relationship.
+   */
+  @JsonProperty("id")
+  public Optional<String> getId() {
+    return id;
   }
 
   @java.lang.Override
@@ -55,12 +66,12 @@ public final class DeleteRelationshipResponse {
   }
 
   private boolean equalTo(DeleteRelationshipResponse other) {
-    return message.equals(other.message);
+    return message.equals(other.message) && id.equals(other.id);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.message);
+    return Objects.hash(this.message, this.id);
   }
 
   @java.lang.Override
@@ -78,6 +89,8 @@ public final class DeleteRelationshipResponse {
   public static final class Builder {
     private Optional<String> message = Optional.empty();
 
+    private Optional<String> id = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +99,7 @@ public final class DeleteRelationshipResponse {
 
     public Builder from(DeleteRelationshipResponse other) {
       message(other.getMessage());
+      id(other.getId());
       return this;
     }
 
@@ -106,8 +120,25 @@ public final class DeleteRelationshipResponse {
       return this;
     }
 
+    /**
+     * <p>The ID of the deleted relationship.</p>
+     */
+    @JsonSetter(
+        value = "id",
+        nulls = Nulls.SKIP
+    )
+    public Builder id(Optional<String> id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder id(String id) {
+      this.id = Optional.ofNullable(id);
+      return this;
+    }
+
     public DeleteRelationshipResponse build() {
-      return new DeleteRelationshipResponse(message, additionalProperties);
+      return new DeleteRelationshipResponse(message, id, additionalProperties);
     }
   }
 }

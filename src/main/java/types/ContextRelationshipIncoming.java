@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,13 +36,15 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
 
   private final Optional<String> description;
 
+  private final Optional<OffsetDateTime> createdAt;
+
   private final Optional<ContextRelationshipIncomingSourceContext> sourceContext;
 
   private final Map<String, Object> additionalProperties;
 
   private ContextRelationshipIncoming(Optional<String> id,
       Optional<ContextRelationshipBaseType> type, Optional<String> foreignKey,
-      Optional<String> name, Optional<String> description,
+      Optional<String> name, Optional<String> description, Optional<OffsetDateTime> createdAt,
       Optional<ContextRelationshipIncomingSourceContext> sourceContext,
       Map<String, Object> additionalProperties) {
     this.id = id;
@@ -49,6 +52,7 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
     this.foreignKey = foreignKey;
     this.name = name;
     this.description = description;
+    this.createdAt = createdAt;
     this.sourceContext = sourceContext;
     this.additionalProperties = additionalProperties;
   }
@@ -73,7 +77,7 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
   /**
    * @return The field key used as the foreign key.
    */
-  @JsonProperty("foreignKey")
+  @JsonProperty("foreign_key")
   @java.lang.Override
   public Optional<String> getForeignKey() {
     return foreignKey;
@@ -97,7 +101,16 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
     return description;
   }
 
-  @JsonProperty("sourceContext")
+  /**
+   * @return When the relationship was created.
+   */
+  @JsonProperty("created_at")
+  @java.lang.Override
+  public Optional<OffsetDateTime> getCreatedAt() {
+    return createdAt;
+  }
+
+  @JsonProperty("source_context")
   public Optional<ContextRelationshipIncomingSourceContext> getSourceContext() {
     return sourceContext;
   }
@@ -114,12 +127,12 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
   }
 
   private boolean equalTo(ContextRelationshipIncoming other) {
-    return id.equals(other.id) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description) && sourceContext.equals(other.sourceContext);
+    return id.equals(other.id) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && sourceContext.equals(other.sourceContext);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.type, this.foreignKey, this.name, this.description, this.sourceContext);
+    return Objects.hash(this.id, this.type, this.foreignKey, this.name, this.description, this.createdAt, this.sourceContext);
   }
 
   @java.lang.Override
@@ -145,6 +158,8 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
 
     private Optional<String> description = Optional.empty();
 
+    private Optional<OffsetDateTime> createdAt = Optional.empty();
+
     private Optional<ContextRelationshipIncomingSourceContext> sourceContext = Optional.empty();
 
     @JsonAnySetter
@@ -159,6 +174,7 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
       foreignKey(other.getForeignKey());
       name(other.getName());
       description(other.getDescription());
+      createdAt(other.getCreatedAt());
       sourceContext(other.getSourceContext());
       return this;
     }
@@ -201,7 +217,7 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
      * <p>The field key used as the foreign key.</p>
      */
     @JsonSetter(
-        value = "foreignKey",
+        value = "foreign_key",
         nulls = Nulls.SKIP
     )
     public Builder foreignKey(Optional<String> foreignKey) {
@@ -248,8 +264,25 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
       return this;
     }
 
+    /**
+     * <p>When the relationship was created.</p>
+     */
     @JsonSetter(
-        value = "sourceContext",
+        value = "created_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAt(Optional<OffsetDateTime> createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = Optional.ofNullable(createdAt);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "source_context",
         nulls = Nulls.SKIP
     )
     public Builder sourceContext(Optional<ContextRelationshipIncomingSourceContext> sourceContext) {
@@ -263,7 +296,7 @@ public final class ContextRelationshipIncoming implements IContextRelationshipBa
     }
 
     public ContextRelationshipIncoming build() {
-      return new ContextRelationshipIncoming(id, type, foreignKey, name, description, sourceContext, additionalProperties);
+      return new ContextRelationshipIncoming(id, type, foreignKey, name, description, createdAt, sourceContext, additionalProperties);
     }
   }
 }

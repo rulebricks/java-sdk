@@ -27,17 +27,20 @@ import java.util.Optional;
 public final class ImportManifestResponseErrorsItem {
   private final Optional<String> type;
 
-  private final Optional<String> id;
+  private final Optional<String> stableId;
 
-  private final Optional<String> error;
+  private final Optional<String> status;
+
+  private final Optional<String> reason;
 
   private final Map<String, Object> additionalProperties;
 
-  private ImportManifestResponseErrorsItem(Optional<String> type, Optional<String> id,
-      Optional<String> error, Map<String, Object> additionalProperties) {
+  private ImportManifestResponseErrorsItem(Optional<String> type, Optional<String> stableId,
+      Optional<String> status, Optional<String> reason, Map<String, Object> additionalProperties) {
     this.type = type;
-    this.id = id;
-    this.error = error;
+    this.stableId = stableId;
+    this.status = status;
+    this.reason = reason;
     this.additionalProperties = additionalProperties;
   }
 
@@ -46,14 +49,19 @@ public final class ImportManifestResponseErrorsItem {
     return type;
   }
 
-  @JsonProperty("id")
-  public Optional<String> getId() {
-    return id;
+  @JsonProperty("stable_id")
+  public Optional<String> getStableId() {
+    return stableId;
   }
 
-  @JsonProperty("error")
-  public Optional<String> getError() {
-    return error;
+  @JsonProperty("status")
+  public Optional<String> getStatus() {
+    return status;
+  }
+
+  @JsonProperty("reason")
+  public Optional<String> getReason() {
+    return reason;
   }
 
   @java.lang.Override
@@ -68,12 +76,12 @@ public final class ImportManifestResponseErrorsItem {
   }
 
   private boolean equalTo(ImportManifestResponseErrorsItem other) {
-    return type.equals(other.type) && id.equals(other.id) && error.equals(other.error);
+    return type.equals(other.type) && stableId.equals(other.stableId) && status.equals(other.status) && reason.equals(other.reason);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.id, this.error);
+    return Objects.hash(this.type, this.stableId, this.status, this.reason);
   }
 
   @java.lang.Override
@@ -91,9 +99,11 @@ public final class ImportManifestResponseErrorsItem {
   public static final class Builder {
     private Optional<String> type = Optional.empty();
 
-    private Optional<String> id = Optional.empty();
+    private Optional<String> stableId = Optional.empty();
 
-    private Optional<String> error = Optional.empty();
+    private Optional<String> status = Optional.empty();
+
+    private Optional<String> reason = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -103,8 +113,9 @@ public final class ImportManifestResponseErrorsItem {
 
     public Builder from(ImportManifestResponseErrorsItem other) {
       type(other.getType());
-      id(other.getId());
-      error(other.getError());
+      stableId(other.getStableId());
+      status(other.getStatus());
+      reason(other.getReason());
       return this;
     }
 
@@ -123,35 +134,49 @@ public final class ImportManifestResponseErrorsItem {
     }
 
     @JsonSetter(
-        value = "id",
+        value = "stable_id",
         nulls = Nulls.SKIP
     )
-    public Builder id(Optional<String> id) {
-      this.id = id;
+    public Builder stableId(Optional<String> stableId) {
+      this.stableId = stableId;
       return this;
     }
 
-    public Builder id(String id) {
-      this.id = Optional.ofNullable(id);
+    public Builder stableId(String stableId) {
+      this.stableId = Optional.ofNullable(stableId);
       return this;
     }
 
     @JsonSetter(
-        value = "error",
+        value = "status",
         nulls = Nulls.SKIP
     )
-    public Builder error(Optional<String> error) {
-      this.error = error;
+    public Builder status(Optional<String> status) {
+      this.status = status;
       return this;
     }
 
-    public Builder error(String error) {
-      this.error = Optional.ofNullable(error);
+    public Builder status(String status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "reason",
+        nulls = Nulls.SKIP
+    )
+    public Builder reason(Optional<String> reason) {
+      this.reason = reason;
+      return this;
+    }
+
+    public Builder reason(String reason) {
+      this.reason = Optional.ofNullable(reason);
       return this;
     }
 
     public ImportManifestResponseErrorsItem build() {
-      return new ImportManifestResponseErrorsItem(type, id, error, additionalProperties);
+      return new ImportManifestResponseErrorsItem(type, stableId, status, reason, additionalProperties);
     }
   }
 }

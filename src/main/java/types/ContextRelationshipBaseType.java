@@ -10,11 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class ContextRelationshipBaseType {
-  public static final ContextRelationshipBaseType ONE_TO_MANY = new ContextRelationshipBaseType(Value.ONE_TO_MANY, "one-to-many");
+  public static final ContextRelationshipBaseType HAS_MANY = new ContextRelationshipBaseType(Value.HAS_MANY, "has_many");
 
-  public static final ContextRelationshipBaseType MANY_TO_ONE = new ContextRelationshipBaseType(Value.MANY_TO_ONE, "many-to-one");
+  public static final ContextRelationshipBaseType BELONGS_TO = new ContextRelationshipBaseType(Value.BELONGS_TO, "belongs_to");
 
-  public static final ContextRelationshipBaseType ONE_TO_ONE = new ContextRelationshipBaseType(Value.ONE_TO_ONE, "one-to-one");
+  public static final ContextRelationshipBaseType HAS_ONE = new ContextRelationshipBaseType(Value.HAS_ONE, "has_one");
 
   private final Value value;
 
@@ -48,12 +48,12 @@ public final class ContextRelationshipBaseType {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case ONE_TO_MANY:
-        return visitor.visitOneToMany();
-      case MANY_TO_ONE:
-        return visitor.visitManyToOne();
-      case ONE_TO_ONE:
-        return visitor.visitOneToOne();
+      case HAS_MANY:
+        return visitor.visitHasMany();
+      case BELONGS_TO:
+        return visitor.visitBelongsTo();
+      case HAS_ONE:
+        return visitor.visitHasOne();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -65,33 +65,33 @@ public final class ContextRelationshipBaseType {
   )
   public static ContextRelationshipBaseType valueOf(String value) {
     switch (value) {
-      case "one-to-many":
-        return ONE_TO_MANY;
-      case "many-to-one":
-        return MANY_TO_ONE;
-      case "one-to-one":
-        return ONE_TO_ONE;
+      case "has_many":
+        return HAS_MANY;
+      case "belongs_to":
+        return BELONGS_TO;
+      case "has_one":
+        return HAS_ONE;
       default:
         return new ContextRelationshipBaseType(Value.UNKNOWN, value);
     }
   }
 
   public enum Value {
-    ONE_TO_ONE,
+    HAS_MANY,
 
-    ONE_TO_MANY,
+    HAS_ONE,
 
-    MANY_TO_ONE,
+    BELONGS_TO,
 
     UNKNOWN
   }
 
   public interface Visitor<T> {
-    T visitOneToOne();
+    T visitHasMany();
 
-    T visitOneToMany();
+    T visitHasOne();
 
-    T visitManyToOne();
+    T visitBelongsTo();
 
     T visitUnknown(String unknownType);
   }

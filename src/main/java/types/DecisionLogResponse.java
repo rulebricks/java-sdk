@@ -47,7 +47,7 @@ public final class DecisionLogResponse {
   }
 
   /**
-   * @return Array of decision log entries (omitted when count=true).
+   * @return Array of decision log entries. Only present when count parameter is not 'true'.
    */
   @JsonProperty("data")
   public Optional<List<DecisionLog>> getData() {
@@ -55,7 +55,7 @@ public final class DecisionLogResponse {
   }
 
   /**
-   * @return Pagination cursor for fetching the next page. Null if no more results.
+   * @return Pagination cursor for fetching the next page. Null if no more results. Only present when count parameter is not 'true'.
    */
   @JsonIgnore
   public Optional<String> getCursor() {
@@ -66,7 +66,7 @@ public final class DecisionLogResponse {
   }
 
   /**
-   * @return Total count of matching logs (only present when count=true parameter is used).
+   * @return Total count of matching logs. Only present when count parameter is 'true'. When this is returned, data and cursor are not included.
    */
   @JsonProperty("count")
   public Optional<Integer> getCount() {
@@ -135,7 +135,7 @@ public final class DecisionLogResponse {
     }
 
     /**
-     * <p>Array of decision log entries (omitted when count=true).</p>
+     * <p>Array of decision log entries. Only present when count parameter is not 'true'.</p>
      */
     @JsonSetter(
         value = "data",
@@ -152,7 +152,7 @@ public final class DecisionLogResponse {
     }
 
     /**
-     * <p>Pagination cursor for fetching the next page. Null if no more results.</p>
+     * <p>Pagination cursor for fetching the next page. Null if no more results. Only present when count parameter is not 'true'.</p>
      */
     @JsonSetter(
         value = "cursor",
@@ -182,7 +182,7 @@ public final class DecisionLogResponse {
     }
 
     /**
-     * <p>Total count of matching logs (only present when count=true parameter is used).</p>
+     * <p>Total count of matching logs. Only present when count parameter is 'true'. When this is returned, data and cursor are not included.</p>
      */
     @JsonSetter(
         value = "count",

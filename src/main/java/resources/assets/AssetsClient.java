@@ -12,7 +12,7 @@ import com.rulebricks.resources.assets.folders.FoldersClient;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
 import com.rulebricks.resources.assets.requests.ImportManifestRequest;
 import com.rulebricks.resources.assets.rules.RulesClient;
-import com.rulebricks.resources.assets.types.ExportAssetsResponse;
+import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
 import com.rulebricks.types.ImportManifestResponse;
 import com.rulebricks.types.UsageStatistics;
 import java.util.function.Supplier;
@@ -58,39 +58,33 @@ public class AssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public ImportManifestResponse import_(ImportManifestRequest request) {
-    return this.rawClient.import_(request).body();
+  public ImportManifestResponse importRbm(ImportManifestRequest request) {
+    return this.rawClient.importRbm(request).body();
   }
 
   /**
-   * Import rules, flows, contexts, and values from an RBM manifest file.
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
    */
-  public ImportManifestResponse import_(ImportManifestRequest request,
+  public ImportManifestResponse importRbm(ImportManifestRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.import_(request, requestOptions).body();
+    return this.rawClient.importRbm(request, requestOptions).body();
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public ExportAssetsResponse export() {
-    return this.rawClient.export().body();
+  public ExportRbmAssetsResponse exportRbm(ExportManifestRequest request) {
+    return this.rawClient.exportRbm(request).body();
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
    */
-  public ExportAssetsResponse export(ExportManifestRequest request) {
-    return this.rawClient.export(request).body();
-  }
-
-  /**
-   * Export selected rules, flows, contexts, and values to an RBM manifest file.
-   */
-  public ExportAssetsResponse export(ExportManifestRequest request, RequestOptions requestOptions) {
-    return this.rawClient.export(request, requestOptions).body();
+  public ExportRbmAssetsResponse exportRbm(ExportManifestRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.exportRbm(request, requestOptions).body();
   }
 
   public RulesClient rules() {

@@ -32,7 +32,7 @@ public final class ImportManifestRequestManifest {
 
   private final Optional<List<Map<String, Object>>> flows;
 
-  private final Optional<List<Map<String, Object>>> contexts;
+  private final Optional<List<Map<String, Object>>> entities;
 
   private final Optional<List<Map<String, Object>>> values;
 
@@ -40,12 +40,12 @@ public final class ImportManifestRequestManifest {
 
   private ImportManifestRequestManifest(Optional<String> version,
       Optional<List<Map<String, Object>>> rules, Optional<List<Map<String, Object>>> flows,
-      Optional<List<Map<String, Object>>> contexts, Optional<List<Map<String, Object>>> values,
+      Optional<List<Map<String, Object>>> entities, Optional<List<Map<String, Object>>> values,
       Map<String, Object> additionalProperties) {
     this.version = version;
     this.rules = rules;
     this.flows = flows;
-    this.contexts = contexts;
+    this.entities = entities;
     this.values = values;
     this.additionalProperties = additionalProperties;
   }
@@ -75,11 +75,11 @@ public final class ImportManifestRequestManifest {
   }
 
   /**
-   * @return Contexts (entities) to import.
+   * @return Contexts to import.
    */
-  @JsonProperty("contexts")
-  public Optional<List<Map<String, Object>>> getContexts() {
-    return contexts;
+  @JsonProperty("entities")
+  public Optional<List<Map<String, Object>>> getEntities() {
+    return entities;
   }
 
   /**
@@ -102,12 +102,12 @@ public final class ImportManifestRequestManifest {
   }
 
   private boolean equalTo(ImportManifestRequestManifest other) {
-    return version.equals(other.version) && rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && values.equals(other.values);
+    return version.equals(other.version) && rules.equals(other.rules) && flows.equals(other.flows) && entities.equals(other.entities) && values.equals(other.values);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.version, this.rules, this.flows, this.contexts, this.values);
+    return Objects.hash(this.version, this.rules, this.flows, this.entities, this.values);
   }
 
   @java.lang.Override
@@ -129,7 +129,7 @@ public final class ImportManifestRequestManifest {
 
     private Optional<List<Map<String, Object>>> flows = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> contexts = Optional.empty();
+    private Optional<List<Map<String, Object>>> entities = Optional.empty();
 
     private Optional<List<Map<String, Object>>> values = Optional.empty();
 
@@ -143,7 +143,7 @@ public final class ImportManifestRequestManifest {
       version(other.getVersion());
       rules(other.getRules());
       flows(other.getFlows());
-      contexts(other.getContexts());
+      entities(other.getEntities());
       values(other.getValues());
       return this;
     }
@@ -200,19 +200,19 @@ public final class ImportManifestRequestManifest {
     }
 
     /**
-     * <p>Contexts (entities) to import.</p>
+     * <p>Contexts to import.</p>
      */
     @JsonSetter(
-        value = "contexts",
+        value = "entities",
         nulls = Nulls.SKIP
     )
-    public Builder contexts(Optional<List<Map<String, Object>>> contexts) {
-      this.contexts = contexts;
+    public Builder entities(Optional<List<Map<String, Object>>> entities) {
+      this.entities = entities;
       return this;
     }
 
-    public Builder contexts(List<Map<String, Object>> contexts) {
-      this.contexts = Optional.ofNullable(contexts);
+    public Builder entities(List<Map<String, Object>> entities) {
+      this.entities = Optional.ofNullable(entities);
       return this;
     }
 
@@ -234,7 +234,7 @@ public final class ImportManifestRequestManifest {
     }
 
     public ImportManifestRequestManifest build() {
-      return new ImportManifestRequestManifest(version, rules, flows, contexts, values, additionalProperties);
+      return new ImportManifestRequestManifest(version, rules, flows, entities, values, additionalProperties);
     }
   }
 }

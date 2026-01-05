@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +35,18 @@ public final class UserGroup {
 
   private final Optional<List<String>> members;
 
+  private final Optional<OffsetDateTime> createdAt;
+
   private final Map<String, Object> additionalProperties;
 
   private UserGroup(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<List<String>> members, Map<String, Object> additionalProperties) {
+      Optional<List<String>> members, Optional<OffsetDateTime> createdAt,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.members = members;
+    this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
 
@@ -77,6 +82,14 @@ public final class UserGroup {
     return members;
   }
 
+  /**
+   * @return When the user group was created.
+   */
+  @JsonProperty("created_at")
+  public Optional<OffsetDateTime> getCreatedAt() {
+    return createdAt;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -89,12 +102,12 @@ public final class UserGroup {
   }
 
   private boolean equalTo(UserGroup other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && members.equals(other.members);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && members.equals(other.members) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.members);
+    return Objects.hash(this.id, this.name, this.description, this.members, this.createdAt);
   }
 
   @java.lang.Override
@@ -118,6 +131,8 @@ public final class UserGroup {
 
     private Optional<List<String>> members = Optional.empty();
 
+    private Optional<OffsetDateTime> createdAt = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -129,6 +144,7 @@ public final class UserGroup {
       name(other.getName());
       description(other.getDescription());
       members(other.getMembers());
+      createdAt(other.getCreatedAt());
       return this;
     }
 
@@ -200,8 +216,25 @@ public final class UserGroup {
       return this;
     }
 
+    /**
+     * <p>When the user group was created.</p>
+     */
+    @JsonSetter(
+        value = "created_at",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAt(Optional<OffsetDateTime> createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = Optional.ofNullable(createdAt);
+      return this;
+    }
+
     public UserGroup build() {
-      return new UserGroup(id, name, description, members, additionalProperties);
+      return new UserGroup(id, name, description, members, createdAt, additionalProperties);
     }
   }
 }

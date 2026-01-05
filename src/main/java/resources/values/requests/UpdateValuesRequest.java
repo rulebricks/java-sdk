@@ -49,7 +49,7 @@ public final class UpdateValuesRequest {
   }
 
   /**
-   * @return Optional array of access group names or IDs. If omitted and user belongs to access groups, values will be assigned to all user's access groups. Required if values should be restricted to specific access groups.
+   * @return Optional array of user group names or IDs. If omitted and user belongs to user groups, values will be assigned to all user's user groups. Required if values should be restricted to specific user groups.
    */
   @JsonProperty("user_groups")
   public Optional<List<String>> getUserGroups() {
@@ -133,7 +133,7 @@ public final class UpdateValuesRequest {
     }
 
     /**
-     * <p>Optional array of access group names or IDs. If omitted and user belongs to access groups, values will be assigned to all user's access groups. Required if values should be restricted to specific access groups.</p>
+     * <p>Optional array of user group names or IDs. If omitted and user belongs to user groups, values will be assigned to all user's user groups. Required if values should be restricted to specific user groups.</p>
      */
     @JsonSetter(
         value = "user_groups",

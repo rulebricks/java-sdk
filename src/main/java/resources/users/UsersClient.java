@@ -37,28 +37,28 @@ public class UsersClient {
   }
 
   /**
-   * Invite a new user to the organization or update role or access group data for an existing user.
+   * Invite a new user to the organization or update role or user group data for an existing user.
    */
   public UserInviteResponse invite(UserInviteRequest request) {
     return this.rawClient.invite(request).body();
   }
 
   /**
-   * Invite a new user to the organization or update role or access group data for an existing user.
+   * Invite a new user to the organization or update role or user group data for an existing user.
    */
   public UserInviteResponse invite(UserInviteRequest request, RequestOptions requestOptions) {
     return this.rawClient.invite(request, requestOptions).body();
   }
 
   /**
-   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, access groups, and join date.
+   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, user groups, and join date.
    */
   public List<UserDetail> list() {
     return this.rawClient.list().body();
   }
 
   /**
-   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, access groups, and join date.
+   * List all users (including the admin and all team members) in the organization with their details including email, name, API key, role, user groups, and join date.
    */
   public List<UserDetail> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).body();

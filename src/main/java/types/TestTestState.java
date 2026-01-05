@@ -85,12 +85,12 @@ public final class TestTestState {
   /**
    * @return HTTP status code returned
    */
-  @JsonProperty("httpStatus")
+  @JsonProperty("http_status")
   public Optional<Integer> getHttpStatus() {
     return httpStatus;
   }
 
-  @JsonProperty("successIdxs")
+  @JsonProperty("success_idxs")
   public Optional<List<Integer>> getSuccessIdxs() {
     return successIdxs;
   }
@@ -98,7 +98,7 @@ public final class TestTestState {
   /**
    * @return Error message or flag indicating if evaluation error occurred
    */
-  @JsonProperty("evaluationError")
+  @JsonProperty("evaluation_error")
   public Optional<TestTestStateEvaluationError> getEvaluationError() {
     return evaluationError;
   }
@@ -238,7 +238,7 @@ public final class TestTestState {
      * <p>HTTP status code returned</p>
      */
     @JsonSetter(
-        value = "httpStatus",
+        value = "http_status",
         nulls = Nulls.SKIP
     )
     public Builder httpStatus(Optional<Integer> httpStatus) {
@@ -252,7 +252,7 @@ public final class TestTestState {
     }
 
     @JsonSetter(
-        value = "successIdxs",
+        value = "success_idxs",
         nulls = Nulls.SKIP
     )
     public Builder successIdxs(Optional<List<Integer>> successIdxs) {
@@ -269,7 +269,7 @@ public final class TestTestState {
      * <p>Error message or flag indicating if evaluation error occurred</p>
      */
     @JsonSetter(
-        value = "evaluationError",
+        value = "evaluation_error",
         nulls = Nulls.SKIP
     )
     public Builder evaluationError(Optional<TestTestStateEvaluationError> evaluationError) {

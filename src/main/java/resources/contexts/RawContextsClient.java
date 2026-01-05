@@ -16,13 +16,13 @@ import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
-import com.rulebricks.resources.contexts.requests.CascadeContextRequest;
-import com.rulebricks.resources.contexts.requests.DeleteInstanceContextsRequest;
+import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
+import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
+import com.rulebricks.resources.contexts.requests.ExecuteContextsRequest;
+import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
-import com.rulebricks.resources.contexts.requests.GetInstanceContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextFlowRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextRuleRequest;
+import com.rulebricks.resources.contexts.requests.SolveContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
 import com.rulebricks.types.ContextInstanceHistory;
@@ -53,23 +53,23 @@ public class RawContextsClient {
   /**
    * Retrieve the current state of a context instance.
    */
-  public RulebricksApiHttpResponse<ContextInstanceState> getInstance(String slug, String instance) {
-    return getInstance(slug,instance,GetInstanceContextsRequest.builder().build());
+  public RulebricksApiHttpResponse<ContextInstanceState> get(String slug, String instance) {
+    return get(slug,instance,GetContextsRequest.builder().build());
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public RulebricksApiHttpResponse<ContextInstanceState> getInstance(String slug, String instance,
-      GetInstanceContextsRequest request) {
-    return getInstance(slug,instance,request,null);
+  public RulebricksApiHttpResponse<ContextInstanceState> get(String slug, String instance,
+      GetContextsRequest request) {
+    return get(slug,instance,request,null);
   }
 
   /**
    * Retrieve the current state of a context instance.
    */
-  public RulebricksApiHttpResponse<ContextInstanceState> getInstance(String slug, String instance,
-      GetInstanceContextsRequest request, RequestOptions requestOptions) {
+  public RulebricksApiHttpResponse<ContextInstanceState> get(String slug, String instance,
+      GetContextsRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("contexts")
@@ -173,24 +173,24 @@ public class RawContextsClient {
   /**
    * Delete a specific context instance and its history.
    */
-  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> deleteInstance(String slug,
+  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> delete(String slug,
       String instance) {
-    return deleteInstance(slug,instance,DeleteInstanceContextsRequest.builder().build());
+    return delete(slug,instance,DeleteContextsRequest.builder().build());
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> deleteInstance(String slug,
-      String instance, DeleteInstanceContextsRequest request) {
-    return deleteInstance(slug,instance,request,null);
+  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> delete(String slug,
+      String instance, DeleteContextsRequest request) {
+    return delete(slug,instance,request,null);
   }
 
   /**
    * Delete a specific context instance and its history.
    */
-  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> deleteInstance(String slug,
-      String instance, DeleteInstanceContextsRequest request, RequestOptions requestOptions) {
+  public RulebricksApiHttpResponse<DeleteContextInstanceResponse> delete(String slug,
+      String instance, DeleteContextsRequest request, RequestOptions requestOptions) {
     HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("contexts")
@@ -360,15 +360,7 @@ public class RawContextsClient {
      * Execute a specific rule using the context instance's state as input.
      */
     public RulebricksApiHttpResponse<SolveContextRuleResponse> solve(String slug, String instance,
-        String ruleSlug) {
-      return solve(slug,instance,ruleSlug,SolveContextRuleRequest.builder().build());
-    }
-
-    /**
-     * Execute a specific rule using the context instance's state as input.
-     */
-    public RulebricksApiHttpResponse<SolveContextRuleResponse> solve(String slug, String instance,
-        String ruleSlug, SolveContextRuleRequest request) {
+        String ruleSlug, SolveContextsRequest request) {
       return solve(slug,instance,ruleSlug,request,null);
     }
 
@@ -376,7 +368,7 @@ public class RawContextsClient {
      * Execute a specific rule using the context instance's state as input.
      */
     public RulebricksApiHttpResponse<SolveContextRuleResponse> solve(String slug, String instance,
-        String ruleSlug, SolveContextRuleRequest request, RequestOptions requestOptions) {
+        String ruleSlug, SolveContextsRequest request, RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("contexts")
@@ -387,7 +379,7 @@ public class RawContextsClient {
         .build();
       RequestBody body;
       try {
-        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
       }
       catch(JsonProcessingException e) {
         throw new RulebricksApiException("Failed to serialize request", e);
@@ -430,15 +422,8 @@ public class RawContextsClient {
     /**
      * Trigger re-evaluation of all bound rules and flows for the instance.
      */
-    public RulebricksApiHttpResponse<CascadeContextResponse> cascade(String slug, String instance) {
-      return cascade(slug,instance,CascadeContextRequest.builder().build());
-    }
-
-    /**
-     * Trigger re-evaluation of all bound rules and flows for the instance.
-     */
     public RulebricksApiHttpResponse<CascadeContextResponse> cascade(String slug, String instance,
-        CascadeContextRequest request) {
+        CascadeContextsRequest request) {
       return cascade(slug,instance,request,null);
     }
 
@@ -446,7 +431,7 @@ public class RawContextsClient {
      * Trigger re-evaluation of all bound rules and flows for the instance.
      */
     public RulebricksApiHttpResponse<CascadeContextResponse> cascade(String slug, String instance,
-        CascadeContextRequest request, RequestOptions requestOptions) {
+        CascadeContextsRequest request, RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("contexts")
@@ -456,7 +441,7 @@ public class RawContextsClient {
         .build();
       RequestBody body;
       try {
-        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
       }
       catch(JsonProcessingException e) {
         throw new RulebricksApiException("Failed to serialize request", e);
@@ -499,15 +484,7 @@ public class RawContextsClient {
      * Execute a specific flow using the context instance's state as input.
      */
     public RulebricksApiHttpResponse<SolveContextFlowResponse> execute(String slug, String instance,
-        String flowSlug) {
-      return execute(slug,instance,flowSlug,SolveContextFlowRequest.builder().build());
-    }
-
-    /**
-     * Execute a specific flow using the context instance's state as input.
-     */
-    public RulebricksApiHttpResponse<SolveContextFlowResponse> execute(String slug, String instance,
-        String flowSlug, SolveContextFlowRequest request) {
+        String flowSlug, ExecuteContextsRequest request) {
       return execute(slug,instance,flowSlug,request,null);
     }
 
@@ -515,7 +492,7 @@ public class RawContextsClient {
      * Execute a specific flow using the context instance's state as input.
      */
     public RulebricksApiHttpResponse<SolveContextFlowResponse> execute(String slug, String instance,
-        String flowSlug, SolveContextFlowRequest request, RequestOptions requestOptions) {
+        String flowSlug, ExecuteContextsRequest request, RequestOptions requestOptions) {
       HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("contexts")
@@ -526,7 +503,7 @@ public class RawContextsClient {
         .build();
       RequestBody body;
       try {
-        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
       }
       catch(JsonProcessingException e) {
         throw new RulebricksApiException("Failed to serialize request", e);
