@@ -18,6 +18,7 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.resources.rules.requests.BulkSolveRulesRequest;
 import com.rulebricks.resources.rules.requests.SolveRulesRequest;
 import com.rulebricks.types.BulkRuleResponseItem;
+import com.rulebricks.types.Error;
 import com.rulebricks.types.ParallelSolveRequestValue;
 import java.io.IOException;
 import java.lang.Object;
@@ -52,166 +53,175 @@ public class RawRulesClient {
    */
   public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug,
       SolveRulesRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+    HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("solve")
-      .addPathSegment(slug)
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("POST", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+      .addPathSegment(slug);if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
+      RequestBody body;
       try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+      }
+      catch(JsonProcessingException e) {
+        throw new RulebricksApiException("Failed to serialize request", e);
+      }
+      Request okhttpRequest = new Request.Builder()
+        .url(httpUrl.build())
+        .method("POST", body)
+        .headers(Headers.of(clientOptions.headers(requestOptions)))
+        .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json")
+        .build();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        if (response.isSuccessful()) {
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+        }
+        try {
+          switch (response.code()) {
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+      }
+      catch (IOException e) {
+        throw new RulebricksApiException("Network error executing HTTP request", e);
+      }
+    }
+
+    /**
+     * Executes a particular rule against multiple request data payloads provided in a list.
+     */
+    public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
+        BulkSolveRulesRequest request) {
+      return bulkSolve(slug,request,null);
+    }
+
+    /**
+     * Executes a particular rule against multiple request data payloads provided in a list.
+     */
+    public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
+        BulkSolveRulesRequest request, RequestOptions requestOptions) {
+      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("bulk-solve")
+        .addPathSegment(slug);if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl.build())
+          .method("POST", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          if (response.isSuccessful()) {
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<BulkRuleResponseItem>>() {}), response);
+          }
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+        }
+        catch (IOException e) {
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
+
+      /**
+       * Executes multiple rules or flows in parallel based on a provided mapping of rule/flow slugs to payloads.
+       */
+      public RulebricksApiHttpResponse<Map<String, Map<String, Object>>> parallelSolve(
+          Map<String, ParallelSolveRequestValue> request) {
+        return parallelSolve(request,null);
       }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
 
-  /**
-   * Executes a particular rule against multiple request data payloads provided in a list.
-   */
-  public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
-      BulkSolveRulesRequest request) {
-    return bulkSolve(slug,request,null);
-  }
+      /**
+       * Executes multiple rules or flows in parallel based on a provided mapping of rule/flow slugs to payloads.
+       */
+      public RulebricksApiHttpResponse<Map<String, Map<String, Object>>> parallelSolve(
+          Map<String, ParallelSolveRequestValue> request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-  /**
-   * Executes a particular rule against multiple request data payloads provided in a list.
-   */
-  public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
-      BulkSolveRulesRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("bulk-solve")
-      .addPathSegment(slug)
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("POST", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<BulkRuleResponseItem>>() {}), response);
-      }
-      try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+          .addPathSegments("parallel-solve");if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          RequestBody body;
+          try {
+            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          }
+          catch(JsonProcessingException e) {
+            throw new RulebricksApiException("Failed to serialize request", e);
+          }
+          Request okhttpRequest = new Request.Builder()
+            .url(httpUrl.build())
+            .method("POST", body)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Accept", "application/json")
+            .build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            if (response.isSuccessful()) {
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Map<String, Object>>>() {}), response);
+            }
+            try {
+              switch (response.code()) {
+                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              }
+            }
+            catch (JsonProcessingException ignored) {
+              // unable to map error response, throwing generic error
+            }
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+            throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+          }
+          catch (IOException e) {
+            throw new RulebricksApiException("Network error executing HTTP request", e);
+          }
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-
-  /**
-   * Executes multiple rules or flows in parallel based on a provided mapping of rule/flow slugs to payloads.
-   */
-  public RulebricksApiHttpResponse<Map<String, Map<String, Object>>> parallelSolve(
-      Map<String, ParallelSolveRequestValue> request) {
-    return parallelSolve(request,null);
-  }
-
-  /**
-   * Executes multiple rules or flows in parallel based on a provided mapping of rule/flow slugs to payloads.
-   */
-  public RulebricksApiHttpResponse<Map<String, Map<String, Object>>> parallelSolve(
-      Map<String, ParallelSolveRequestValue> request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("parallel-solve")
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("POST", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Map<String, Object>>>() {}), response);
-      }
-      try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-        }
-      }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-}

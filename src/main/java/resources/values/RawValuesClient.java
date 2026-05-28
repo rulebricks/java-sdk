@@ -22,6 +22,7 @@ import com.rulebricks.resources.values.requests.DeleteValuesRequest;
 import com.rulebricks.resources.values.requests.ListValuesRequest;
 import com.rulebricks.resources.values.requests.UpdateValuesRequest;
 import com.rulebricks.types.DynamicValue;
+import com.rulebricks.types.Error;
 import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
 import java.lang.Object;
@@ -52,6 +53,13 @@ public class RawValuesClient {
   /**
    * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
+  public RulebricksApiHttpResponse<List<DynamicValue>> list(RequestOptions requestOptions) {
+    return list(ListValuesRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   */
   public RulebricksApiHttpResponse<List<DynamicValue>> list(ListValuesRequest request) {
     return list(request,null);
   }
@@ -68,6 +76,11 @@ public class RawValuesClient {
       }
       if (request.getInclude().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+      }
+      if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
@@ -87,8 +100,8 @@ public class RawValuesClient {
         }
         try {
           switch (response.code()) {
-            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
           }
         }
         catch (JsonProcessingException ignored) {
@@ -114,73 +127,27 @@ public class RawValuesClient {
      */
     public RulebricksApiHttpResponse<List<DynamicValue>> update(UpdateValuesRequest request,
         RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-        .addPathSegments("values")
-        .build();
-      RequestBody body;
-      try {
-        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-      }
-      catch(JsonProcessingException e) {
-        throw new RulebricksApiException("Failed to serialize request", e);
-      }
-      Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("POST", body)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json")
-        .addHeader("Accept", "application/json")
-        .build();
-      OkHttpClient client = clientOptions.httpClient();
-      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-        client = clientOptions.httpClientWithTimeout(requestOptions);
-      }
-      try (Response response = client.newCall(okhttpRequest).execute()) {
-        ResponseBody responseBody = response.body();
-        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-        if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response);
-        }
-        try {
-          switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          }
-        }
-        catch (JsonProcessingException ignored) {
-          // unable to map error response, throwing generic error
-        }
-        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-      }
-      catch (IOException e) {
-        throw new RulebricksApiException("Network error executing HTTP request", e);
-      }
-    }
-
-    /**
-     * Delete a specific dynamic value for the authenticated user by its ID.
-     */
-    public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request) {
-      return delete(request,null);
-    }
-
-    /**
-     * Delete a specific dynamic value for the authenticated user by its ID.
-     */
-    public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request,
-        RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
-        Request.Builder _requestBuilder = new Request.Builder()
+        .addPathSegments("values");if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
           .url(httpUrl.build())
-          .method("DELETE", null)
+          .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
-          .addHeader("Accept", "application/json");
-        Request okhttpRequest = _requestBuilder.build();
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -189,13 +156,13 @@ public class RawValuesClient {
           ResponseBody responseBody = response.body();
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response);
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response);
           }
           try {
             switch (response.code()) {
-              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -208,4 +175,58 @@ public class RawValuesClient {
           throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
-    }
+
+      /**
+       * Delete a specific dynamic value for the authenticated user by its ID.
+       */
+      public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request) {
+        return delete(request,null);
+      }
+
+      /**
+       * Delete a specific dynamic value for the authenticated user by its ID.
+       */
+      public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request,
+          RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
+          if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          Request.Builder _requestBuilder = new Request.Builder()
+            .url(httpUrl.build())
+            .method("DELETE", null)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            if (response.isSuccessful()) {
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response);
+            }
+            try {
+              switch (response.code()) {
+                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              }
+            }
+            catch (JsonProcessingException ignored) {
+              // unable to map error response, throwing generic error
+            }
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+            throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+          }
+          catch (IOException e) {
+            throw new RulebricksApiException("Network error executing HTTP request", e);
+          }
+        }
+      }

@@ -10,11 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class ContextSchemaFieldType {
+  public static final ContextSchemaFieldType LIST = new ContextSchemaFieldType(Value.LIST, "list");
+
   public static final ContextSchemaFieldType NUMBER = new ContextSchemaFieldType(Value.NUMBER, "number");
 
   public static final ContextSchemaFieldType STRING = new ContextSchemaFieldType(Value.STRING, "string");
-
-  public static final ContextSchemaFieldType LIST = new ContextSchemaFieldType(Value.LIST, "list");
 
   public static final ContextSchemaFieldType FUNCTION = new ContextSchemaFieldType(Value.FUNCTION, "function");
 
@@ -54,12 +54,12 @@ public final class ContextSchemaFieldType {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case LIST:
+        return visitor.visitList();
       case NUMBER:
         return visitor.visitNumber();
       case STRING:
         return visitor.visitString();
-      case LIST:
-        return visitor.visitList();
       case FUNCTION:
         return visitor.visitFunction();
       case BOOLEAN:
@@ -77,12 +77,12 @@ public final class ContextSchemaFieldType {
   )
   public static ContextSchemaFieldType valueOf(String value) {
     switch (value) {
+      case "list":
+        return LIST;
       case "number":
         return NUMBER;
       case "string":
         return STRING;
-      case "list":
-        return LIST;
       case "function":
         return FUNCTION;
       case "boolean":

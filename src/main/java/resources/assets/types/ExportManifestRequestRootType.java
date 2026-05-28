@@ -12,11 +12,11 @@ import java.lang.String;
 public final class ExportManifestRequestRootType {
   public static final ExportManifestRequestRootType RULE = new ExportManifestRequestRootType(Value.RULE, "rule");
 
-  public static final ExportManifestRequestRootType CONTEXT = new ExportManifestRequestRootType(Value.CONTEXT, "context");
-
   public static final ExportManifestRequestRootType VALUE = new ExportManifestRequestRootType(Value.VALUE, "value");
 
   public static final ExportManifestRequestRootType FLOW = new ExportManifestRequestRootType(Value.FLOW, "flow");
+
+  public static final ExportManifestRequestRootType CONTEXT = new ExportManifestRequestRootType(Value.CONTEXT, "context");
 
   private final Value value;
 
@@ -52,12 +52,12 @@ public final class ExportManifestRequestRootType {
     switch (value) {
       case RULE:
         return visitor.visitRule();
-      case CONTEXT:
-        return visitor.visitContext();
       case VALUE:
         return visitor.visitValue();
       case FLOW:
         return visitor.visitFlow();
+      case CONTEXT:
+        return visitor.visitContext();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -71,12 +71,12 @@ public final class ExportManifestRequestRootType {
     switch (value) {
       case "rule":
         return RULE;
-      case "context":
-        return CONTEXT;
       case "value":
         return VALUE;
       case "flow":
         return FLOW;
+      case "context":
+        return CONTEXT;
       default:
         return new ExportManifestRequestRootType(Value.UNKNOWN, value);
     }

@@ -22,6 +22,7 @@ import com.rulebricks.resources.values.requests.DeleteValuesRequest;
 import com.rulebricks.resources.values.requests.ListValuesRequest;
 import com.rulebricks.resources.values.requests.UpdateValuesRequest;
 import com.rulebricks.types.DynamicValue;
+import com.rulebricks.types.Error;
 import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
 import java.lang.Object;
@@ -58,6 +59,14 @@ public class AsyncRawValuesClient {
    * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<DynamicValue>>> list(
+      RequestOptions requestOptions) {
+    return list(ListValuesRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<DynamicValue>>> list(
       ListValuesRequest request) {
     return list(request,null);
   }
@@ -74,6 +83,11 @@ public class AsyncRawValuesClient {
       }
       if (request.getInclude().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+      }
+      if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
@@ -97,9 +111,9 @@ public class AsyncRawValuesClient {
             }
             try {
               switch (response.code()) {
-                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                 return;
-                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                 return;
               }
             }
@@ -136,111 +150,48 @@ public class AsyncRawValuesClient {
      */
     public CompletableFuture<RulebricksApiHttpResponse<List<DynamicValue>>> update(
         UpdateValuesRequest request, RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-        .addPathSegments("values")
-        .build();
-      RequestBody body;
-      try {
-        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-      }
-      catch(JsonProcessingException e) {
-        throw new RulebricksApiException("Failed to serialize request", e);
-      }
-      Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("POST", body)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Content-Type", "application/json")
-        .addHeader("Accept", "application/json")
-        .build();
-      OkHttpClient client = clientOptions.httpClient();
-      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-        client = clientOptions.httpClientWithTimeout(requestOptions);
-      }
-      CompletableFuture<RulebricksApiHttpResponse<List<DynamicValue>>> future = new CompletableFuture<>();
-      client.newCall(okhttpRequest).enqueue(new Callback() {
-        @Override
-        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-          try (ResponseBody responseBody = response.body()) {
-            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-            if (response.isSuccessful()) {
-              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response));
-              return;
-            }
-            try {
-              switch (response.code()) {
-                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                return;
-                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                return;
-                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                return;
-              }
-            }
-            catch (JsonProcessingException ignored) {
-              // unable to map error response, throwing generic error
-            }
-            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-            future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
-            return;
-          }
-          catch (IOException e) {
-            future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
-          }
-        }
-
-        @Override
-        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-          future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
-        }
-      });
-      return future;
-    }
-
-    /**
-     * Delete a specific dynamic value for the authenticated user by its ID.
-     */
-    public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
-        DeleteValuesRequest request) {
-      return delete(request,null);
-    }
-
-    /**
-     * Delete a specific dynamic value for the authenticated user by its ID.
-     */
-    public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
-        DeleteValuesRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
-        Request.Builder _requestBuilder = new Request.Builder()
+        .addPathSegments("values");if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
           .url(httpUrl.build())
-          .method("DELETE", null)
+          .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
-          .addHeader("Accept", "application/json");
-        Request okhttpRequest = _requestBuilder.build();
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> future = new CompletableFuture<>();
+        CompletableFuture<RulebricksApiHttpResponse<List<DynamicValue>>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
           @Override
           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             try (ResponseBody responseBody = response.body()) {
               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
               if (response.isSuccessful()) {
-                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response));
+                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response));
                 return;
               }
               try {
                 switch (response.code()) {
-                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
-                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
-                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
                 }
               }
@@ -263,4 +214,75 @@ public class AsyncRawValuesClient {
         });
         return future;
       }
-    }
+
+      /**
+       * Delete a specific dynamic value for the authenticated user by its ID.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
+          DeleteValuesRequest request) {
+        return delete(request,null);
+      }
+
+      /**
+       * Delete a specific dynamic value for the authenticated user by its ID.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
+          DeleteValuesRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("values");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
+          if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          Request.Builder _requestBuilder = new Request.Builder()
+            .url(httpUrl.build())
+            .method("DELETE", null)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> future = new CompletableFuture<>();
+          client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+              try (ResponseBody responseBody = response.body()) {
+                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                if (response.isSuccessful()) {
+                  future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response));
+                  return;
+                }
+                try {
+                  switch (response.code()) {
+                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                  }
+                }
+                catch (JsonProcessingException ignored) {
+                  // unable to map error response, throwing generic error
+                }
+                Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                return;
+              }
+              catch (IOException e) {
+                future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+              }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+              future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+            }
+          });
+          return future;
+        }
+      }

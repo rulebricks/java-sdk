@@ -234,5 +234,15 @@ public final class ContextDetailBoundFlowsItem {
     public ContextDetailBoundFlowsItem build() {
       return new ContextDetailBoundFlowsItem(id, name, slug, published, originRule, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

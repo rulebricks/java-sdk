@@ -31,12 +31,16 @@ public final class UpdateValuesRequest {
 
   private final Optional<List<String>> userGroups;
 
+  private final Optional<Map<String, Map<String, Object>>> metadataByName;
+
   private final Map<String, Object> additionalProperties;
 
   private UpdateValuesRequest(Map<String, Object> values, Optional<List<String>> userGroups,
+      Optional<Map<String, Map<String, Object>>> metadataByName,
       Map<String, Object> additionalProperties) {
     this.values = values;
     this.userGroups = userGroups;
+    this.metadataByName = metadataByName;
     this.additionalProperties = additionalProperties;
   }
 
@@ -56,6 +60,14 @@ public final class UpdateValuesRequest {
     return userGroups;
   }
 
+  /**
+   * @return Optional metadata keyed by dynamic value name. This is the canonical snake_case field; legacy clients may still send <code>metadataByName</code>.
+   */
+  @JsonProperty("metadata_by_name")
+  public Optional<Map<String, Map<String, Object>>> getMetadataByName() {
+    return metadataByName;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -68,12 +80,12 @@ public final class UpdateValuesRequest {
   }
 
   private boolean equalTo(UpdateValuesRequest other) {
-    return values.equals(other.values) && userGroups.equals(other.userGroups);
+    return values.equals(other.values) && userGroups.equals(other.userGroups) && metadataByName.equals(other.metadataByName);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.values, this.userGroups);
+    return Objects.hash(this.values, this.userGroups, this.metadataByName);
   }
 
   @java.lang.Override
@@ -93,6 +105,8 @@ public final class UpdateValuesRequest {
 
     private Optional<List<String>> userGroups = Optional.empty();
 
+    private Optional<Map<String, Map<String, Object>>> metadataByName = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -102,6 +116,7 @@ public final class UpdateValuesRequest {
     public Builder from(UpdateValuesRequest other) {
       values(other.getValues());
       userGroups(other.getUserGroups());
+      metadataByName(other.getMetadataByName());
       return this;
     }
 
@@ -149,8 +164,35 @@ public final class UpdateValuesRequest {
       return this;
     }
 
+    /**
+     * <p>Optional metadata keyed by dynamic value name. This is the canonical snake_case field; legacy clients may still send <code>metadataByName</code>.</p>
+     */
+    @JsonSetter(
+        value = "metadata_by_name",
+        nulls = Nulls.SKIP
+    )
+    public Builder metadataByName(Optional<Map<String, Map<String, Object>>> metadataByName) {
+      this.metadataByName = metadataByName;
+      return this;
+    }
+
+    public Builder metadataByName(Map<String, Map<String, Object>> metadataByName) {
+      this.metadataByName = Optional.ofNullable(metadataByName);
+      return this;
+    }
+
     public UpdateValuesRequest build() {
-      return new UpdateValuesRequest(values, userGroups, additionalProperties);
+      return new UpdateValuesRequest(values, userGroups, metadataByName, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

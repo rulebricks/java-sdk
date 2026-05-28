@@ -319,5 +319,15 @@ public final class CreateUserResponseUser {
     public CreateUserResponseUser build() {
       return new CreateUserResponseUser(id, email, name, role, userGroups, apiKey, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

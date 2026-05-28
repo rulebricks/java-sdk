@@ -359,5 +359,15 @@ public final class SubmitContextDataResponse {
     public SubmitContextDataResponse build() {
       return new SubmitContextDataResponse(context, state, status, have, need, isNew, expiresAt, cascaded, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

@@ -19,6 +19,7 @@ import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.tests.flows.requests.CreateFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.DeleteFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.ListFlowsRequest;
+import com.rulebricks.types.Error;
 import com.rulebricks.types.Test;
 import java.io.IOException;
 import java.lang.Object;
@@ -49,6 +50,13 @@ public class RawFlowsClient {
   /**
    * Retrieves a list of tests associated with the flow identified by the slug.
    */
+  public RulebricksApiHttpResponse<List<Test>> list(String slug, RequestOptions requestOptions) {
+    return list(slug,ListFlowsRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Retrieves a list of tests associated with the flow identified by the slug.
+   */
   public RulebricksApiHttpResponse<List<Test>> list(String slug, ListFlowsRequest request) {
     return list(slug,request,null);
   }
@@ -58,162 +66,179 @@ public class RawFlowsClient {
    */
   public RulebricksApiHttpResponse<List<Test>> list(String slug, ListFlowsRequest request,
       RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+    HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("admin/flows")
       .addPathSegment(slug)
-      .addPathSegments("tests")
-      .build();
-    Request.Builder _requestBuilder = new Request.Builder()
-      .url(httpUrl)
-      .method("GET", null)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Accept", "application/json");
-    Request okhttpRequest = _requestBuilder.build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<Test>>() {}), response);
+      .addPathSegments("tests");if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
-      try {
-        switch (response.code()) {
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+      Request.Builder _requestBuilder = new Request.Builder()
+        .url(httpUrl.build())
+        .method("GET", null)
+        .headers(Headers.of(clientOptions.headers(requestOptions)))
+        .addHeader("Accept", "application/json");
+      Request okhttpRequest = _requestBuilder.build();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        if (response.isSuccessful()) {
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<Test>>() {}), response);
+        }
+        try {
+          switch (response.code()) {
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+      }
+      catch (IOException e) {
+        throw new RulebricksApiException("Network error executing HTTP request", e);
+      }
+    }
+
+    /**
+     * Adds a new test to the test suite of a flow identified by the slug.
+     */
+    public RulebricksApiHttpResponse<Test> create(String slug, CreateFlowsRequest request) {
+      return create(slug,request,null);
+    }
+
+    /**
+     * Adds a new test to the test suite of a flow identified by the slug.
+     */
+    public RulebricksApiHttpResponse<Test> create(String slug, CreateFlowsRequest request,
+        RequestOptions requestOptions) {
+      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("admin/flows")
+        .addPathSegment(slug)
+        .addPathSegments("tests");if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl.build())
+          .method("POST", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          if (response.isSuccessful()) {
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Test.class), response);
+          }
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+        }
+        catch (IOException e) {
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
+
+      /**
+       * Deletes a test from the test suite of a flow identified by the slug.
+       */
+      public RulebricksApiHttpResponse<Test> delete(String slug, String testId) {
+        return delete(slug,testId,DeleteFlowsRequest.builder().build());
       }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
 
-  /**
-   * Adds a new test to the test suite of a flow identified by the slug.
-   */
-  public RulebricksApiHttpResponse<Test> create(String slug, CreateFlowsRequest request) {
-    return create(slug,request,null);
-  }
-
-  /**
-   * Adds a new test to the test suite of a flow identified by the slug.
-   */
-  public RulebricksApiHttpResponse<Test> create(String slug, CreateFlowsRequest request,
-      RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("admin/flows")
-      .addPathSegment(slug)
-      .addPathSegments("tests")
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("POST", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Test.class), response);
+      /**
+       * Deletes a test from the test suite of a flow identified by the slug.
+       */
+      public RulebricksApiHttpResponse<Test> delete(String slug, String testId,
+          RequestOptions requestOptions) {
+        return delete(slug,testId,DeleteFlowsRequest.builder().build(),requestOptions);
       }
-      try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+
+      /**
+       * Deletes a test from the test suite of a flow identified by the slug.
+       */
+      public RulebricksApiHttpResponse<Test> delete(String slug, String testId,
+          DeleteFlowsRequest request) {
+        return delete(slug,testId,request,null);
+      }
+
+      /**
+       * Deletes a test from the test suite of a flow identified by the slug.
+       */
+      public RulebricksApiHttpResponse<Test> delete(String slug, String testId,
+          DeleteFlowsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("admin/flows")
+          .addPathSegment(slug)
+          .addPathSegments("tests")
+          .addPathSegment(testId);if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          Request.Builder _requestBuilder = new Request.Builder()
+            .url(httpUrl.build())
+            .method("DELETE", null)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            if (response.isSuccessful()) {
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Test.class), response);
+            }
+            try {
+              switch (response.code()) {
+                case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              }
+            }
+            catch (JsonProcessingException ignored) {
+              // unable to map error response, throwing generic error
+            }
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+            throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+          }
+          catch (IOException e) {
+            throw new RulebricksApiException("Network error executing HTTP request", e);
+          }
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-
-  /**
-   * Deletes a test from the test suite of a flow identified by the slug.
-   */
-  public RulebricksApiHttpResponse<Test> delete(String slug, String testId) {
-    return delete(slug,testId,DeleteFlowsRequest.builder().build());
-  }
-
-  /**
-   * Deletes a test from the test suite of a flow identified by the slug.
-   */
-  public RulebricksApiHttpResponse<Test> delete(String slug, String testId,
-      DeleteFlowsRequest request) {
-    return delete(slug,testId,request,null);
-  }
-
-  /**
-   * Deletes a test from the test suite of a flow identified by the slug.
-   */
-  public RulebricksApiHttpResponse<Test> delete(String slug, String testId,
-      DeleteFlowsRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("admin/flows")
-      .addPathSegment(slug)
-      .addPathSegments("tests")
-      .addPathSegment(testId)
-      .build();
-    Request.Builder _requestBuilder = new Request.Builder()
-      .url(httpUrl)
-      .method("DELETE", null)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Accept", "application/json");
-    Request okhttpRequest = _requestBuilder.build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Test.class), response);
-      }
-      try {
-        switch (response.code()) {
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-        }
-      }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-}

@@ -234,5 +234,15 @@ public final class SolveContextFlowResponse {
     public SolveContextFlowResponse build() {
       return new SolveContextFlowResponse(status, context, flow, result, usage, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

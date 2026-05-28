@@ -236,5 +236,15 @@ public final class ImportManifestRequestManifest {
     public ImportManifestRequestManifest build() {
       return new ImportManifestRequestManifest(version, rules, flows, entities, values, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

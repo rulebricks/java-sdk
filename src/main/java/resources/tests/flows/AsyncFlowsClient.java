@@ -41,6 +41,13 @@ public class AsyncFlowsClient {
   /**
    * Retrieves a list of tests associated with the flow identified by the slug.
    */
+  public CompletableFuture<List<Test>> list(String slug, RequestOptions requestOptions) {
+    return this.rawClient.list(slug, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieves a list of tests associated with the flow identified by the slug.
+   */
   public CompletableFuture<List<Test>> list(String slug, ListFlowsRequest request) {
     return this.rawClient.list(slug, request).thenApply(response -> response.body());
   }
@@ -73,6 +80,13 @@ public class AsyncFlowsClient {
    */
   public CompletableFuture<Test> delete(String slug, String testId) {
     return this.rawClient.delete(slug, testId).thenApply(response -> response.body());
+  }
+
+  /**
+   * Deletes a test from the test suite of a flow identified by the slug.
+   */
+  public CompletableFuture<Test> delete(String slug, String testId, RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, testId, requestOptions).thenApply(response -> response.body());
   }
 
   /**

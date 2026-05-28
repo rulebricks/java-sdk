@@ -135,7 +135,7 @@ public final class DecisionLog {
   }
 
   /**
-   * @return Decision details including matched conditions, rows, and evaluation metadata.
+   * @return Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, such as <code>rule_id</code>, <code>rule_slug</code>, <code>rule_version</code>, <code>success_idxs</code>, <code>total_usage</code>, and <code>entity_count</code>; user-defined request/response schema keys are preserved.
    */
   @JsonIgnore
   public Optional<Map<String, Object>> getDecision() {
@@ -487,7 +487,7 @@ public final class DecisionLog {
     }
 
     /**
-     * <p>Decision details including matched conditions, rows, and evaluation metadata.</p>
+     * <p>Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, such as <code>rule_id</code>, <code>rule_slug</code>, <code>rule_version</code>, <code>success_idxs</code>, <code>total_usage</code>, and <code>entity_count</code>; user-defined request/response schema keys are preserved.</p>
      */
     @JsonSetter(
         value = "decision",
@@ -565,6 +565,16 @@ public final class DecisionLog {
 
     public DecisionLog build() {
       return new DecisionLog(timestamp, name, endpoint, status, request, response, decision, error, abbreviated, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

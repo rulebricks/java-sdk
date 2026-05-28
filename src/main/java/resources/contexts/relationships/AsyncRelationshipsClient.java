@@ -43,6 +43,14 @@ public class AsyncRelationshipsClient {
    * List all relationships for a specific context.
    */
   public CompletableFuture<ContextRelationshipsResponse> list(String id,
+      RequestOptions requestOptions) {
+    return this.rawClient.list(id, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * List all relationships for a specific context.
+   */
+  public CompletableFuture<ContextRelationshipsResponse> list(String id,
       ListRelationshipsRequest request) {
     return this.rawClient.list(id, request).thenApply(response -> response.body());
   }
@@ -76,6 +84,14 @@ public class AsyncRelationshipsClient {
    */
   public CompletableFuture<DeleteRelationshipResponse> delete(String id, String relationship) {
     return this.rawClient.delete(id, relationship).thenApply(response -> response.body());
+  }
+
+  /**
+   * Delete a specific relationship between contexts.
+   */
+  public CompletableFuture<DeleteRelationshipResponse> delete(String id, String relationship,
+      RequestOptions requestOptions) {
+    return this.rawClient.delete(id, relationship, requestOptions).thenApply(response -> response.body());
   }
 
   /**

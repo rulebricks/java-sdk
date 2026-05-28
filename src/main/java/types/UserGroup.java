@@ -17,7 +17,6 @@ import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,19 +32,15 @@ public final class UserGroup {
 
   private final Optional<String> description;
 
-  private final Optional<List<String>> members;
-
   private final Optional<OffsetDateTime> createdAt;
 
   private final Map<String, Object> additionalProperties;
 
   private UserGroup(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<List<String>> members, Optional<OffsetDateTime> createdAt,
-      Map<String, Object> additionalProperties) {
+      Optional<OffsetDateTime> createdAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
-    this.members = members;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -75,14 +70,6 @@ public final class UserGroup {
   }
 
   /**
-   * @return List of member emails in the user group.
-   */
-  @JsonProperty("members")
-  public Optional<List<String>> getMembers() {
-    return members;
-  }
-
-  /**
    * @return When the user group was created.
    */
   @JsonProperty("created_at")
@@ -102,12 +89,12 @@ public final class UserGroup {
   }
 
   private boolean equalTo(UserGroup other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && members.equals(other.members) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.members, this.createdAt);
+    return Objects.hash(this.id, this.name, this.description, this.createdAt);
   }
 
   @java.lang.Override
@@ -129,8 +116,6 @@ public final class UserGroup {
 
     private Optional<String> description = Optional.empty();
 
-    private Optional<List<String>> members = Optional.empty();
-
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     @JsonAnySetter
@@ -143,7 +128,6 @@ public final class UserGroup {
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
-      members(other.getMembers());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -200,23 +184,6 @@ public final class UserGroup {
     }
 
     /**
-     * <p>List of member emails in the user group.</p>
-     */
-    @JsonSetter(
-        value = "members",
-        nulls = Nulls.SKIP
-    )
-    public Builder members(Optional<List<String>> members) {
-      this.members = members;
-      return this;
-    }
-
-    public Builder members(List<String> members) {
-      this.members = Optional.ofNullable(members);
-      return this;
-    }
-
-    /**
      * <p>When the user group was created.</p>
      */
     @JsonSetter(
@@ -234,7 +201,17 @@ public final class UserGroup {
     }
 
     public UserGroup build() {
-      return new UserGroup(id, name, description, members, createdAt, additionalProperties);
+      return new UserGroup(id, name, description, createdAt, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

@@ -10,9 +10,9 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class ContextInstanceStateStatus {
-  public static final ContextInstanceStateStatus COMPLETE = new ContextInstanceStateStatus(Value.COMPLETE, "complete");
-
   public static final ContextInstanceStateStatus PENDING = new ContextInstanceStateStatus(Value.PENDING, "pending");
+
+  public static final ContextInstanceStateStatus COMPLETE = new ContextInstanceStateStatus(Value.COMPLETE, "complete");
 
   private final Value value;
 
@@ -46,10 +46,10 @@ public final class ContextInstanceStateStatus {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case COMPLETE:
-        return visitor.visitComplete();
       case PENDING:
         return visitor.visitPending();
+      case COMPLETE:
+        return visitor.visitComplete();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -61,10 +61,10 @@ public final class ContextInstanceStateStatus {
   )
   public static ContextInstanceStateStatus valueOf(String value) {
     switch (value) {
-      case "complete":
-        return COMPLETE;
       case "pending":
         return PENDING;
+      case "complete":
+        return COMPLETE;
       default:
         return new ContextInstanceStateStatus(Value.UNKNOWN, value);
     }

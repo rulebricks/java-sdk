@@ -52,7 +52,7 @@ public final class ImportManifestRequest {
   }
 
   /**
-   * @return The RBM manifest object containing assets to import.
+   * @return The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.
    */
   @JsonProperty("manifest")
   public ImportManifestRequestManifest getManifest() {
@@ -114,7 +114,7 @@ public final class ImportManifestRequest {
 
   public interface ManifestStage {
     /**
-     * <p>The RBM manifest object containing assets to import.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
      */
     _FinalStage manifest(@NotNull ImportManifestRequestManifest manifest);
 
@@ -123,6 +123,10 @@ public final class ImportManifestRequest {
 
   public interface _FinalStage {
     ImportManifestRequest build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
      * <p>How to handle conflicts with existing assets. 'update' overwrites, 'skip' ignores, 'error' fails.</p>
@@ -176,8 +180,8 @@ public final class ImportManifestRequest {
     }
 
     /**
-     * <p>The RBM manifest object containing assets to import.</p>
-     * <p>The RBM manifest object containing assets to import.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -262,6 +266,18 @@ public final class ImportManifestRequest {
     @java.lang.Override
     public ImportManifestRequest build() {
       return new ImportManifestRequest(manifest, conflictStrategy, targetFolderName, legacyRuleMapping, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

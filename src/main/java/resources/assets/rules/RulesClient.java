@@ -49,49 +49,56 @@ public class RulesClient {
   }
 
   /**
-   * Export a specific rule by its ID.
+   * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
    */
   public Map<String, Object> pull(PullRulesRequest request) {
     return this.rawClient.pull(request).body();
   }
 
   /**
-   * Export a specific rule by its ID.
+   * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
    */
   public Map<String, Object> pull(PullRulesRequest request, RequestOptions requestOptions) {
     return this.rawClient.pull(request, requestOptions).body();
   }
 
   /**
-   * Import a rule into the user's account.
+   * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
    */
   public Map<String, Object> push(ImportRuleRequest request) {
     return this.rawClient.push(request).body();
   }
 
   /**
-   * Import a rule into the user's account.
+   * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
    */
   public Map<String, Object> push(ImportRuleRequest request, RequestOptions requestOptions) {
     return this.rawClient.push(request, requestOptions).body();
   }
 
   /**
-   * List all rules in the organization. Optionally filter by folder name or ID.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
    */
   public List<RuleDetail> list() {
     return this.rawClient.list().body();
   }
 
   /**
-   * List all rules in the organization. Optionally filter by folder name or ID.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+   */
+  public List<RuleDetail> list(RequestOptions requestOptions) {
+    return this.rawClient.list(requestOptions).body();
+  }
+
+  /**
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
    */
   public List<RuleDetail> list(ListRulesRequest request) {
     return this.rawClient.list(request).body();
   }
 
   /**
-   * List all rules in the organization. Optionally filter by folder name or ID.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
    */
   public List<RuleDetail> list(ListRulesRequest request, RequestOptions requestOptions) {
     return this.rawClient.list(request, requestOptions).body();

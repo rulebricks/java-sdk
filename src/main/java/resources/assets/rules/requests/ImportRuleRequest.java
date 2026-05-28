@@ -10,35 +10,32 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.types.RuleImportPayload;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ImportRuleRequest.Builder.class
 )
 public final class ImportRuleRequest {
-  private final Map<String, Object> rule;
+  private final RuleImportPayload rule;
 
   private final Map<String, Object> additionalProperties;
 
-  private ImportRuleRequest(Map<String, Object> rule, Map<String, Object> additionalProperties) {
+  private ImportRuleRequest(RuleImportPayload rule, Map<String, Object> additionalProperties) {
     this.rule = rule;
     this.additionalProperties = additionalProperties;
   }
 
-  /**
-   * @return The rule data to import.
-   */
   @JsonProperty("rule")
-  public Map<String, Object> getRule() {
+  public RuleImportPayload getRule() {
     return rule;
   }
 
@@ -67,15 +64,29 @@ public final class ImportRuleRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static RuleStage builder() {
     return new Builder();
+  }
+
+  public interface RuleStage {
+    _FinalStage rule(@NotNull RuleImportPayload rule);
+
+    Builder from(ImportRuleRequest other);
+  }
+
+  public interface _FinalStage {
+    ImportRuleRequest build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Map<String, Object> rule = new LinkedHashMap<>();
+  public static final class Builder implements RuleStage, _FinalStage {
+    private RuleImportPayload rule;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -83,40 +94,34 @@ public final class ImportRuleRequest {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(ImportRuleRequest other) {
       rule(other.getRule());
       return this;
     }
 
-    /**
-     * <p>The rule data to import.</p>
-     */
-    @JsonSetter(
-        value = "rule",
-        nulls = Nulls.SKIP
-    )
-    public Builder rule(Map<String, Object> rule) {
-      this.rule.clear();
-      if (rule != null) {
-        this.rule.putAll(rule);
-      }
+    @java.lang.Override
+    @JsonSetter("rule")
+    public _FinalStage rule(@NotNull RuleImportPayload rule) {
+      this.rule = Objects.requireNonNull(rule, "rule must not be null");
       return this;
     }
 
-    public Builder putAllRule(Map<String, Object> rule) {
-      if (rule != null) {
-        this.rule.putAll(rule);
-      }
-      return this;
-    }
-
-    public Builder rule(String key, Object value) {
-      this.rule.put(key, value);
-      return this;
-    }
-
+    @java.lang.Override
     public ImportRuleRequest build() {
       return new ImportRuleRequest(rule, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

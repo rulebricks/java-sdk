@@ -146,6 +146,10 @@ public final class ExportManifestRequest {
   public interface _FinalStage {
     ExportManifestRequest build();
 
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
     /**
      * <p>Array of IDs for the root assets to export. Dependencies are automatically resolved.</p>
      */
@@ -362,6 +366,18 @@ public final class ExportManifestRequest {
     @java.lang.Override
     public ExportManifestRequest build() {
       return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

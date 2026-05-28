@@ -22,6 +22,7 @@ import com.rulebricks.resources.assets.rules.requests.DeleteRuleRequest;
 import com.rulebricks.resources.assets.rules.requests.ImportRuleRequest;
 import com.rulebricks.resources.assets.rules.requests.ListRulesRequest;
 import com.rulebricks.resources.assets.rules.requests.PullRulesRequest;
+import com.rulebricks.types.Error;
 import com.rulebricks.types.RuleDetail;
 import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
@@ -56,117 +57,13 @@ public class RawRulesClient {
    */
   public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteRuleRequest request,
       RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("admin/rules/delete")
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("DELETE", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response);
-      }
-      try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-        }
-      }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-
-  /**
-   * Export a specific rule by its ID.
-   */
-  public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request) {
-    return pull(request,null);
-  }
-
-  /**
-   * Export a specific rule by its ID.
-   */
-  public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request,
-      RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("admin/rules/export");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
-      Request.Builder _requestBuilder = new Request.Builder()
-        .url(httpUrl.build())
-        .method("GET", null)
-        .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Accept", "application/json");
-      Request okhttpRequest = _requestBuilder.build();
-      OkHttpClient client = clientOptions.httpClient();
-      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-        client = clientOptions.httpClientWithTimeout(requestOptions);
+      .addPathSegments("admin/rules/delete");if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
-      try (Response response = client.newCall(okhttpRequest).execute()) {
-        ResponseBody responseBody = response.body();
-        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-        if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
-        }
-        try {
-          switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          }
-        }
-        catch (JsonProcessingException ignored) {
-          // unable to map error response, throwing generic error
-        }
-        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-      }
-      catch (IOException e) {
-        throw new RulebricksApiException("Network error executing HTTP request", e);
-      }
-    }
-
-    /**
-     * Import a rule into the user's account.
-     */
-    public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request) {
-      return push(request,null);
-    }
-
-    /**
-     * Import a rule into the user's account.
-     */
-    public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request,
-        RequestOptions requestOptions) {
-      HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-        .addPathSegments("admin/rules/import")
-        .build();
       RequestBody body;
       try {
         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
@@ -175,8 +72,8 @@ public class RawRulesClient {
         throw new RulebricksApiException("Failed to serialize request", e);
       }
       Request okhttpRequest = new Request.Builder()
-        .url(httpUrl)
-        .method("POST", body)
+        .url(httpUrl.build())
+        .method("DELETE", body)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
         .addHeader("Content-Type", "application/json")
         .addHeader("Accept", "application/json")
@@ -189,13 +86,13 @@ public class RawRulesClient {
         ResponseBody responseBody = response.body();
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response);
         }
         try {
           switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
           }
         }
         catch (JsonProcessingException ignored) {
@@ -210,28 +107,24 @@ public class RawRulesClient {
     }
 
     /**
-     * List all rules in the organization. Optionally filter by folder name or ID.
+     * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public RulebricksApiHttpResponse<List<RuleDetail>> list() {
-      return list(ListRulesRequest.builder().build());
+    public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request) {
+      return pull(request,null);
     }
 
     /**
-     * List all rules in the organization. Optionally filter by folder name or ID.
+     * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request) {
-      return list(request,null);
-    }
-
-    /**
-     * List all rules in the organization. Optionally filter by folder name or ID.
-     */
-    public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request,
+    public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("admin/rules/list");if (request.getFolder().isPresent()) {
-          QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
+        .addPathSegments("admin/rules/export");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
+        if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
         }
         Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
@@ -247,12 +140,13 @@ public class RawRulesClient {
           ResponseBody responseBody = response.body();
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<RuleDetail>>() {}), response);
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
           }
           try {
             switch (response.code()) {
-              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -265,4 +159,137 @@ public class RawRulesClient {
           throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
-    }
+
+      /**
+       * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
+       */
+      public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request) {
+        return push(request,null);
+      }
+
+      /**
+       * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
+       */
+      public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request,
+          RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("admin/rules/import");if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          RequestBody body;
+          try {
+            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          }
+          catch(JsonProcessingException e) {
+            throw new RulebricksApiException("Failed to serialize request", e);
+          }
+          Request okhttpRequest = new Request.Builder()
+            .url(httpUrl.build())
+            .method("POST", body)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Accept", "application/json")
+            .build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            if (response.isSuccessful()) {
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+            }
+            try {
+              switch (response.code()) {
+                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              }
+            }
+            catch (JsonProcessingException ignored) {
+              // unable to map error response, throwing generic error
+            }
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+            throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+          }
+          catch (IOException e) {
+            throw new RulebricksApiException("Network error executing HTTP request", e);
+          }
+        }
+
+        /**
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         */
+        public RulebricksApiHttpResponse<List<RuleDetail>> list() {
+          return list(ListRulesRequest.builder().build());
+        }
+
+        /**
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         */
+        public RulebricksApiHttpResponse<List<RuleDetail>> list(RequestOptions requestOptions) {
+          return list(ListRulesRequest.builder().build(),requestOptions);
+        }
+
+        /**
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         */
+        public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request) {
+          return list(request,null);
+        }
+
+        /**
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         */
+        public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request,
+            RequestOptions requestOptions) {
+          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+            .addPathSegments("admin/rules/list");if (request.getFolder().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
+            }
+            if (request.getUserGroup().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+            }
+            if (requestOptions != null) {
+              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                httpUrl.addQueryParameter(_key, _value);
+              } );
+            }
+            Request.Builder _requestBuilder = new Request.Builder()
+              .url(httpUrl.build())
+              .method("GET", null)
+              .headers(Headers.of(clientOptions.headers(requestOptions)))
+              .addHeader("Accept", "application/json");
+            Request okhttpRequest = _requestBuilder.build();
+            OkHttpClient client = clientOptions.httpClient();
+            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+              client = clientOptions.httpClientWithTimeout(requestOptions);
+            }
+            try (Response response = client.newCall(okhttpRequest).execute()) {
+              ResponseBody responseBody = response.body();
+              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+              if (response.isSuccessful()) {
+                return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<RuleDetail>>() {}), response);
+              }
+              try {
+                switch (response.code()) {
+                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                }
+              }
+              catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+              }
+              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+              throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+            }
+            catch (IOException e) {
+              throw new RulebricksApiException("Network error executing HTTP request", e);
+            }
+          }
+        }

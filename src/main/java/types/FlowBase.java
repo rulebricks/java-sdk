@@ -206,5 +206,15 @@ public final class FlowBase implements IFlowBase {
     public FlowBase build() {
       return new FlowBase(id, name, description, slug, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

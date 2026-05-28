@@ -37,6 +37,13 @@ public class AsyncDecisionsClient {
   /**
    * Query decision logs with support for the decision data query language, rule/status filters, date ranges, and pagination. The query language supports field comparisons (e.g., <code>alpha=0</code>, <code>score&gt;10</code>), contains/not-contains (e.g., <code>name:John</code>, <code>status!:error</code>), boolean logic (<code>AND</code>, <code>OR</code>), and parentheses for grouping.
    */
+  public CompletableFuture<DecisionLogResponse> query(RequestOptions requestOptions) {
+    return this.rawClient.query(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Query decision logs with support for the decision data query language, rule/status filters, date ranges, and pagination. The query language supports field comparisons (e.g., <code>alpha=0</code>, <code>score&gt;10</code>), contains/not-contains (e.g., <code>name:John</code>, <code>status!:error</code>), boolean logic (<code>AND</code>, <code>OR</code>), and parentheses for grouping.
+   */
   public CompletableFuture<DecisionLogResponse> query(QueryDecisionsRequest request) {
     return this.rawClient.query(request).thenApply(response -> response.body());
   }

@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.Nullable;
 import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
@@ -42,6 +44,14 @@ public final class RuleDetail implements IRuleBase {
 
   private final Optional<OffsetDateTime> updatedAt;
 
+  private final Optional<Boolean> published;
+
+  private final Optional<Integer> noConditions;
+
+  private final Optional<Map<String, Object>> metadata;
+
+  private final Optional<List<String>> userGroups;
+
   private final Optional<Folder> folder;
 
   private final Optional<RuleDetailContext> context;
@@ -54,6 +64,8 @@ public final class RuleDetail implements IRuleBase {
 
   private RuleDetail(Optional<String> id, Optional<String> name, Optional<String> description,
       Optional<String> slug, Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
+      Optional<Boolean> published, Optional<Integer> noConditions,
+      Optional<Map<String, Object>> metadata, Optional<List<String>> userGroups,
       Optional<Folder> folder, Optional<RuleDetailContext> context,
       Optional<List<SchemaField>> requestSchema, Optional<List<SchemaField>> responseSchema,
       Map<String, Object> additionalProperties) {
@@ -63,6 +75,10 @@ public final class RuleDetail implements IRuleBase {
     this.slug = slug;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.published = published;
+    this.noConditions = noConditions;
+    this.metadata = metadata;
+    this.userGroups = userGroups;
     this.folder = folder;
     this.context = context;
     this.requestSchema = requestSchema;
@@ -122,6 +138,38 @@ public final class RuleDetail implements IRuleBase {
     return updatedAt;
   }
 
+  /**
+   * @return Whether the rule is currently published.
+   */
+  @JsonProperty("published")
+  public Optional<Boolean> getPublished() {
+    return published;
+  }
+
+  /**
+   * @return The number of condition rows configured for the rule. Uses the published condition count when the rule is published, otherwise the draft condition count.
+   */
+  @JsonProperty("no_conditions")
+  public Optional<Integer> getNoConditions() {
+    return noConditions;
+  }
+
+  /**
+   * @return Optional user-defined metadata for API-first integrations.
+   */
+  @JsonProperty("metadata")
+  public Optional<Map<String, Object>> getMetadata() {
+    return metadata;
+  }
+
+  /**
+   * @return User groups that can access this rule.
+   */
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
+  }
+
   @JsonProperty("folder")
   public Optional<Folder> getFolder() {
     return folder;
@@ -139,7 +187,7 @@ public final class RuleDetail implements IRuleBase {
   }
 
   /**
-   * @return The published request schema for the rule.
+   * @return The request schema for the rule. Uses published schema when published, otherwise draft schema.
    */
   @JsonProperty("request_schema")
   public Optional<List<SchemaField>> getRequestSchema() {
@@ -147,7 +195,7 @@ public final class RuleDetail implements IRuleBase {
   }
 
   /**
-   * @return The published response schema for the rule.
+   * @return The response schema for the rule. Uses published schema when published, otherwise draft schema.
    */
   @JsonProperty("response_schema")
   public Optional<List<SchemaField>> getResponseSchema() {
@@ -175,12 +223,12 @@ public final class RuleDetail implements IRuleBase {
   }
 
   private boolean equalTo(RuleDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && folder.equals(other.folder) && context.equals(other.context) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && published.equals(other.published) && noConditions.equals(other.noConditions) && metadata.equals(other.metadata) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && context.equals(other.context) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.updatedAt, this.folder, this.context, this.requestSchema, this.responseSchema);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.updatedAt, this.published, this.noConditions, this.metadata, this.userGroups, this.folder, this.context, this.requestSchema, this.responseSchema);
   }
 
   @java.lang.Override
@@ -208,6 +256,14 @@ public final class RuleDetail implements IRuleBase {
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
 
+    private Optional<Boolean> published = Optional.empty();
+
+    private Optional<Integer> noConditions = Optional.empty();
+
+    private Optional<Map<String, Object>> metadata = Optional.empty();
+
+    private Optional<List<String>> userGroups = Optional.empty();
+
     private Optional<Folder> folder = Optional.empty();
 
     private Optional<RuleDetailContext> context = Optional.empty();
@@ -229,6 +285,10 @@ public final class RuleDetail implements IRuleBase {
       slug(other.getSlug());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
+      published(other.getPublished());
+      noConditions(other.getNoConditions());
+      metadata(other.getMetadata());
+      userGroups(other.getUserGroups());
       folder(other.getFolder());
       context(other.getContext());
       requestSchema(other.getRequestSchema());
@@ -338,6 +398,74 @@ public final class RuleDetail implements IRuleBase {
       return this;
     }
 
+    /**
+     * <p>Whether the rule is currently published.</p>
+     */
+    @JsonSetter(
+        value = "published",
+        nulls = Nulls.SKIP
+    )
+    public Builder published(Optional<Boolean> published) {
+      this.published = published;
+      return this;
+    }
+
+    public Builder published(Boolean published) {
+      this.published = Optional.ofNullable(published);
+      return this;
+    }
+
+    /**
+     * <p>The number of condition rows configured for the rule. Uses the published condition count when the rule is published, otherwise the draft condition count.</p>
+     */
+    @JsonSetter(
+        value = "no_conditions",
+        nulls = Nulls.SKIP
+    )
+    public Builder noConditions(Optional<Integer> noConditions) {
+      this.noConditions = noConditions;
+      return this;
+    }
+
+    public Builder noConditions(Integer noConditions) {
+      this.noConditions = Optional.ofNullable(noConditions);
+      return this;
+    }
+
+    /**
+     * <p>Optional user-defined metadata for API-first integrations.</p>
+     */
+    @JsonSetter(
+        value = "metadata",
+        nulls = Nulls.SKIP
+    )
+    public Builder metadata(Optional<Map<String, Object>> metadata) {
+      this.metadata = metadata;
+      return this;
+    }
+
+    public Builder metadata(Map<String, Object> metadata) {
+      this.metadata = Optional.ofNullable(metadata);
+      return this;
+    }
+
+    /**
+     * <p>User groups that can access this rule.</p>
+     */
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
     @JsonSetter(
         value = "folder",
         nulls = Nulls.SKIP
@@ -383,7 +511,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     /**
-     * <p>The published request schema for the rule.</p>
+     * <p>The request schema for the rule. Uses published schema when published, otherwise draft schema.</p>
      */
     @JsonSetter(
         value = "request_schema",
@@ -400,7 +528,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     /**
-     * <p>The published response schema for the rule.</p>
+     * <p>The response schema for the rule. Uses published schema when published, otherwise draft schema.</p>
      */
     @JsonSetter(
         value = "response_schema",
@@ -417,7 +545,17 @@ public final class RuleDetail implements IRuleBase {
     }
 
     public RuleDetail build() {
-      return new RuleDetail(id, name, description, slug, createdAt, updatedAt, folder, context, requestSchema, responseSchema, additionalProperties);
+      return new RuleDetail(id, name, description, slug, createdAt, updatedAt, published, noConditions, metadata, userGroups, folder, context, requestSchema, responseSchema, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

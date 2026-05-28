@@ -141,5 +141,15 @@ public final class ContextInstanceHistoryEntry {
     public ContextInstanceHistoryEntry build() {
       return new ContextInstanceHistoryEntry(timestamp, value, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

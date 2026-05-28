@@ -81,6 +81,10 @@ public final class DeleteValuesRequest {
 
   public interface _FinalStage {
     DeleteValuesRequest build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
@@ -116,6 +120,18 @@ public final class DeleteValuesRequest {
     @java.lang.Override
     public DeleteValuesRequest build() {
       return new DeleteValuesRequest(id, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

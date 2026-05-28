@@ -63,6 +63,14 @@ public class AsyncContextsClient {
    * Retrieve the current state of a context instance.
    */
   public CompletableFuture<ContextInstanceState> get(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.get(slug, instance, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieve the current state of a context instance.
+   */
+  public CompletableFuture<ContextInstanceState> get(String slug, String instance,
       GetContextsRequest request) {
     return this.rawClient.get(slug, instance, request).thenApply(response -> response.body());
   }
@@ -102,6 +110,14 @@ public class AsyncContextsClient {
    * Delete a specific context instance and its history.
    */
   public CompletableFuture<DeleteContextInstanceResponse> delete(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, instance, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Delete a specific context instance and its history.
+   */
+  public CompletableFuture<DeleteContextInstanceResponse> delete(String slug, String instance,
       DeleteContextsRequest request) {
     return this.rawClient.delete(slug, instance, request).thenApply(response -> response.body());
   }
@@ -119,6 +135,14 @@ public class AsyncContextsClient {
    */
   public CompletableFuture<ContextInstanceHistory> getHistory(String slug, String instance) {
     return this.rawClient.getHistory(slug, instance).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieve the change history for a context instance.
+   */
+  public CompletableFuture<ContextInstanceHistory> getHistory(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.getHistory(slug, instance, requestOptions).thenApply(response -> response.body());
   }
 
   /**
@@ -143,6 +167,14 @@ public class AsyncContextsClient {
   public CompletableFuture<ContextInstancePendingResponse> getPending(String slug,
       String instance) {
     return this.rawClient.getPending(slug, instance).thenApply(response -> response.body());
+  }
+
+  /**
+   * Get list of rules/flows that need to be evaluated for this instance.
+   */
+  public CompletableFuture<ContextInstancePendingResponse> getPending(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.getPending(slug, instance, requestOptions).thenApply(response -> response.body());
   }
 
   /**

@@ -146,6 +146,10 @@ public final class CreateRelationshipRequest {
   public interface _FinalStage {
     CreateRelationshipRequest build();
 
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
     /**
      * <p>Display name for the relationship.</p>
      */
@@ -277,6 +281,18 @@ public final class CreateRelationshipRequest {
     @java.lang.Override
     public CreateRelationshipRequest build() {
       return new CreateRelationshipRequest(toContextId, relationType, foreignKeyFact, name, description, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

@@ -325,5 +325,15 @@ public final class ExportManifestResponseManifest {
     public ExportManifestResponseManifest build() {
       return new ExportManifestResponseManifest(version, name, description, exportedAt, contexts, values, rules, flows, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

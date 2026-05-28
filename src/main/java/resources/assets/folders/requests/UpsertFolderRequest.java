@@ -107,6 +107,10 @@ public final class UpsertFolderRequest {
   public interface _FinalStage {
     UpsertFolderRequest build();
 
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
     /**
      * <p>Folder ID (required for updates, omit for creation)</p>
      */
@@ -207,6 +211,18 @@ public final class UpsertFolderRequest {
     @java.lang.Override
     public UpsertFolderRequest build() {
       return new UpsertFolderRequest(id, name, description, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

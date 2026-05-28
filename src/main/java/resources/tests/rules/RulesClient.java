@@ -40,6 +40,13 @@ public class RulesClient {
   /**
    * Retrieves a list of tests associated with the rule identified by the slug.
    */
+  public List<Test> list(String slug, RequestOptions requestOptions) {
+    return this.rawClient.list(slug, requestOptions).body();
+  }
+
+  /**
+   * Retrieves a list of tests associated with the rule identified by the slug.
+   */
   public List<Test> list(String slug, ListRulesRequest request) {
     return this.rawClient.list(slug, request).body();
   }
@@ -70,6 +77,13 @@ public class RulesClient {
    */
   public Test delete(String slug, String testId) {
     return this.rawClient.delete(slug, testId).body();
+  }
+
+  /**
+   * Deletes a test from the test suite of a rule identified by the slug.
+   */
+  public Test delete(String slug, String testId, RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, testId, requestOptions).body();
   }
 
   /**

@@ -40,6 +40,13 @@ public class ValuesClient {
   /**
    * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
+  public List<DynamicValue> list(RequestOptions requestOptions) {
+    return this.rawClient.list(requestOptions).body();
+  }
+
+  /**
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   */
   public List<DynamicValue> list(ListValuesRequest request) {
     return this.rawClient.list(request).body();
   }

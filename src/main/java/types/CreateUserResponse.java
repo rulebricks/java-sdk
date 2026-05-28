@@ -25,28 +25,17 @@ import java.util.Optional;
     builder = CreateUserResponse.Builder.class
 )
 public final class CreateUserResponse {
-  private final Optional<String> status;
-
   private final Optional<String> message;
 
   private final Optional<CreateUserResponseUser> user;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateUserResponse(Optional<String> status, Optional<String> message,
-      Optional<CreateUserResponseUser> user, Map<String, Object> additionalProperties) {
-    this.status = status;
+  private CreateUserResponse(Optional<String> message, Optional<CreateUserResponseUser> user,
+      Map<String, Object> additionalProperties) {
     this.message = message;
     this.user = user;
     this.additionalProperties = additionalProperties;
-  }
-
-  /**
-   * @return Status of the operation.
-   */
-  @JsonProperty("status")
-  public Optional<String> getStatus() {
-    return status;
   }
 
   /**
@@ -74,12 +63,12 @@ public final class CreateUserResponse {
   }
 
   private boolean equalTo(CreateUserResponse other) {
-    return status.equals(other.status) && message.equals(other.message) && user.equals(other.user);
+    return message.equals(other.message) && user.equals(other.user);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.status, this.message, this.user);
+    return Objects.hash(this.message, this.user);
   }
 
   @java.lang.Override
@@ -95,8 +84,6 @@ public final class CreateUserResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<String> status = Optional.empty();
-
     private Optional<String> message = Optional.empty();
 
     private Optional<CreateUserResponseUser> user = Optional.empty();
@@ -108,26 +95,8 @@ public final class CreateUserResponse {
     }
 
     public Builder from(CreateUserResponse other) {
-      status(other.getStatus());
       message(other.getMessage());
       user(other.getUser());
-      return this;
-    }
-
-    /**
-     * <p>Status of the operation.</p>
-     */
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public Builder status(Optional<String> status) {
-      this.status = status;
-      return this;
-    }
-
-    public Builder status(String status) {
-      this.status = Optional.ofNullable(status);
       return this;
     }
 
@@ -163,7 +132,17 @@ public final class CreateUserResponse {
     }
 
     public CreateUserResponse build() {
-      return new CreateUserResponse(status, message, user, additionalProperties);
+      return new CreateUserResponse(message, user, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

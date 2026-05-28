@@ -178,5 +178,15 @@ public final class ImportManifestResponseErrorsItem {
     public ImportManifestResponseErrorsItem build() {
       return new ImportManifestResponseErrorsItem(type, stableId, status, reason, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

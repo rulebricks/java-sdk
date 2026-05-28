@@ -41,6 +41,13 @@ public class AsyncValuesClient {
   /**
    * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
    */
+  public CompletableFuture<List<DynamicValue>> list(RequestOptions requestOptions) {
+    return this.rawClient.list(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   */
   public CompletableFuture<List<DynamicValue>> list(ListValuesRequest request) {
     return this.rawClient.list(request).thenApply(response -> response.body());
   }

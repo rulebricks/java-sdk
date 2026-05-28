@@ -141,5 +141,15 @@ public final class DeleteContextInstanceResponse {
     public DeleteContextInstanceResponse build() {
       return new DeleteContextInstanceResponse(message, pendingEvaluationsCancelled, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

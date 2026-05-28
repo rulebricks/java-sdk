@@ -362,5 +362,15 @@ public final class QueryDecisionsRequest {
     public QueryDecisionsRequest build() {
       return new QueryDecisionsRequest(search, rules, statuses, start, end, cursor, limit, count, slug, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

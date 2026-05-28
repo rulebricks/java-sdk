@@ -21,6 +21,7 @@ import com.rulebricks.resources.contexts.relationships.requests.ListRelationship
 import com.rulebricks.types.ContextRelationshipOutgoing;
 import com.rulebricks.types.ContextRelationshipsResponse;
 import com.rulebricks.types.DeleteRelationshipResponse;
+import com.rulebricks.types.Error;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
@@ -50,6 +51,14 @@ public class RawRelationshipsClient {
    * List all relationships for a specific context.
    */
   public RulebricksApiHttpResponse<ContextRelationshipsResponse> list(String id,
+      RequestOptions requestOptions) {
+    return list(id,ListRelationshipsRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * List all relationships for a specific context.
+   */
+  public RulebricksApiHttpResponse<ContextRelationshipsResponse> list(String id,
       ListRelationshipsRequest request) {
     return list(id,request,null);
   }
@@ -59,164 +68,181 @@ public class RawRelationshipsClient {
    */
   public RulebricksApiHttpResponse<ContextRelationshipsResponse> list(String id,
       ListRelationshipsRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+    HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("admin/contexts")
       .addPathSegment(id)
-      .addPathSegments("relationships")
-      .build();
-    Request.Builder _requestBuilder = new Request.Builder()
-      .url(httpUrl)
-      .method("GET", null)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Accept", "application/json");
-    Request okhttpRequest = _requestBuilder.build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextRelationshipsResponse.class), response);
+      .addPathSegments("relationships");if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
       }
-      try {
-        switch (response.code()) {
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+      Request.Builder _requestBuilder = new Request.Builder()
+        .url(httpUrl.build())
+        .method("GET", null)
+        .headers(Headers.of(clientOptions.headers(requestOptions)))
+        .addHeader("Accept", "application/json");
+      Request okhttpRequest = _requestBuilder.build();
+      OkHttpClient client = clientOptions.httpClient();
+      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+        client = clientOptions.httpClientWithTimeout(requestOptions);
+      }
+      try (Response response = client.newCall(okhttpRequest).execute()) {
+        ResponseBody responseBody = response.body();
+        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+        if (response.isSuccessful()) {
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextRelationshipsResponse.class), response);
+        }
+        try {
+          switch (response.code()) {
+            case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+          }
+        }
+        catch (JsonProcessingException ignored) {
+          // unable to map error response, throwing generic error
+        }
+        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+        throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+      }
+      catch (IOException e) {
+        throw new RulebricksApiException("Network error executing HTTP request", e);
+      }
+    }
+
+    /**
+     * Create a new relationship between two contexts.
+     */
+    public RulebricksApiHttpResponse<ContextRelationshipOutgoing> create(String id,
+        CreateRelationshipRequest request) {
+      return create(id,request,null);
+    }
+
+    /**
+     * Create a new relationship between two contexts.
+     */
+    public RulebricksApiHttpResponse<ContextRelationshipOutgoing> create(String id,
+        CreateRelationshipRequest request, RequestOptions requestOptions) {
+      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("admin/contexts")
+        .addPathSegment(id)
+        .addPathSegments("relationships");if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl.build())
+          .method("POST", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+          ResponseBody responseBody = response.body();
+          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+          if (response.isSuccessful()) {
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextRelationshipOutgoing.class), response);
+          }
+          try {
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            }
+          }
+          catch (JsonProcessingException ignored) {
+            // unable to map error response, throwing generic error
+          }
+          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+          throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+        }
+        catch (IOException e) {
+          throw new RulebricksApiException("Network error executing HTTP request", e);
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
+
+      /**
+       * Delete a specific relationship between contexts.
+       */
+      public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
+          String relationship) {
+        return delete(id,relationship,DeleteRelationshipsRequest.builder().build());
       }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
 
-  /**
-   * Create a new relationship between two contexts.
-   */
-  public RulebricksApiHttpResponse<ContextRelationshipOutgoing> create(String id,
-      CreateRelationshipRequest request) {
-    return create(id,request,null);
-  }
-
-  /**
-   * Create a new relationship between two contexts.
-   */
-  public RulebricksApiHttpResponse<ContextRelationshipOutgoing> create(String id,
-      CreateRelationshipRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("admin/contexts")
-      .addPathSegment(id)
-      .addPathSegments("relationships")
-      .build();
-    RequestBody body;
-    try {
-      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-    }
-    catch(JsonProcessingException e) {
-      throw new RulebricksApiException("Failed to serialize request", e);
-    }
-    Request okhttpRequest = new Request.Builder()
-      .url(httpUrl)
-      .method("POST", body)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Content-Type", "application/json")
-      .addHeader("Accept", "application/json")
-      .build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextRelationshipOutgoing.class), response);
+      /**
+       * Delete a specific relationship between contexts.
+       */
+      public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
+          String relationship, RequestOptions requestOptions) {
+        return delete(id,relationship,DeleteRelationshipsRequest.builder().build(),requestOptions);
       }
-      try {
-        switch (response.code()) {
-          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+
+      /**
+       * Delete a specific relationship between contexts.
+       */
+      public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
+          String relationship, DeleteRelationshipsRequest request) {
+        return delete(id,relationship,request,null);
+      }
+
+      /**
+       * Delete a specific relationship between contexts.
+       */
+      public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
+          String relationship, DeleteRelationshipsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("admin/contexts")
+          .addPathSegment(id)
+          .addPathSegments("relationships")
+          .addPathSegment(relationship);if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          Request.Builder _requestBuilder = new Request.Builder()
+            .url(httpUrl.build())
+            .method("DELETE", null)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            if (response.isSuccessful()) {
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DeleteRelationshipResponse.class), response);
+            }
+            try {
+              switch (response.code()) {
+                case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              }
+            }
+            catch (JsonProcessingException ignored) {
+              // unable to map error response, throwing generic error
+            }
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+            throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+          }
+          catch (IOException e) {
+            throw new RulebricksApiException("Network error executing HTTP request", e);
+          }
         }
       }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-
-  /**
-   * Delete a specific relationship between contexts.
-   */
-  public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
-      String relationship) {
-    return delete(id,relationship,DeleteRelationshipsRequest.builder().build());
-  }
-
-  /**
-   * Delete a specific relationship between contexts.
-   */
-  public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
-      String relationship, DeleteRelationshipsRequest request) {
-    return delete(id,relationship,request,null);
-  }
-
-  /**
-   * Delete a specific relationship between contexts.
-   */
-  public RulebricksApiHttpResponse<DeleteRelationshipResponse> delete(String id,
-      String relationship, DeleteRelationshipsRequest request, RequestOptions requestOptions) {
-    HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-      .addPathSegments("admin/contexts")
-      .addPathSegment(id)
-      .addPathSegments("relationships")
-      .addPathSegment(relationship)
-      .build();
-    Request.Builder _requestBuilder = new Request.Builder()
-      .url(httpUrl)
-      .method("DELETE", null)
-      .headers(Headers.of(clientOptions.headers(requestOptions)))
-      .addHeader("Accept", "application/json");
-    Request okhttpRequest = _requestBuilder.build();
-    OkHttpClient client = clientOptions.httpClient();
-    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-      client = clientOptions.httpClientWithTimeout(requestOptions);
-    }
-    try (Response response = client.newCall(okhttpRequest).execute()) {
-      ResponseBody responseBody = response.body();
-      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-      if (response.isSuccessful()) {
-        return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DeleteRelationshipResponse.class), response);
-      }
-      try {
-        switch (response.code()) {
-          case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-          case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-        }
-      }
-      catch (JsonProcessingException ignored) {
-        // unable to map error response, throwing generic error
-      }
-      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-      throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
-    }
-    catch (IOException e) {
-      throw new RulebricksApiException("Network error executing HTTP request", e);
-    }
-  }
-}

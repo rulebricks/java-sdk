@@ -61,6 +61,13 @@ public class ContextsClient {
   /**
    * Retrieve the current state of a context instance.
    */
+  public ContextInstanceState get(String slug, String instance, RequestOptions requestOptions) {
+    return this.rawClient.get(slug, instance, requestOptions).body();
+  }
+
+  /**
+   * Retrieve the current state of a context instance.
+   */
   public ContextInstanceState get(String slug, String instance, GetContextsRequest request) {
     return this.rawClient.get(slug, instance, request).body();
   }
@@ -100,6 +107,14 @@ public class ContextsClient {
    * Delete a specific context instance and its history.
    */
   public DeleteContextInstanceResponse delete(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.delete(slug, instance, requestOptions).body();
+  }
+
+  /**
+   * Delete a specific context instance and its history.
+   */
+  public DeleteContextInstanceResponse delete(String slug, String instance,
       DeleteContextsRequest request) {
     return this.rawClient.delete(slug, instance, request).body();
   }
@@ -123,6 +138,14 @@ public class ContextsClient {
    * Retrieve the change history for a context instance.
    */
   public ContextInstanceHistory getHistory(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.getHistory(slug, instance, requestOptions).body();
+  }
+
+  /**
+   * Retrieve the change history for a context instance.
+   */
+  public ContextInstanceHistory getHistory(String slug, String instance,
       GetHistoryContextsRequest request) {
     return this.rawClient.getHistory(slug, instance, request).body();
   }
@@ -140,6 +163,14 @@ public class ContextsClient {
    */
   public ContextInstancePendingResponse getPending(String slug, String instance) {
     return this.rawClient.getPending(slug, instance).body();
+  }
+
+  /**
+   * Get list of rules/flows that need to be evaluated for this instance.
+   */
+  public ContextInstancePendingResponse getPending(String slug, String instance,
+      RequestOptions requestOptions) {
+    return this.rawClient.getPending(slug, instance, requestOptions).body();
   }
 
   /**

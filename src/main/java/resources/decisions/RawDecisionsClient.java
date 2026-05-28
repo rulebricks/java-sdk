@@ -16,6 +16,7 @@ import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.resources.decisions.requests.QueryDecisionsRequest;
 import com.rulebricks.types.DecisionLogResponse;
+import com.rulebricks.types.Error;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
@@ -38,6 +39,13 @@ public class RawDecisionsClient {
    */
   public RulebricksApiHttpResponse<DecisionLogResponse> query() {
     return query(QueryDecisionsRequest.builder().build());
+  }
+
+  /**
+   * Query decision logs with support for the decision data query language, rule/status filters, date ranges, and pagination. The query language supports field comparisons (e.g., <code>alpha=0</code>, <code>score&gt;10</code>), contains/not-contains (e.g., <code>name:John</code>, <code>status!:error</code>), boolean logic (<code>AND</code>, <code>OR</code>), and parentheses for grouping.
+   */
+  public RulebricksApiHttpResponse<DecisionLogResponse> query(RequestOptions requestOptions) {
+    return query(QueryDecisionsRequest.builder().build(),requestOptions);
   }
 
   /**
@@ -81,6 +89,11 @@ public class RawDecisionsClient {
       if (request.getSlug().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "slug", request.getSlug().get(), false);
       }
+      if (requestOptions != null) {
+        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+          httpUrl.addQueryParameter(_key, _value);
+        } );
+      }
       Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
@@ -99,8 +112,8 @@ public class RawDecisionsClient {
         }
         try {
           switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
           }
         }
         catch (JsonProcessingException ignored) {

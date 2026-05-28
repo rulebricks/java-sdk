@@ -829,5 +829,15 @@ public final class ContextDetail implements IContextBase {
     public ContextDetail build() {
       return new ContextDetail(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, webhookOnSolve, webhookOnExpire, schema, identityFact, userGroups, folder, boundRules, boundFlows, relationships, createdAt, updatedAt, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

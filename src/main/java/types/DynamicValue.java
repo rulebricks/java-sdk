@@ -156,6 +156,10 @@ public final class DynamicValue {
   public interface _FinalStage {
     DynamicValue build();
 
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
     /**
      * <p>The actual value - can be any valid JSON type</p>
      */
@@ -319,6 +323,18 @@ public final class DynamicValue {
     @java.lang.Override
     public DynamicValue build() {
       return new DynamicValue(id, name, type, value, usages, userGroups, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

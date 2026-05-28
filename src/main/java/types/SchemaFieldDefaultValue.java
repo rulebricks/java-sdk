@@ -119,15 +119,15 @@ public final class SchemaFieldDefaultValue {
     public SchemaFieldDefaultValue deserialize(JsonParser p, DeserializationContext context) throws
         IOException {
       Object value = p.readValueAs(Object.class);
-      try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, String.class));
-      } catch(RuntimeException e) {
-      }
       if (value instanceof Double) {
         return of((Double) value);
       }
       if (value instanceof Boolean) {
         return of((Boolean) value);
+      }
+      try {
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, String.class));
+      } catch(RuntimeException e) {
       }
       try {
         return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<Map<String, Object>>() {}));

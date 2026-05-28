@@ -14,9 +14,9 @@ public final class UserInviteRequestRole {
 
   public static final UserInviteRequestRole ADMIN = new UserInviteRequestRole(Value.ADMIN, "admin");
 
-  public static final UserInviteRequestRole DEVELOPER = new UserInviteRequestRole(Value.DEVELOPER, "developer");
-
   public static final UserInviteRequestRole CUSTOM_ROLE = new UserInviteRequestRole(Value.CUSTOM_ROLE, "custom-role");
+
+  public static final UserInviteRequestRole DEVELOPER = new UserInviteRequestRole(Value.DEVELOPER, "developer");
 
   private final Value value;
 
@@ -54,10 +54,10 @@ public final class UserInviteRequestRole {
         return visitor.visitEditor();
       case ADMIN:
         return visitor.visitAdmin();
-      case DEVELOPER:
-        return visitor.visitDeveloper();
       case CUSTOM_ROLE:
         return visitor.visitCustomRole();
+      case DEVELOPER:
+        return visitor.visitDeveloper();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -73,10 +73,10 @@ public final class UserInviteRequestRole {
         return EDITOR;
       case "admin":
         return ADMIN;
-      case "developer":
-        return DEVELOPER;
       case "custom-role":
         return CUSTOM_ROLE;
+      case "developer":
+        return DEVELOPER;
       default:
         return new UserInviteRequestRole(Value.UNKNOWN, value);
     }

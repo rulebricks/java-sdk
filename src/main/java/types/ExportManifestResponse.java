@@ -52,7 +52,7 @@ public final class ExportManifestResponse {
   }
 
   /**
-   * @return The exported manifest data.
+   * @return The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility.
    */
   @JsonProperty("manifest")
   public Optional<ExportManifestResponseManifest> getManifest() {
@@ -137,7 +137,7 @@ public final class ExportManifestResponse {
     }
 
     /**
-     * <p>The exported manifest data.</p>
+     * <p>The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility.</p>
      */
     @JsonSetter(
         value = "manifest",
@@ -172,6 +172,16 @@ public final class ExportManifestResponse {
 
     public ExportManifestResponse build() {
       return new ExportManifestResponse(success, manifest, error, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

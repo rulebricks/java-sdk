@@ -96,6 +96,10 @@ public final class CreateUserGroupRequest {
   public interface _FinalStage {
     CreateUserGroupRequest build();
 
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
     /**
      * <p>Description of the user group.</p>
      */
@@ -163,6 +167,18 @@ public final class CreateUserGroupRequest {
     @java.lang.Override
     public CreateUserGroupRequest build() {
       return new CreateUserGroupRequest(name, description, additionalProperties);
+    }
+
+    @java.lang.Override
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    @java.lang.Override
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

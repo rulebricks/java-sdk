@@ -298,5 +298,15 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
     public ContextRelationshipOutgoing build() {
       return new ContextRelationshipOutgoing(id, type, foreignKey, name, description, createdAt, targetContext, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

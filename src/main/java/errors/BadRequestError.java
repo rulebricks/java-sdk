@@ -5,21 +5,21 @@
 package com.rulebricks.errors;
 
 import com.rulebricks.core.RulebricksApiApiException;
-import java.lang.Object;
+import com.rulebricks.types.Error;
 import okhttp3.Response;
 
 public final class BadRequestError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Object body;
+  private final Error body;
 
-  public BadRequestError(Object body) {
+  public BadRequestError(Error body) {
     super("BadRequestError", 400, body);
     this.body = body;
   }
 
-  public BadRequestError(Object body, Response rawResponse) {
+  public BadRequestError(Error body, Response rawResponse) {
     super("BadRequestError", 400, body, rawResponse);
     this.body = body;
   }
@@ -28,7 +28,7 @@ public final class BadRequestError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Object body() {
+  public Error body() {
     return this.body;
   }
 }

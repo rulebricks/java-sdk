@@ -267,5 +267,15 @@ public final class RuleUsage {
     public RuleUsage build() {
       return new RuleUsage(id, name, description, slug, published, updatedAt, additionalProperties);
     }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
+    }
   }
 }

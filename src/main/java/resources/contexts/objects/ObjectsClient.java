@@ -72,6 +72,13 @@ public class ObjectsClient {
   /**
    * Retrieve a specific context by its ID.
    */
+  public ContextDetail get(String id, RequestOptions requestOptions) {
+    return this.rawClient.get(id, requestOptions).body();
+  }
+
+  /**
+   * Retrieve a specific context by its ID.
+   */
   public ContextDetail get(String id, GetObjectsRequest request) {
     return this.rawClient.get(id, request).body();
   }
@@ -88,6 +95,13 @@ public class ObjectsClient {
    */
   public UpdateContextResponse update(String id) {
     return this.rawClient.update(id).body();
+  }
+
+  /**
+   * Update an existing context's properties and schema.
+   */
+  public UpdateContextResponse update(String id, RequestOptions requestOptions) {
+    return this.rawClient.update(id, requestOptions).body();
   }
 
   /**
@@ -110,6 +124,13 @@ public class ObjectsClient {
    */
   public DeleteContextResponse delete(String id) {
     return this.rawClient.delete(id).body();
+  }
+
+  /**
+   * Delete a specific context and all its instances.
+   */
+  public DeleteContextResponse delete(String id, RequestOptions requestOptions) {
+    return this.rawClient.delete(id, requestOptions).body();
   }
 
   /**

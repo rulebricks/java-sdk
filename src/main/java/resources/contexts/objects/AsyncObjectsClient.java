@@ -74,6 +74,13 @@ public class AsyncObjectsClient {
   /**
    * Retrieve a specific context by its ID.
    */
+  public CompletableFuture<ContextDetail> get(String id, RequestOptions requestOptions) {
+    return this.rawClient.get(id, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieve a specific context by its ID.
+   */
   public CompletableFuture<ContextDetail> get(String id, GetObjectsRequest request) {
     return this.rawClient.get(id, request).thenApply(response -> response.body());
   }
@@ -96,6 +103,13 @@ public class AsyncObjectsClient {
   /**
    * Update an existing context's properties and schema.
    */
+  public CompletableFuture<UpdateContextResponse> update(String id, RequestOptions requestOptions) {
+    return this.rawClient.update(id, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Update an existing context's properties and schema.
+   */
   public CompletableFuture<UpdateContextResponse> update(String id, UpdateContextRequest request) {
     return this.rawClient.update(id, request).thenApply(response -> response.body());
   }
@@ -113,6 +127,13 @@ public class AsyncObjectsClient {
    */
   public CompletableFuture<DeleteContextResponse> delete(String id) {
     return this.rawClient.delete(id).thenApply(response -> response.body());
+  }
+
+  /**
+   * Delete a specific context and all its instances.
+   */
+  public CompletableFuture<DeleteContextResponse> delete(String id, RequestOptions requestOptions) {
+    return this.rawClient.delete(id, requestOptions).thenApply(response -> response.body());
   }
 
   /**

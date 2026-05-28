@@ -27,10 +27,14 @@ import java.util.Optional;
 public final class ListRulesRequest {
   private final Optional<String> folder;
 
+  private final Optional<String> userGroup;
+
   private final Map<String, Object> additionalProperties;
 
-  private ListRulesRequest(Optional<String> folder, Map<String, Object> additionalProperties) {
+  private ListRulesRequest(Optional<String> folder, Optional<String> userGroup,
+      Map<String, Object> additionalProperties) {
     this.folder = folder;
+    this.userGroup = userGroup;
     this.additionalProperties = additionalProperties;
   }
 
@@ -40,6 +44,14 @@ public final class ListRulesRequest {
   @JsonProperty("folder")
   public Optional<String> getFolder() {
     return folder;
+  }
+
+  /**
+   * @return Filter rules by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.
+   */
+  @JsonProperty("user_group")
+  public Optional<String> getUserGroup() {
+    return userGroup;
   }
 
   @java.lang.Override
@@ -54,12 +66,12 @@ public final class ListRulesRequest {
   }
 
   private boolean equalTo(ListRulesRequest other) {
-    return folder.equals(other.folder);
+    return folder.equals(other.folder) && userGroup.equals(other.userGroup);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.folder);
+    return Objects.hash(this.folder, this.userGroup);
   }
 
   @java.lang.Override
@@ -77,6 +89,8 @@ public final class ListRulesRequest {
   public static final class Builder {
     private Optional<String> folder = Optional.empty();
 
+    private Optional<String> userGroup = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -85,6 +99,7 @@ public final class ListRulesRequest {
 
     public Builder from(ListRulesRequest other) {
       folder(other.getFolder());
+      userGroup(other.getUserGroup());
       return this;
     }
 
@@ -105,8 +120,35 @@ public final class ListRulesRequest {
       return this;
     }
 
+    /**
+     * <p>Filter rules by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.</p>
+     */
+    @JsonSetter(
+        value = "user_group",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroup(Optional<String> userGroup) {
+      this.userGroup = userGroup;
+      return this;
+    }
+
+    public Builder userGroup(String userGroup) {
+      this.userGroup = Optional.ofNullable(userGroup);
+      return this;
+    }
+
     public ListRulesRequest build() {
-      return new ListRulesRequest(folder, additionalProperties);
+      return new ListRulesRequest(folder, userGroup, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

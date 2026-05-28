@@ -5,21 +5,21 @@
 package com.rulebricks.errors;
 
 import com.rulebricks.core.RulebricksApiApiException;
-import java.lang.Object;
+import com.rulebricks.types.Error;
 import okhttp3.Response;
 
 public final class ForbiddenError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Object body;
+  private final Error body;
 
-  public ForbiddenError(Object body) {
+  public ForbiddenError(Error body) {
     super("ForbiddenError", 403, body);
     this.body = body;
   }
 
-  public ForbiddenError(Object body, Response rawResponse) {
+  public ForbiddenError(Error body, Response rawResponse) {
     super("ForbiddenError", 403, body, rawResponse);
     this.body = body;
   }
@@ -28,7 +28,7 @@ public final class ForbiddenError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Object body() {
+  public Error body() {
     return this.body;
   }
 }

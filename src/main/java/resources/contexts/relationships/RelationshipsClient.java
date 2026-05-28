@@ -41,6 +41,13 @@ public class RelationshipsClient {
   /**
    * List all relationships for a specific context.
    */
+  public ContextRelationshipsResponse list(String id, RequestOptions requestOptions) {
+    return this.rawClient.list(id, requestOptions).body();
+  }
+
+  /**
+   * List all relationships for a specific context.
+   */
   public ContextRelationshipsResponse list(String id, ListRelationshipsRequest request) {
     return this.rawClient.list(id, request).body();
   }
@@ -73,6 +80,14 @@ public class RelationshipsClient {
    */
   public DeleteRelationshipResponse delete(String id, String relationship) {
     return this.rawClient.delete(id, relationship).body();
+  }
+
+  /**
+   * Delete a specific relationship between contexts.
+   */
+  public DeleteRelationshipResponse delete(String id, String relationship,
+      RequestOptions requestOptions) {
+    return this.rawClient.delete(id, relationship, requestOptions).body();
   }
 
   /**

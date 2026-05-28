@@ -10,9 +10,9 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class ImportManifestRequestLegacyRuleMappingValueAction {
-  public static final ImportManifestRequestLegacyRuleMappingValueAction CREATE = new ImportManifestRequestLegacyRuleMappingValueAction(Value.CREATE, "create");
-
   public static final ImportManifestRequestLegacyRuleMappingValueAction REUSE = new ImportManifestRequestLegacyRuleMappingValueAction(Value.REUSE, "reuse");
+
+  public static final ImportManifestRequestLegacyRuleMappingValueAction CREATE = new ImportManifestRequestLegacyRuleMappingValueAction(Value.CREATE, "create");
 
   private final Value value;
 
@@ -46,10 +46,10 @@ public final class ImportManifestRequestLegacyRuleMappingValueAction {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case CREATE:
-        return visitor.visitCreate();
       case REUSE:
         return visitor.visitReuse();
+      case CREATE:
+        return visitor.visitCreate();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -61,10 +61,10 @@ public final class ImportManifestRequestLegacyRuleMappingValueAction {
   )
   public static ImportManifestRequestLegacyRuleMappingValueAction valueOf(String value) {
     switch (value) {
-      case "create":
-        return CREATE;
       case "reuse":
         return REUSE;
+      case "create":
+        return CREATE;
       default:
         return new ImportManifestRequestLegacyRuleMappingValueAction(Value.UNKNOWN, value);
     }

@@ -10,9 +10,9 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class SubmitContextDataResponseStatus {
-  public static final SubmitContextDataResponseStatus COMPLETE = new SubmitContextDataResponseStatus(Value.COMPLETE, "complete");
-
   public static final SubmitContextDataResponseStatus PENDING = new SubmitContextDataResponseStatus(Value.PENDING, "pending");
+
+  public static final SubmitContextDataResponseStatus COMPLETE = new SubmitContextDataResponseStatus(Value.COMPLETE, "complete");
 
   private final Value value;
 
@@ -46,10 +46,10 @@ public final class SubmitContextDataResponseStatus {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case COMPLETE:
-        return visitor.visitComplete();
       case PENDING:
         return visitor.visitPending();
+      case COMPLETE:
+        return visitor.visitComplete();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -61,10 +61,10 @@ public final class SubmitContextDataResponseStatus {
   )
   public static SubmitContextDataResponseStatus valueOf(String value) {
     switch (value) {
-      case "complete":
-        return COMPLETE;
       case "pending":
         return PENDING;
+      case "complete":
+        return COMPLETE;
       default:
         return new SubmitContextDataResponseStatus(Value.UNKNOWN, value);
     }

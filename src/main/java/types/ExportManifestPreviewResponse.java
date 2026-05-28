@@ -52,7 +52,7 @@ public final class ExportManifestPreviewResponse {
   }
 
   /**
-   * @return Preview of assets that would be exported.
+   * @return Preview of assets that would be exported. The preview wrapper uses snake_case, while asset items intentionally preserve <code>.rbm</code>/database casing (for example, <code>valueType</code> and <code>updatedAt</code>) because the same items feed manifest preview/import UI.
    */
   @JsonProperty("preview")
   public Optional<ExportManifestPreviewResponsePreview> getPreview() {
@@ -137,7 +137,7 @@ public final class ExportManifestPreviewResponse {
     }
 
     /**
-     * <p>Preview of assets that would be exported.</p>
+     * <p>Preview of assets that would be exported. The preview wrapper uses snake_case, while asset items intentionally preserve <code>.rbm</code>/database casing (for example, <code>valueType</code> and <code>updatedAt</code>) because the same items feed manifest preview/import UI.</p>
      */
     @JsonSetter(
         value = "preview",
@@ -172,6 +172,16 @@ public final class ExportManifestPreviewResponse {
 
     public ExportManifestPreviewResponse build() {
       return new ExportManifestPreviewResponse(success, preview, error, additionalProperties);
+    }
+
+    public Builder additionalProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
+    public Builder additionalProperties(Map<String, Object> additionalProperties) {
+      this.additionalProperties.putAll(additionalProperties);
+      return this;
     }
   }
 }

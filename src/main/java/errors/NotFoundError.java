@@ -5,21 +5,21 @@
 package com.rulebricks.errors;
 
 import com.rulebricks.core.RulebricksApiApiException;
-import java.lang.Object;
+import com.rulebricks.types.Error;
 import okhttp3.Response;
 
 public final class NotFoundError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Object body;
+  private final Error body;
 
-  public NotFoundError(Object body) {
+  public NotFoundError(Error body) {
     super("NotFoundError", 404, body);
     this.body = body;
   }
 
-  public NotFoundError(Object body, Response rawResponse) {
+  public NotFoundError(Error body, Response rawResponse) {
     super("NotFoundError", 404, body, rawResponse);
     this.body = body;
   }
@@ -28,7 +28,7 @@ public final class NotFoundError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Object body() {
+  public Error body() {
     return this.body;
   }
 }
