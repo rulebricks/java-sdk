@@ -39,7 +39,7 @@ public final class ParallelSolveRequestValue {
   }
 
   /**
-   * @return Slug of the rule to execute
+   * @return Slug of the rule to execute, optionally suffixed with a published version number or release environment slug (e.g. <code>my-rule</code>, <code>my-rule/3</code>, or <code>my-rule/production</code>). A bare slug executes the current published version.
    */
   @JsonProperty("$rule")
   public Optional<String> getRule() {
@@ -47,7 +47,7 @@ public final class ParallelSolveRequestValue {
   }
 
   /**
-   * @return Slug of the flow to execute
+   * @return Slug of the flow to execute, optionally suffixed with a published version number or release environment slug (e.g. <code>my-flow</code>, <code>my-flow/3</code>, or <code>my-flow/production</code>). A bare slug executes the current published version.
    */
   @JsonProperty("$flow")
   public Optional<String> getFlow() {
@@ -104,7 +104,7 @@ public final class ParallelSolveRequestValue {
     }
 
     /**
-     * <p>Slug of the rule to execute</p>
+     * <p>Slug of the rule to execute, optionally suffixed with a published version number or release environment slug (e.g. <code>my-rule</code>, <code>my-rule/3</code>, or <code>my-rule/production</code>). A bare slug executes the current published version.</p>
      */
     @JsonSetter(
         value = "$rule",
@@ -121,7 +121,7 @@ public final class ParallelSolveRequestValue {
     }
 
     /**
-     * <p>Slug of the flow to execute</p>
+     * <p>Slug of the flow to execute, optionally suffixed with a published version number or release environment slug (e.g. <code>my-flow</code>, <code>my-flow/3</code>, or <code>my-flow/production</code>). A bare slug executes the current published version.</p>
      */
     @JsonSetter(
         value = "$flow",

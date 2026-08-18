@@ -41,22 +41,23 @@ public class RawRulesClient {
   }
 
   /**
-   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration.
+   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug,
+  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug, String version,
       SolveRulesRequest request) {
-    return solve(slug,request,null);
+    return solve(slug,version,request,null);
   }
 
   /**
-   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration.
+   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug,
+  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug, String version,
       SolveRulesRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("solve")
-      .addPathSegment(slug);if (requestOptions != null) {
+      .addPathSegment(slug)
+      .addPathSegment(version);if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );
@@ -103,22 +104,23 @@ public class RawRulesClient {
     }
 
     /**
-     * Executes a particular rule against multiple request data payloads provided in a list.
+     * Executes a particular rule against multiple request data payloads provided in a list. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
      */
     public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
-        BulkSolveRulesRequest request) {
-      return bulkSolve(slug,request,null);
+        String version, BulkSolveRulesRequest request) {
+      return bulkSolve(slug,version,request,null);
     }
 
     /**
-     * Executes a particular rule against multiple request data payloads provided in a list.
+     * Executes a particular rule against multiple request data payloads provided in a list. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
      */
     public RulebricksApiHttpResponse<List<BulkRuleResponseItem>> bulkSolve(String slug,
-        BulkSolveRulesRequest request, RequestOptions requestOptions) {
+        String version, BulkSolveRulesRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("bulk-solve")
-        .addPathSegment(slug);if (requestOptions != null) {
+        .addPathSegment(slug)
+        .addPathSegment(version);if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );

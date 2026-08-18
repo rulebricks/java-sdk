@@ -37,18 +37,21 @@ public final class ContextDetailBoundFlowsItem {
 
   private final Optional<Boolean> published;
 
+  private final Optional<String> contextVersion;
+
   private final Optional<ContextDetailBoundFlowsItemOriginRule> originRule;
 
   private final Map<String, Object> additionalProperties;
 
   private ContextDetailBoundFlowsItem(Optional<String> id, Optional<String> name,
-      Optional<String> slug, Optional<Boolean> published,
+      Optional<String> slug, Optional<Boolean> published, Optional<String> contextVersion,
       Optional<ContextDetailBoundFlowsItemOriginRule> originRule,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.slug = slug;
     this.published = published;
+    this.contextVersion = contextVersion;
     this.originRule = originRule;
     this.additionalProperties = additionalProperties;
   }
@@ -73,12 +76,32 @@ public final class ContextDetailBoundFlowsItem {
     return published;
   }
 
+  /**
+   * @return Version target for this binding: <code>null</code> or <code>latest</code> follows the current published version, a version number (e.g. <code>3</code>) pins that published version, and any other value is a release environment slug resolved at execution time.
+   */
+  @JsonIgnore
+  public Optional<String> getContextVersion() {
+    if (contextVersion == null) {
+      return Optional.empty();
+    }
+    return contextVersion;
+  }
+
   @JsonIgnore
   public Optional<ContextDetailBoundFlowsItemOriginRule> getOriginRule() {
     if (originRule == null) {
       return Optional.empty();
     }
     return originRule;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("context_version")
+  private Optional<String> _getContextVersion() {
+    return contextVersion;
   }
 
   @JsonInclude(
@@ -102,12 +125,12 @@ public final class ContextDetailBoundFlowsItem {
   }
 
   private boolean equalTo(ContextDetailBoundFlowsItem other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && published.equals(other.published) && originRule.equals(other.originRule);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && published.equals(other.published) && contextVersion.equals(other.contextVersion) && originRule.equals(other.originRule);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.published, this.originRule);
+    return Objects.hash(this.id, this.name, this.slug, this.published, this.contextVersion, this.originRule);
   }
 
   @java.lang.Override
@@ -131,6 +154,8 @@ public final class ContextDetailBoundFlowsItem {
 
     private Optional<Boolean> published = Optional.empty();
 
+    private Optional<String> contextVersion = Optional.empty();
+
     private Optional<ContextDetailBoundFlowsItemOriginRule> originRule = Optional.empty();
 
     @JsonAnySetter
@@ -144,6 +169,7 @@ public final class ContextDetailBoundFlowsItem {
       name(other.getName());
       slug(other.getSlug());
       published(other.getPublished());
+      contextVersion(other.getContextVersion());
       originRule(other.getOriginRule());
       return this;
     }
@@ -204,6 +230,36 @@ public final class ContextDetailBoundFlowsItem {
       return this;
     }
 
+    /**
+     * <p>Version target for this binding: <code>null</code> or <code>latest</code> follows the current published version, a version number (e.g. <code>3</code>) pins that published version, and any other value is a release environment slug resolved at execution time.</p>
+     */
+    @JsonSetter(
+        value = "context_version",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextVersion(Optional<String> contextVersion) {
+      this.contextVersion = contextVersion;
+      return this;
+    }
+
+    public Builder contextVersion(String contextVersion) {
+      this.contextVersion = Optional.ofNullable(contextVersion);
+      return this;
+    }
+
+    public Builder contextVersion(Nullable<String> contextVersion) {
+      if (contextVersion.isNull()) {
+        this.contextVersion = null;
+      }
+      else if (contextVersion.isEmpty()) {
+        this.contextVersion = Optional.empty();
+      }
+      else {
+        this.contextVersion = Optional.of(contextVersion.get());
+      }
+      return this;
+    }
+
     @JsonSetter(
         value = "origin_rule",
         nulls = Nulls.SKIP
@@ -232,7 +288,7 @@ public final class ContextDetailBoundFlowsItem {
     }
 
     public ContextDetailBoundFlowsItem build() {
-      return new ContextDetailBoundFlowsItem(id, name, slug, published, originRule, additionalProperties);
+      return new ContextDetailBoundFlowsItem(id, name, slug, published, contextVersion, originRule, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

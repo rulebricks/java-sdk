@@ -37,22 +37,23 @@ public class RawFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug.
+   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug,
+  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request) {
-    return execute(slug,request,null);
+    return execute(slug,version,request,null);
   }
 
   /**
-   * Execute a flow by its slug.
+   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug,
+  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("flows")
-      .addPathSegment(slug);if (requestOptions != null) {
+      .addPathSegment(slug)
+      .addPathSegment(version);if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );

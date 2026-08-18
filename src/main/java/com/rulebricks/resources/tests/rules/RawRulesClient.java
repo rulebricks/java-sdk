@@ -245,7 +245,7 @@ public class RawRulesClient {
         }
 
         /**
-         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked. Tests always run against the latest draft of the rule; version targeting does not apply.
          */
         public RulebricksApiHttpResponse<RunTestsResponse> run(String slug,
             RunRulesRequest request) {
@@ -253,7 +253,7 @@ public class RawRulesClient {
         }
 
         /**
-         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked. Tests always run against the latest draft of the rule; version targeting does not apply.
          */
         public RulebricksApiHttpResponse<RunTestsResponse> run(String slug, RunRulesRequest request,
             RequestOptions requestOptions) {

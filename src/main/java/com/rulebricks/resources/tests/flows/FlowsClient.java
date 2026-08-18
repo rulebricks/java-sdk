@@ -104,14 +104,14 @@ public class FlowsClient {
   }
 
   /**
-   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Tests always run against the latest draft of the flow; version targeting does not apply.
    */
   public RunTestsResponse run(String slug, RunFlowsRequest request) {
     return this.rawClient.run(slug, request).body();
   }
 
   /**
-   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Tests always run against the latest draft of the flow; version targeting does not apply.
    */
   public RunTestsResponse run(String slug, RunFlowsRequest request, RequestOptions requestOptions) {
     return this.rawClient.run(slug, request, requestOptions).body();

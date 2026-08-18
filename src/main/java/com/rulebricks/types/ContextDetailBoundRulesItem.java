@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Boolean;
 import java.lang.Object;
@@ -34,15 +37,18 @@ public final class ContextDetailBoundRulesItem {
 
   private final Optional<Boolean> published;
 
+  private final Optional<String> contextVersion;
+
   private final Map<String, Object> additionalProperties;
 
   private ContextDetailBoundRulesItem(Optional<String> id, Optional<String> name,
-      Optional<String> slug, Optional<Boolean> published,
+      Optional<String> slug, Optional<Boolean> published, Optional<String> contextVersion,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.slug = slug;
     this.published = published;
+    this.contextVersion = contextVersion;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +72,26 @@ public final class ContextDetailBoundRulesItem {
     return published;
   }
 
+  /**
+   * @return Version target for this binding: <code>null</code> or <code>latest</code> follows the current published version, a version number (e.g. <code>3</code>) pins that published version, and any other value is a release environment slug resolved at execution time.
+   */
+  @JsonIgnore
+  public Optional<String> getContextVersion() {
+    if (contextVersion == null) {
+      return Optional.empty();
+    }
+    return contextVersion;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("context_version")
+  private Optional<String> _getContextVersion() {
+    return contextVersion;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +104,12 @@ public final class ContextDetailBoundRulesItem {
   }
 
   private boolean equalTo(ContextDetailBoundRulesItem other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && published.equals(other.published);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && published.equals(other.published) && contextVersion.equals(other.contextVersion);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.published);
+    return Objects.hash(this.id, this.name, this.slug, this.published, this.contextVersion);
   }
 
   @java.lang.Override
@@ -107,6 +133,8 @@ public final class ContextDetailBoundRulesItem {
 
     private Optional<Boolean> published = Optional.empty();
 
+    private Optional<String> contextVersion = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -118,6 +146,7 @@ public final class ContextDetailBoundRulesItem {
       name(other.getName());
       slug(other.getSlug());
       published(other.getPublished());
+      contextVersion(other.getContextVersion());
       return this;
     }
 
@@ -177,8 +206,38 @@ public final class ContextDetailBoundRulesItem {
       return this;
     }
 
+    /**
+     * <p>Version target for this binding: <code>null</code> or <code>latest</code> follows the current published version, a version number (e.g. <code>3</code>) pins that published version, and any other value is a release environment slug resolved at execution time.</p>
+     */
+    @JsonSetter(
+        value = "context_version",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextVersion(Optional<String> contextVersion) {
+      this.contextVersion = contextVersion;
+      return this;
+    }
+
+    public Builder contextVersion(String contextVersion) {
+      this.contextVersion = Optional.ofNullable(contextVersion);
+      return this;
+    }
+
+    public Builder contextVersion(Nullable<String> contextVersion) {
+      if (contextVersion.isNull()) {
+        this.contextVersion = null;
+      }
+      else if (contextVersion.isEmpty()) {
+        this.contextVersion = Optional.empty();
+      }
+      else {
+        this.contextVersion = Optional.of(contextVersion.get());
+      }
+      return this;
+    }
+
     public ContextDetailBoundRulesItem build() {
-      return new ContextDetailBoundRulesItem(id, name, slug, published, additionalProperties);
+      return new ContextDetailBoundRulesItem(id, name, slug, published, contextVersion, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

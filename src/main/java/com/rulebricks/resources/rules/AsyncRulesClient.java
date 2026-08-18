@@ -34,34 +34,35 @@ public class AsyncRulesClient {
   }
 
   /**
-   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration.
+   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> solve(String slug, SolveRulesRequest request) {
-    return this.rawClient.solve(slug, request).thenApply(response -> response.body());
+  public CompletableFuture<Map<String, Object>> solve(String slug, String version,
+      SolveRulesRequest request) {
+    return this.rawClient.solve(slug, version, request).thenApply(response -> response.body());
   }
 
   /**
-   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration.
+   * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> solve(String slug, SolveRulesRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.solve(slug, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<Map<String, Object>> solve(String slug, String version,
+      SolveRulesRequest request, RequestOptions requestOptions) {
+    return this.rawClient.solve(slug, version, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Executes a particular rule against multiple request data payloads provided in a list.
+   * Executes a particular rule against multiple request data payloads provided in a list. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<List<BulkRuleResponseItem>> bulkSolve(String slug,
+  public CompletableFuture<List<BulkRuleResponseItem>> bulkSolve(String slug, String version,
       BulkSolveRulesRequest request) {
-    return this.rawClient.bulkSolve(slug, request).thenApply(response -> response.body());
+    return this.rawClient.bulkSolve(slug, version, request).thenApply(response -> response.body());
   }
 
   /**
-   * Executes a particular rule against multiple request data payloads provided in a list.
+   * Executes a particular rule against multiple request data payloads provided in a list. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<List<BulkRuleResponseItem>> bulkSolve(String slug,
+  public CompletableFuture<List<BulkRuleResponseItem>> bulkSolve(String slug, String version,
       BulkSolveRulesRequest request, RequestOptions requestOptions) {
-    return this.rawClient.bulkSolve(slug, request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.bulkSolve(slug, version, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**

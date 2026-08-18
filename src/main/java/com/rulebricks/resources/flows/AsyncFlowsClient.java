@@ -30,17 +30,18 @@ public class AsyncFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug.
+   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> execute(String slug, ExecuteFlowsRequest request) {
-    return this.rawClient.execute(slug, request).thenApply(response -> response.body());
+  public CompletableFuture<Map<String, Object>> execute(String slug, String version,
+      ExecuteFlowsRequest request) {
+    return this.rawClient.execute(slug, version, request).thenApply(response -> response.body());
   }
 
   /**
-   * Execute a flow by its slug.
+   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> execute(String slug, ExecuteFlowsRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.execute(slug, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<Map<String, Object>> execute(String slug, String version,
+      ExecuteFlowsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.execute(slug, version, request, requestOptions).thenApply(response -> response.body());
   }
 }
