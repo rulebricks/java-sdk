@@ -7,14 +7,25 @@ package com.rulebricks.resources.assets.flows;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
+import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.core.QueryStringMapper;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
+import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
+import com.rulebricks.errors.NotFoundError;
+import com.rulebricks.resources.assets.flows.requests.DeleteFlowRequest;
+import com.rulebricks.resources.assets.flows.requests.ImportFlowRequest;
+import com.rulebricks.resources.assets.flows.requests.ListFlowsRequest;
+import com.rulebricks.resources.assets.flows.requests.PullFlowsRequest;
 import com.rulebricks.types.Error;
 import com.rulebricks.types.FlowDetail;
+import com.rulebricks.types.FlowImportPayload;
+import com.rulebricks.types.FlowImportResponse;
+import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.Override;
@@ -27,6 +38,7 @@ import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
@@ -39,30 +51,55 @@ public class AsyncRawFlowsClient {
   }
 
   /**
-   * List all flows in the organization.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<FlowDetail>>> list() {
-    return list(null);
+    return list(ListFlowsRequest.builder().build());
   }
 
   /**
-   * List all flows in the organization.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<FlowDetail>>> list(
       RequestOptions requestOptions) {
+    return list(ListFlowsRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<FlowDetail>>> list(
+      ListFlowsRequest request) {
+    return list(request,null);
+  }
+
+  /**
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<FlowDetail>>> list(
+      ListFlowsRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("admin/flows/list");if (requestOptions != null) {
+      .addPathSegments("admin/flows/list");if (request.getFolder().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
+      }
+      if (request.getUserGroup().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+      }
+      if (request.getName().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );
       }
-      Request okhttpRequest = new Request.Builder()
+      Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Accept", "application/json")
-        .build();
+        .addHeader("Accept", "application/json");
+      Request okhttpRequest = _requestBuilder.build();
       OkHttpClient client = clientOptions.httpClient();
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -102,4 +139,249 @@ public class AsyncRawFlowsClient {
       });
       return future;
     }
-  }
+
+    /**
+     * Create or update a flow from the Rulebricks Flow Schema (a list of <code>nodes</code> and <code>connections</code>). The server expands the Rulebricks Flow Schema definition into the full flow graph - laying it out, wiring property/control handles, resolving referenced published rules, and backfilling node defaults - so the result both renders in the editor and executes via <code>/flows/{slug}</code> without any manual editing. If <code>id</code> is provided the matching flow is updated; otherwise a new flow is created (<code>id</code>/<code>slug</code> auto-generated). Flows auto-publish unless <code>_publish</code> is set to <code>false</code>.
+     */
+    public CompletableFuture<RulebricksApiHttpResponse<FlowImportResponse>> push(
+        ImportFlowRequest request) {
+      return push(request,null);
+    }
+
+    /**
+     * Create or update a flow from the Rulebricks Flow Schema (a list of <code>nodes</code> and <code>connections</code>). The server expands the Rulebricks Flow Schema definition into the full flow graph - laying it out, wiring property/control handles, resolving referenced published rules, and backfilling node defaults - so the result both renders in the editor and executes via <code>/flows/{slug}</code> without any manual editing. If <code>id</code> is provided the matching flow is updated; otherwise a new flow is created (<code>id</code>/<code>slug</code> auto-generated). Flows auto-publish unless <code>_publish</code> is set to <code>false</code>.
+     */
+    public CompletableFuture<RulebricksApiHttpResponse<FlowImportResponse>> push(
+        ImportFlowRequest request, RequestOptions requestOptions) {
+      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+        .addPathSegments("admin/flows/import");if (requestOptions != null) {
+          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+            httpUrl.addQueryParameter(_key, _value);
+          } );
+        }
+        RequestBody body;
+        try {
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        }
+        catch(JsonProcessingException e) {
+          throw new RulebricksApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+          .url(httpUrl.build())
+          .method("POST", body)
+          .headers(Headers.of(clientOptions.headers(requestOptions)))
+          .addHeader("Content-Type", "application/json")
+          .addHeader("Accept", "application/json")
+          .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+          client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<RulebricksApiHttpResponse<FlowImportResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+          @Override
+          public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            try (ResponseBody responseBody = response.body()) {
+              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+              if (response.isSuccessful()) {
+                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FlowImportResponse.class), response));
+                return;
+              }
+              try {
+                switch (response.code()) {
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  return;
+                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  return;
+                }
+              }
+              catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+              }
+              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+              future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+              return;
+            }
+            catch (IOException e) {
+              future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+            }
+          }
+
+          @Override
+          public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+          }
+        });
+        return future;
+      }
+
+      /**
+       * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<FlowImportPayload>> pull() {
+        return pull(PullFlowsRequest.builder().build());
+      }
+
+      /**
+       * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<FlowImportPayload>> pull(
+          RequestOptions requestOptions) {
+        return pull(PullFlowsRequest.builder().build(),requestOptions);
+      }
+
+      /**
+       * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<FlowImportPayload>> pull(
+          PullFlowsRequest request) {
+        return pull(request,null);
+      }
+
+      /**
+       * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+       */
+      public CompletableFuture<RulebricksApiHttpResponse<FlowImportPayload>> pull(
+          PullFlowsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+          .addPathSegments("admin/flows/export");if (request.getId().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId().get(), false);
+          }
+          if (request.getSlug().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "slug", request.getSlug().get(), false);
+          }
+          if (requestOptions != null) {
+            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+              httpUrl.addQueryParameter(_key, _value);
+            } );
+          }
+          Request.Builder _requestBuilder = new Request.Builder()
+            .url(httpUrl.build())
+            .method("GET", null)
+            .headers(Headers.of(clientOptions.headers(requestOptions)))
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
+          OkHttpClient client = clientOptions.httpClient();
+          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+          }
+          CompletableFuture<RulebricksApiHttpResponse<FlowImportPayload>> future = new CompletableFuture<>();
+          client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+              try (ResponseBody responseBody = response.body()) {
+                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                if (response.isSuccessful()) {
+                  future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FlowImportPayload.class), response));
+                  return;
+                }
+                try {
+                  switch (response.code()) {
+                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                  }
+                }
+                catch (JsonProcessingException ignored) {
+                  // unable to map error response, throwing generic error
+                }
+                Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                return;
+              }
+              catch (IOException e) {
+                future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+              }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+              future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+            }
+          });
+          return future;
+        }
+
+        /**
+         * Delete a specific flow by its ID.
+         */
+        public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
+            DeleteFlowRequest request) {
+          return delete(request,null);
+        }
+
+        /**
+         * Delete a specific flow by its ID.
+         */
+        public CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> delete(
+            DeleteFlowRequest request, RequestOptions requestOptions) {
+          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+            .addPathSegments("admin/flows/delete");if (requestOptions != null) {
+              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                httpUrl.addQueryParameter(_key, _value);
+              } );
+            }
+            RequestBody body;
+            try {
+              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+            }
+            catch(JsonProcessingException e) {
+              throw new RulebricksApiException("Failed to serialize request", e);
+            }
+            Request okhttpRequest = new Request.Builder()
+              .url(httpUrl.build())
+              .method("DELETE", body)
+              .headers(Headers.of(clientOptions.headers(requestOptions)))
+              .addHeader("Content-Type", "application/json")
+              .addHeader("Accept", "application/json")
+              .build();
+            OkHttpClient client = clientOptions.httpClient();
+            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+              client = clientOptions.httpClientWithTimeout(requestOptions);
+            }
+            CompletableFuture<RulebricksApiHttpResponse<SuccessMessage>> future = new CompletableFuture<>();
+            client.newCall(okhttpRequest).enqueue(new Callback() {
+              @Override
+              public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                  String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                  if (response.isSuccessful()) {
+                    future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response));
+                    return;
+                  }
+                  try {
+                    switch (response.code()) {
+                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      return;
+                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      return;
+                      case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      return;
+                    }
+                  }
+                  catch (JsonProcessingException ignored) {
+                    // unable to map error response, throwing generic error
+                  }
+                  Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                  future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                  return;
+                }
+                catch (IOException e) {
+                  future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                }
+              }
+
+              @Override
+              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+              }
+            });
+            return future;
+          }
+        }

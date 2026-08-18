@@ -40,7 +40,7 @@ public final class ContextInstancePendingEvaluation {
 
   private final Optional<String> flowId;
 
-  private final Optional<List<ContextInstancePendingEvaluationWaitingOnItem>> waitingOn;
+  private final Optional<List<ContextWaitingOn>> waitingOn;
 
   private final Optional<OffsetDateTime> createdAt;
 
@@ -50,8 +50,7 @@ public final class ContextInstancePendingEvaluation {
 
   private ContextInstancePendingEvaluation(Optional<ContextInstancePendingEvaluationType> type,
       Optional<String> rule, Optional<String> ruleId, Optional<String> flow,
-      Optional<String> flowId,
-      Optional<List<ContextInstancePendingEvaluationWaitingOnItem>> waitingOn,
+      Optional<String> flowId, Optional<List<ContextWaitingOn>> waitingOn,
       Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> expiresAt,
       Map<String, Object> additionalProperties) {
     this.type = type;
@@ -118,10 +117,10 @@ public final class ContextInstancePendingEvaluation {
   }
 
   /**
-   * @return List of field keys or dependency objects this evaluation is waiting for. Can contain simple strings for direct fields or objects for relationship dependencies.
+   * @return Structured fact and relationship dependencies this evaluation is waiting for.
    */
   @JsonProperty("waiting_on")
-  public Optional<List<ContextInstancePendingEvaluationWaitingOnItem>> getWaitingOn() {
+  public Optional<List<ContextWaitingOn>> getWaitingOn() {
     return waitingOn;
   }
 
@@ -220,7 +219,7 @@ public final class ContextInstancePendingEvaluation {
 
     private Optional<String> flowId = Optional.empty();
 
-    private Optional<List<ContextInstancePendingEvaluationWaitingOnItem>> waitingOn = Optional.empty();
+    private Optional<List<ContextWaitingOn>> waitingOn = Optional.empty();
 
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
@@ -382,19 +381,18 @@ public final class ContextInstancePendingEvaluation {
     }
 
     /**
-     * <p>List of field keys or dependency objects this evaluation is waiting for. Can contain simple strings for direct fields or objects for relationship dependencies.</p>
+     * <p>Structured fact and relationship dependencies this evaluation is waiting for.</p>
      */
     @JsonSetter(
         value = "waiting_on",
         nulls = Nulls.SKIP
     )
-    public Builder waitingOn(
-        Optional<List<ContextInstancePendingEvaluationWaitingOnItem>> waitingOn) {
+    public Builder waitingOn(Optional<List<ContextWaitingOn>> waitingOn) {
       this.waitingOn = waitingOn;
       return this;
     }
 
-    public Builder waitingOn(List<ContextInstancePendingEvaluationWaitingOnItem> waitingOn) {
+    public Builder waitingOn(List<ContextWaitingOn> waitingOn) {
       this.waitingOn = Optional.ofNullable(waitingOn);
       return this;
     }

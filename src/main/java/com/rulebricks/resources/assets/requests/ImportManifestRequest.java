@@ -52,7 +52,7 @@ public final class ImportManifestRequest {
   }
 
   /**
-   * @return The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.
+   * @return The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads. A compressed manifest is also accepted: the JSON array produced by the compress-json library (for example, the contents of a compressed .rbm file exported with <code>compress: true</code>); it is detected and decompressed automatically.
    */
   @JsonProperty("manifest")
   public ImportManifestRequestManifest getManifest() {
@@ -114,7 +114,7 @@ public final class ImportManifestRequest {
 
   public interface ManifestStage {
     /**
-     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads. A compressed manifest is also accepted: the JSON array produced by the compress-json library (for example, the contents of a compressed .rbm file exported with <code>compress: true</code>); it is detected and decompressed automatically.</p>
      */
     _FinalStage manifest(@NotNull ImportManifestRequestManifest manifest);
 
@@ -180,8 +180,8 @@ public final class ImportManifestRequest {
     }
 
     /**
-     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
-     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads. A compressed manifest is also accepted: the JSON array produced by the compress-json library (for example, the contents of a compressed .rbm file exported with <code>compress: true</code>); it is detected and decompressed automatically.</p>
+     * <p>The RBM manifest object containing assets to import. Asset objects inside the manifest intentionally preserve <code>.rbm</code>/database casing so exported manifests can be imported without rewriting asset payloads. A compressed manifest is also accepted: the JSON array produced by the compress-json library (for example, the contents of a compressed .rbm file exported with <code>compress: true</code>); it is detected and decompressed automatically.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

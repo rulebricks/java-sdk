@@ -13,6 +13,8 @@ import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.ConflictError;
+import com.rulebricks.errors.ForbiddenError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.contexts.relationships.requests.CreateRelationshipRequest;
@@ -159,7 +161,9 @@ public class RawRelationshipsClient {
           try {
             switch (response.code()) {
               case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             }
           }
@@ -231,6 +235,7 @@ public class RawRelationshipsClient {
             }
             try {
               switch (response.code()) {
+                case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               }

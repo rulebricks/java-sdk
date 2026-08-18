@@ -14,6 +14,8 @@ public final class UpdateContextRequestOnSchemaMismatch {
 
   public static final UpdateContextRequestOnSchemaMismatch IGNORE = new UpdateContextRequestOnSchemaMismatch(Value.IGNORE, "ignore");
 
+  public static final UpdateContextRequestOnSchemaMismatch STORE = new UpdateContextRequestOnSchemaMismatch(Value.STORE, "store");
+
   private final Value value;
 
   private final String string;
@@ -50,6 +52,8 @@ public final class UpdateContextRequestOnSchemaMismatch {
         return visitor.visitReject();
       case IGNORE:
         return visitor.visitIgnore();
+      case STORE:
+        return visitor.visitStore();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -65,6 +69,8 @@ public final class UpdateContextRequestOnSchemaMismatch {
         return REJECT;
       case "ignore":
         return IGNORE;
+      case "store":
+        return STORE;
       default:
         return new UpdateContextRequestOnSchemaMismatch(Value.UNKNOWN, value);
     }
@@ -75,6 +81,8 @@ public final class UpdateContextRequestOnSchemaMismatch {
 
     REJECT,
 
+    STORE,
+
     UNKNOWN
   }
 
@@ -82,6 +90,8 @@ public final class UpdateContextRequestOnSchemaMismatch {
     T visitIgnore();
 
     T visitReject();
+
+    T visitStore();
 
     T visitUnknown(String unknownType);
   }

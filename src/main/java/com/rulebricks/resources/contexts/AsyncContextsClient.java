@@ -9,23 +9,24 @@ import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
 import com.rulebricks.resources.contexts.objects.AsyncObjectsClient;
 import com.rulebricks.resources.contexts.relationships.AsyncRelationshipsClient;
+import com.rulebricks.resources.contexts.requests.BulkIngestContextsRequest;
 import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
 import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
-import com.rulebricks.resources.contexts.requests.ExecuteContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
+import com.rulebricks.types.ContextBatchResponse;
 import com.rulebricks.types.ContextInstanceHistory;
 import com.rulebricks.types.ContextInstancePendingResponse;
 import com.rulebricks.types.ContextInstanceState;
 import com.rulebricks.types.DeleteContextInstanceResponse;
-import com.rulebricks.types.SolveContextFlowResponse;
-import com.rulebricks.types.SolveContextRuleResponse;
 import com.rulebricks.types.SubmitContextDataResponse;
+import java.lang.Object;
 import java.lang.String;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -194,23 +195,7 @@ public class AsyncContextsClient {
   }
 
   /**
-   * Execute a specific rule using the context instance's state as input.
-   */
-  public CompletableFuture<SolveContextRuleResponse> solve(String slug, String instance,
-      String ruleSlug, SolveContextsRequest request) {
-    return this.rawClient.solve(slug, instance, ruleSlug, request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Execute a specific rule using the context instance's state as input.
-   */
-  public CompletableFuture<SolveContextRuleResponse> solve(String slug, String instance,
-      String ruleSlug, SolveContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.solve(slug, instance, ruleSlug, request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Trigger re-evaluation of all bound rules and flows for the instance.
+   * Re-evaluate registered pending rule and flow executions for this instance after their fact or relationship dependencies may have become available. This does not run every bound asset.
    */
   public CompletableFuture<CascadeContextResponse> cascade(String slug, String instance,
       CascadeContextsRequest request) {
@@ -218,7 +203,7 @@ public class AsyncContextsClient {
   }
 
   /**
-   * Trigger re-evaluation of all bound rules and flows for the instance.
+   * Re-evaluate registered pending rule and flow executions for this instance after their fact or relationship dependencies may have become available. This does not run every bound asset.
    */
   public CompletableFuture<CascadeContextResponse> cascade(String slug, String instance,
       CascadeContextsRequest request, RequestOptions requestOptions) {
@@ -226,19 +211,35 @@ public class AsyncContextsClient {
   }
 
   /**
-   * Execute a specific flow using the context instance's state as input.
+   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
    */
-  public CompletableFuture<SolveContextFlowResponse> execute(String slug, String instance,
-      String flowSlug, ExecuteContextsRequest request) {
-    return this.rawClient.execute(slug, instance, flowSlug, request).thenApply(response -> response.body());
+  public CompletableFuture<ContextBatchResponse> bulkIngest(String slug,
+      List<Map<String, Object>> body) {
+    return this.rawClient.bulkIngest(slug, body).thenApply(response -> response.body());
   }
 
   /**
-   * Execute a specific flow using the context instance's state as input.
+   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
    */
-  public CompletableFuture<SolveContextFlowResponse> execute(String slug, String instance,
-      String flowSlug, ExecuteContextsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.execute(slug, instance, flowSlug, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<ContextBatchResponse> bulkIngest(String slug,
+      List<Map<String, Object>> body, RequestOptions requestOptions) {
+    return this.rawClient.bulkIngest(slug, body, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
+   */
+  public CompletableFuture<ContextBatchResponse> bulkIngest(String slug,
+      BulkIngestContextsRequest request) {
+    return this.rawClient.bulkIngest(slug, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
+   */
+  public CompletableFuture<ContextBatchResponse> bulkIngest(String slug,
+      BulkIngestContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.bulkIngest(slug, request, requestOptions).thenApply(response -> response.body());
   }
 
   public AsyncObjectsClient objects() {

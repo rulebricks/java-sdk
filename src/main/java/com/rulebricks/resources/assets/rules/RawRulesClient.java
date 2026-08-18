@@ -222,28 +222,28 @@ public class RawRulesClient {
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list() {
           return list(ListRulesRequest.builder().build());
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(RequestOptions requestOptions) {
           return list(ListRulesRequest.builder().build(),requestOptions);
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request) {
           return list(request,null);
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request,
             RequestOptions requestOptions) {
@@ -254,6 +254,9 @@ public class RawRulesClient {
             }
             if (request.getUserGroup().isPresent()) {
               QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+            }
+            if (request.getName().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
             }
             if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {

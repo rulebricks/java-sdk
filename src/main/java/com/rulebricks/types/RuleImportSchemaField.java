@@ -122,7 +122,7 @@ public final class RuleImportSchemaField {
   }
 
   /**
-   * @return Prefix used to scope available dynamic values for this field.
+   * @return Prefix used to scope available vocabulary values for this field.
    */
   @JsonProperty("valuesPrefix")
   public Optional<String> getValuesPrefix() {
@@ -228,7 +228,7 @@ public final class RuleImportSchemaField {
     _FinalStage valuesOnly(Boolean valuesOnly);
 
     /**
-     * <p>Prefix used to scope available dynamic values for this field.</p>
+     * <p>Prefix used to scope available vocabulary values for this field.</p>
      */
     _FinalStage valuesPrefix(Optional<String> valuesPrefix);
 
@@ -323,7 +323,7 @@ public final class RuleImportSchemaField {
     }
 
     /**
-     * <p>Prefix used to scope available dynamic values for this field.</p>
+     * <p>Prefix used to scope available vocabulary values for this field.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -333,7 +333,7 @@ public final class RuleImportSchemaField {
     }
 
     /**
-     * <p>Prefix used to scope available dynamic values for this field.</p>
+     * <p>Prefix used to scope available vocabulary values for this field.</p>
      */
     @java.lang.Override
     @JsonSetter(

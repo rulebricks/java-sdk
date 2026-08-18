@@ -33,6 +33,8 @@ public final class Folder {
 
   private final Optional<String> description;
 
+  private final Optional<FolderType> type;
+
   private final Optional<OffsetDateTime> createdAt;
 
   private final Optional<OffsetDateTime> updatedAt;
@@ -42,11 +44,13 @@ public final class Folder {
   private final Map<String, Object> additionalProperties;
 
   private Folder(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
-      Optional<List<String>> userGroups, Map<String, Object> additionalProperties) {
+      Optional<FolderType> type, Optional<OffsetDateTime> createdAt,
+      Optional<OffsetDateTime> updatedAt, Optional<List<String>> userGroups,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.type = type;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.userGroups = userGroups;
@@ -75,6 +79,14 @@ public final class Folder {
   @JsonProperty("description")
   public Optional<String> getDescription() {
     return description;
+  }
+
+  /**
+   * @return The type of assets the folder organizes.
+   */
+  @JsonProperty("type")
+  public Optional<FolderType> getType() {
+    return type;
   }
 
   /**
@@ -113,12 +125,12 @@ public final class Folder {
   }
 
   private boolean equalTo(Folder other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && userGroups.equals(other.userGroups);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && type.equals(other.type) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && userGroups.equals(other.userGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.createdAt, this.updatedAt, this.userGroups);
+    return Objects.hash(this.id, this.name, this.description, this.type, this.createdAt, this.updatedAt, this.userGroups);
   }
 
   @java.lang.Override
@@ -140,6 +152,8 @@ public final class Folder {
 
     private Optional<String> description = Optional.empty();
 
+    private Optional<FolderType> type = Optional.empty();
+
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
@@ -156,6 +170,7 @@ public final class Folder {
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
+      type(other.getType());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       userGroups(other.getUserGroups());
@@ -214,6 +229,23 @@ public final class Folder {
     }
 
     /**
+     * <p>The type of assets the folder organizes.</p>
+     */
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public Builder type(Optional<FolderType> type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder type(FolderType type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    /**
      * <p>Timestamp of when the folder was created.</p>
      */
     @JsonSetter(
@@ -265,7 +297,7 @@ public final class Folder {
     }
 
     public Folder build() {
-      return new Folder(id, name, description, createdAt, updatedAt, userGroups, additionalProperties);
+      return new Folder(id, name, description, type, createdAt, updatedAt, userGroups, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -9,6 +9,8 @@ import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.tests.flows.requests.CreateFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.DeleteFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.ListFlowsRequest;
+import com.rulebricks.resources.tests.flows.requests.RunFlowsRequest;
+import com.rulebricks.types.RunTestsResponse;
 import com.rulebricks.types.Test;
 import java.lang.String;
 import java.util.List;
@@ -99,5 +101,19 @@ public class FlowsClient {
   public Test delete(String slug, String testId, DeleteFlowsRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.delete(slug, testId, request, requestOptions).body();
+  }
+
+  /**
+   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+   */
+  public RunTestsResponse run(String slug, RunFlowsRequest request) {
+    return this.rawClient.run(slug, request).body();
+  }
+
+  /**
+   * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+   */
+  public RunTestsResponse run(String slug, RunFlowsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.run(slug, request, requestOptions).body();
   }
 }

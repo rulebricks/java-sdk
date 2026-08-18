@@ -63,7 +63,7 @@ public final class SchemaField {
   }
 
   /**
-   * @return The unique key for this field.
+   * @return The unique key for this field. Nested facts use dot-separated identifiers.
    */
   @JsonProperty("key")
   public Optional<String> getKey() {
@@ -218,7 +218,7 @@ public final class SchemaField {
     }
 
     /**
-     * <p>The unique key for this field.</p>
+     * <p>The unique key for this field. Nested facts use dot-separated identifiers.</p>
      */
     @JsonSetter(
         value = "key",

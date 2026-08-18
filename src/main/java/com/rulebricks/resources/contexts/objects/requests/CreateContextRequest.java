@@ -6,25 +6,20 @@ package com.rulebricks.resources.contexts.objects.requests;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.rulebricks.core.Nullable;
-import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.resources.contexts.objects.types.CreateContextRequestOnSchemaMismatch;
-import com.rulebricks.resources.contexts.objects.types.CreateContextRequestSchemaItem;
+import com.rulebricks.types.ContextSchema;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,11 +32,9 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateContextRequest {
   private final String name;
 
-  private final Optional<String> slug;
-
   private final Optional<String> description;
 
-  private final List<CreateContextRequestSchemaItem> schema;
+  private final ContextSchema schema;
 
   private final String identityFact;
 
@@ -53,21 +46,14 @@ public final class CreateContextRequest {
 
   private final Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch;
 
-  private final Optional<String> webhookOnSolve;
-
-  private final Optional<String> webhookOnExpire;
-
   private final Map<String, Object> additionalProperties;
 
-  private CreateContextRequest(String name, Optional<String> slug, Optional<String> description,
-      List<CreateContextRequestSchemaItem> schema, String identityFact,
-      Optional<Boolean> autoExecuteDecisions, Optional<Integer> ttlSeconds,
+  private CreateContextRequest(String name, Optional<String> description, ContextSchema schema,
+      String identityFact, Optional<Boolean> autoExecuteDecisions, Optional<Integer> ttlSeconds,
       Optional<Integer> historyLimit,
       Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch,
-      Optional<String> webhookOnSolve, Optional<String> webhookOnExpire,
       Map<String, Object> additionalProperties) {
     this.name = name;
-    this.slug = slug;
     this.description = description;
     this.schema = schema;
     this.identityFact = identityFact;
@@ -75,25 +61,15 @@ public final class CreateContextRequest {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
-    this.webhookOnSolve = webhookOnSolve;
-    this.webhookOnExpire = webhookOnExpire;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The name of the context.
+   * @return The name of the context. The context's slug is generated from it (suffixed on collision).
    */
   @JsonProperty("name")
   public String getName() {
     return name;
-  }
-
-  /**
-   * @return Optional custom slug. Auto-generated if not provided.
-   */
-  @JsonProperty("slug")
-  public Optional<String> getSlug() {
-    return slug;
   }
 
   /**
@@ -105,15 +81,15 @@ public final class CreateContextRequest {
   }
 
   /**
-   * @return Initial schema fields for the context. At least one field must be defined.
+   * @return The context's schema: an object with <code>base</code> (stored facts; at least one required) and optional <code>derived</code> (expression-computed facts) field arrays.
    */
   @JsonProperty("schema")
-  public List<CreateContextRequestSchemaItem> getSchema() {
+  public ContextSchema getSchema() {
     return schema;
   }
 
   /**
-   * @return The field key to use as the unique identifier for instances. Must be a key from the schema.
+   * @return The fact key to use as the unique identifier for instances. Must be a key from schema.base.
    */
   @JsonProperty("identity_fact")
   public String getIdentityFact() {
@@ -129,13 +105,10 @@ public final class CreateContextRequest {
   }
 
   /**
-   * @return Time-to-live in seconds for live context instances. Instances expire after this duration.
+   * @return Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration; each write extends the expiry.
    */
-  @JsonIgnore
+  @JsonProperty("ttl_seconds")
   public Optional<Integer> getTtlSeconds() {
-    if (ttlSeconds == null) {
-      return Optional.empty();
-    }
     return ttlSeconds;
   }
 
@@ -148,36 +121,11 @@ public final class CreateContextRequest {
   }
 
   /**
-   * @return How to handle fields that don't match the schema.
+   * @return How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.
    */
   @JsonProperty("on_schema_mismatch")
   public Optional<CreateContextRequestOnSchemaMismatch> getOnSchemaMismatch() {
     return onSchemaMismatch;
-  }
-
-  /**
-   * @return Webhook URL called when a rule or flow successfully solves.
-   */
-  @JsonProperty("webhook_on_solve")
-  public Optional<String> getWebhookOnSolve() {
-    return webhookOnSolve;
-  }
-
-  /**
-   * @return Webhook URL called when a live context expires due to TTL.
-   */
-  @JsonProperty("webhook_on_expire")
-  public Optional<String> getWebhookOnExpire() {
-    return webhookOnExpire;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("ttl_seconds")
-  private Optional<Integer> _getTtlSeconds() {
-    return ttlSeconds;
   }
 
   @java.lang.Override
@@ -192,12 +140,12 @@ public final class CreateContextRequest {
   }
 
   private boolean equalTo(CreateContextRequest other) {
-    return name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && webhookOnSolve.equals(other.webhookOnSolve) && webhookOnExpire.equals(other.webhookOnExpire);
+    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.slug, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.webhookOnSolve, this.webhookOnExpire);
+    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
   }
 
   @java.lang.Override
@@ -211,16 +159,23 @@ public final class CreateContextRequest {
 
   public interface NameStage {
     /**
-     * <p>The name of the context.</p>
+     * <p>The name of the context. The context's slug is generated from it (suffixed on collision).</p>
      */
-    IdentityFactStage name(@NotNull String name);
+    SchemaStage name(@NotNull String name);
 
     Builder from(CreateContextRequest other);
   }
 
+  public interface SchemaStage {
+    /**
+     * <p>The context's schema: an object with <code>base</code> (stored facts; at least one required) and optional <code>derived</code> (expression-computed facts) field arrays.</p>
+     */
+    IdentityFactStage schema(@NotNull ContextSchema schema);
+  }
+
   public interface IdentityFactStage {
     /**
-     * <p>The field key to use as the unique identifier for instances. Must be a key from the schema.</p>
+     * <p>The fact key to use as the unique identifier for instances. Must be a key from schema.base.</p>
      */
     _FinalStage identityFact(@NotNull String identityFact);
   }
@@ -233,27 +188,11 @@ public final class CreateContextRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Optional custom slug. Auto-generated if not provided.</p>
-     */
-    _FinalStage slug(Optional<String> slug);
-
-    _FinalStage slug(String slug);
-
-    /**
      * <p>The description of the context.</p>
      */
     _FinalStage description(Optional<String> description);
 
     _FinalStage description(String description);
-
-    /**
-     * <p>Initial schema fields for the context. At least one field must be defined.</p>
-     */
-    _FinalStage schema(List<CreateContextRequestSchemaItem> schema);
-
-    _FinalStage addSchema(CreateContextRequestSchemaItem schema);
-
-    _FinalStage addAllSchema(List<CreateContextRequestSchemaItem> schema);
 
     /**
      * <p>When true (default), bound rules and flows automatically execute when their inputs are satisfied.</p>
@@ -263,13 +202,11 @@ public final class CreateContextRequest {
     _FinalStage autoExecuteDecisions(Boolean autoExecuteDecisions);
 
     /**
-     * <p>Time-to-live in seconds for live context instances. Instances expire after this duration.</p>
+     * <p>Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration; each write extends the expiry.</p>
      */
     _FinalStage ttlSeconds(Optional<Integer> ttlSeconds);
 
     _FinalStage ttlSeconds(Integer ttlSeconds);
-
-    _FinalStage ttlSeconds(Nullable<Integer> ttlSeconds);
 
     /**
      * <p>Maximum number of history entries to retain per field.</p>
@@ -279,38 +216,22 @@ public final class CreateContextRequest {
     _FinalStage historyLimit(Integer historyLimit);
 
     /**
-     * <p>How to handle fields that don't match the schema.</p>
+     * <p>How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.</p>
      */
     _FinalStage onSchemaMismatch(Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch);
 
     _FinalStage onSchemaMismatch(CreateContextRequestOnSchemaMismatch onSchemaMismatch);
-
-    /**
-     * <p>Webhook URL called when a rule or flow successfully solves.</p>
-     */
-    _FinalStage webhookOnSolve(Optional<String> webhookOnSolve);
-
-    _FinalStage webhookOnSolve(String webhookOnSolve);
-
-    /**
-     * <p>Webhook URL called when a live context expires due to TTL.</p>
-     */
-    _FinalStage webhookOnExpire(Optional<String> webhookOnExpire);
-
-    _FinalStage webhookOnExpire(String webhookOnExpire);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements NameStage, IdentityFactStage, _FinalStage {
+  public static final class Builder implements NameStage, SchemaStage, IdentityFactStage, _FinalStage {
     private String name;
 
+    private ContextSchema schema;
+
     private String identityFact;
-
-    private Optional<String> webhookOnExpire = Optional.empty();
-
-    private Optional<String> webhookOnSolve = Optional.empty();
 
     private Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
@@ -320,11 +241,7 @@ public final class CreateContextRequest {
 
     private Optional<Boolean> autoExecuteDecisions = Optional.empty();
 
-    private List<CreateContextRequestSchemaItem> schema = new ArrayList<>();
-
     private Optional<String> description = Optional.empty();
-
-    private Optional<String> slug = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -335,7 +252,6 @@ public final class CreateContextRequest {
     @java.lang.Override
     public Builder from(CreateContextRequest other) {
       name(other.getName());
-      slug(other.getSlug());
       description(other.getDescription());
       schema(other.getSchema());
       identityFact(other.getIdentityFact());
@@ -343,26 +259,36 @@ public final class CreateContextRequest {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
-      webhookOnSolve(other.getWebhookOnSolve());
-      webhookOnExpire(other.getWebhookOnExpire());
       return this;
     }
 
     /**
-     * <p>The name of the context.</p>
-     * <p>The name of the context.</p>
+     * <p>The name of the context. The context's slug is generated from it (suffixed on collision).</p>
+     * <p>The name of the context. The context's slug is generated from it (suffixed on collision).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("name")
-    public IdentityFactStage name(@NotNull String name) {
+    public SchemaStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
       return this;
     }
 
     /**
-     * <p>The field key to use as the unique identifier for instances. Must be a key from the schema.</p>
-     * <p>The field key to use as the unique identifier for instances. Must be a key from the schema.</p>
+     * <p>The context's schema: an object with <code>base</code> (stored facts; at least one required) and optional <code>derived</code> (expression-computed facts) field arrays.</p>
+     * <p>The context's schema: an object with <code>base</code> (stored facts; at least one required) and optional <code>derived</code> (expression-computed facts) field arrays.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("schema")
+    public IdentityFactStage schema(@NotNull ContextSchema schema) {
+      this.schema = Objects.requireNonNull(schema, "schema must not be null");
+      return this;
+    }
+
+    /**
+     * <p>The fact key to use as the unique identifier for instances. Must be a key from schema.base.</p>
+     * <p>The fact key to use as the unique identifier for instances. Must be a key from schema.base.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -373,53 +299,7 @@ public final class CreateContextRequest {
     }
 
     /**
-     * <p>Webhook URL called when a live context expires due to TTL.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage webhookOnExpire(String webhookOnExpire) {
-      this.webhookOnExpire = Optional.ofNullable(webhookOnExpire);
-      return this;
-    }
-
-    /**
-     * <p>Webhook URL called when a live context expires due to TTL.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "webhook_on_expire",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage webhookOnExpire(Optional<String> webhookOnExpire) {
-      this.webhookOnExpire = webhookOnExpire;
-      return this;
-    }
-
-    /**
-     * <p>Webhook URL called when a rule or flow successfully solves.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage webhookOnSolve(String webhookOnSolve) {
-      this.webhookOnSolve = Optional.ofNullable(webhookOnSolve);
-      return this;
-    }
-
-    /**
-     * <p>Webhook URL called when a rule or flow successfully solves.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "webhook_on_solve",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage webhookOnSolve(Optional<String> webhookOnSolve) {
-      this.webhookOnSolve = webhookOnSolve;
-      return this;
-    }
-
-    /**
-     * <p>How to handle fields that don't match the schema.</p>
+     * <p>How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -429,7 +309,7 @@ public final class CreateContextRequest {
     }
 
     /**
-     * <p>How to handle fields that don't match the schema.</p>
+     * <p>How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -466,25 +346,7 @@ public final class CreateContextRequest {
     }
 
     /**
-     * <p>Time-to-live in seconds for live context instances. Instances expire after this duration.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage ttlSeconds(Nullable<Integer> ttlSeconds) {
-      if (ttlSeconds.isNull()) {
-        this.ttlSeconds = null;
-      }
-      else if (ttlSeconds.isEmpty()) {
-        this.ttlSeconds = Optional.empty();
-      }
-      else {
-        this.ttlSeconds = Optional.of(ttlSeconds.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>Time-to-live in seconds for live context instances. Instances expire after this duration.</p>
+     * <p>Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration; each write extends the expiry.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -494,7 +356,7 @@ public final class CreateContextRequest {
     }
 
     /**
-     * <p>Time-to-live in seconds for live context instances. Instances expire after this duration.</p>
+     * <p>Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration; each write extends the expiry.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -530,44 +392,6 @@ public final class CreateContextRequest {
     }
 
     /**
-     * <p>Initial schema fields for the context. At least one field must be defined.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage addAllSchema(List<CreateContextRequestSchemaItem> schema) {
-      if (schema != null) {
-        this.schema.addAll(schema);
-      }
-      return this;
-    }
-
-    /**
-     * <p>Initial schema fields for the context. At least one field must be defined.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage addSchema(CreateContextRequestSchemaItem schema) {
-      this.schema.add(schema);
-      return this;
-    }
-
-    /**
-     * <p>Initial schema fields for the context. At least one field must be defined.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "schema",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage schema(List<CreateContextRequestSchemaItem> schema) {
-      this.schema.clear();
-      if (schema != null) {
-        this.schema.addAll(schema);
-      }
-      return this;
-    }
-
-    /**
      * <p>The description of the context.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -590,32 +414,9 @@ public final class CreateContextRequest {
       return this;
     }
 
-    /**
-     * <p>Optional custom slug. Auto-generated if not provided.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage slug(String slug) {
-      this.slug = Optional.ofNullable(slug);
-      return this;
-    }
-
-    /**
-     * <p>Optional custom slug. Auto-generated if not provided.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "slug",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage slug(Optional<String> slug) {
-      this.slug = slug;
-      return this;
-    }
-
     @java.lang.Override
     public CreateContextRequest build() {
-      return new CreateContextRequest(name, slug, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, webhookOnSolve, webhookOnExpire, additionalProperties);
+      return new CreateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
     }
 
     @java.lang.Override

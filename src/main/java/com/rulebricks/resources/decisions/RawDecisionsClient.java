@@ -14,6 +14,7 @@ import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
+import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.decisions.requests.QueryDecisionsRequest;
 import com.rulebricks.types.DecisionLogResponse;
 import com.rulebricks.types.Error;
@@ -68,14 +69,35 @@ public class RawDecisionsClient {
       if (request.getRules().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "rules", request.getRules().get(), false);
       }
+      if (request.getFlows().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "flows", request.getFlows().get(), false);
+      }
+      if (request.getContexts().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "contexts", request.getContexts().get(), false);
+      }
+      if (request.getTrace().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "trace", request.getTrace().get(), false);
+      }
       if (request.getStatuses().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "statuses", request.getStatuses().get(), false);
+      }
+      if (request.getIncludeTraces().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "include_traces", request.getIncludeTraces().get(), false);
+      }
+      if (request.getItemFilter().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "item_filter", request.getItemFilter().get(), false);
       }
       if (request.getStart().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "start", request.getStart().get(), false);
       }
       if (request.getEnd().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "end", request.getEnd().get(), false);
+      }
+      if (request.getSort().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "sort", request.getSort().get(), false);
+      }
+      if (request.getOrder().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
       }
       if (request.getCursor().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "cursor", request.getCursor().get(), false);
@@ -85,9 +107,6 @@ public class RawDecisionsClient {
       }
       if (request.getCount().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "count", request.getCount().get(), false);
-      }
-      if (request.getSlug().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "slug", request.getSlug().get(), false);
       }
       if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -114,6 +133,7 @@ public class RawDecisionsClient {
           switch (response.code()) {
             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }
         catch (JsonProcessingException ignored) {

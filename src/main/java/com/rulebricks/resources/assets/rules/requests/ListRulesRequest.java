@@ -29,17 +29,20 @@ public final class ListRulesRequest {
 
   private final Optional<String> userGroup;
 
+  private final Optional<String> name;
+
   private final Map<String, Object> additionalProperties;
 
   private ListRulesRequest(Optional<String> folder, Optional<String> userGroup,
-      Map<String, Object> additionalProperties) {
+      Optional<String> name, Map<String, Object> additionalProperties) {
     this.folder = folder;
     this.userGroup = userGroup;
+    this.name = name;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Filter rules by folder name or folder ID
+   * @return Filter results by folder name or folder ID.
    */
   @JsonProperty("folder")
   public Optional<String> getFolder() {
@@ -47,11 +50,19 @@ public final class ListRulesRequest {
   }
 
   /**
-   * @return Filter rules by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.
+   * @return Filter results by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.
    */
   @JsonProperty("user_group")
   public Optional<String> getUserGroup() {
     return userGroup;
+  }
+
+  /**
+   * @return Filter results by name using a case-insensitive substring match.
+   */
+  @JsonProperty("name")
+  public Optional<String> getName() {
+    return name;
   }
 
   @java.lang.Override
@@ -66,12 +77,12 @@ public final class ListRulesRequest {
   }
 
   private boolean equalTo(ListRulesRequest other) {
-    return folder.equals(other.folder) && userGroup.equals(other.userGroup);
+    return folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.folder, this.userGroup);
+    return Objects.hash(this.folder, this.userGroup, this.name);
   }
 
   @java.lang.Override
@@ -91,6 +102,8 @@ public final class ListRulesRequest {
 
     private Optional<String> userGroup = Optional.empty();
 
+    private Optional<String> name = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -100,11 +113,12 @@ public final class ListRulesRequest {
     public Builder from(ListRulesRequest other) {
       folder(other.getFolder());
       userGroup(other.getUserGroup());
+      name(other.getName());
       return this;
     }
 
     /**
-     * <p>Filter rules by folder name or folder ID</p>
+     * <p>Filter results by folder name or folder ID.</p>
      */
     @JsonSetter(
         value = "folder",
@@ -121,7 +135,7 @@ public final class ListRulesRequest {
     }
 
     /**
-     * <p>Filter rules by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.</p>
+     * <p>Filter results by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.</p>
      */
     @JsonSetter(
         value = "user_group",
@@ -137,8 +151,25 @@ public final class ListRulesRequest {
       return this;
     }
 
+    /**
+     * <p>Filter results by name using a case-insensitive substring match.</p>
+     */
+    @JsonSetter(
+        value = "name",
+        nulls = Nulls.SKIP
+    )
+    public Builder name(Optional<String> name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder name(String name) {
+      this.name = Optional.ofNullable(name);
+      return this;
+    }
+
     public ListRulesRequest build() {
-      return new ListRulesRequest(folder, userGroup, additionalProperties);
+      return new ListRulesRequest(folder, userGroup, name, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

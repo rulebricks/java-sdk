@@ -22,6 +22,8 @@ public final class ContextSchemaFieldType {
 
   public static final ContextSchemaFieldType DATE = new ContextSchemaFieldType(Value.DATE, "date");
 
+  public static final ContextSchemaFieldType OBJECT = new ContextSchemaFieldType(Value.OBJECT, "object");
+
   private final Value value;
 
   private final String string;
@@ -66,6 +68,8 @@ public final class ContextSchemaFieldType {
         return visitor.visitBoolean();
       case DATE:
         return visitor.visitDate();
+      case OBJECT:
+        return visitor.visitObject();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -89,6 +93,8 @@ public final class ContextSchemaFieldType {
         return BOOLEAN;
       case "date":
         return DATE;
+      case "object":
+        return OBJECT;
       default:
         return new ContextSchemaFieldType(Value.UNKNOWN, value);
     }
@@ -105,6 +111,8 @@ public final class ContextSchemaFieldType {
 
     LIST,
 
+    OBJECT,
+
     FUNCTION,
 
     UNKNOWN
@@ -120,6 +128,8 @@ public final class ContextSchemaFieldType {
     T visitDate();
 
     T visitList();
+
+    T visitObject();
 
     T visitFunction();
 

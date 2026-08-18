@@ -10,6 +10,8 @@ import com.rulebricks.resources.assets.AsyncAssetsClient;
 import com.rulebricks.resources.contexts.AsyncContextsClient;
 import com.rulebricks.resources.decisions.AsyncDecisionsClient;
 import com.rulebricks.resources.flows.AsyncFlowsClient;
+import com.rulebricks.resources.infra.AsyncInfraClient;
+import com.rulebricks.resources.objects.AsyncObjectsClient;
 import com.rulebricks.resources.rules.AsyncRulesClient;
 import com.rulebricks.resources.tests.AsyncTestsClient;
 import com.rulebricks.resources.users.AsyncUsersClient;
@@ -21,6 +23,8 @@ public class AsyncRulebricksApiClient {
 
   protected final Supplier<AsyncRulesClient> rulesClient;
 
+  protected final Supplier<AsyncInfraClient> infraClient;
+
   protected final Supplier<AsyncFlowsClient> flowsClient;
 
   protected final Supplier<AsyncDecisionsClient> decisionsClient;
@@ -31,6 +35,8 @@ public class AsyncRulebricksApiClient {
 
   protected final Supplier<AsyncValuesClient> valuesClient;
 
+  protected final Supplier<AsyncObjectsClient> objectsClient;
+
   protected final Supplier<AsyncContextsClient> contextsClient;
 
   protected final Supplier<AsyncTestsClient> testsClient;
@@ -38,17 +44,23 @@ public class AsyncRulebricksApiClient {
   public AsyncRulebricksApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rulesClient = Suppliers.memoize(() -> new AsyncRulesClient(clientOptions));
+    this.infraClient = Suppliers.memoize(() -> new AsyncInfraClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new AsyncFlowsClient(clientOptions));
     this.decisionsClient = Suppliers.memoize(() -> new AsyncDecisionsClient(clientOptions));
     this.usersClient = Suppliers.memoize(() -> new AsyncUsersClient(clientOptions));
     this.assetsClient = Suppliers.memoize(() -> new AsyncAssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new AsyncValuesClient(clientOptions));
+    this.objectsClient = Suppliers.memoize(() -> new AsyncObjectsClient(clientOptions));
     this.contextsClient = Suppliers.memoize(() -> new AsyncContextsClient(clientOptions));
     this.testsClient = Suppliers.memoize(() -> new AsyncTestsClient(clientOptions));
   }
 
   public AsyncRulesClient rules() {
     return this.rulesClient.get();
+  }
+
+  public AsyncInfraClient infra() {
+    return this.infraClient.get();
   }
 
   public AsyncFlowsClient flows() {
@@ -69,6 +81,10 @@ public class AsyncRulebricksApiClient {
 
   public AsyncValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public AsyncObjectsClient objects() {
+    return this.objectsClient.get();
   }
 
   public AsyncContextsClient contexts() {

@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -27,23 +29,83 @@ import java.util.Optional;
 public final class ListValuesRequest {
   private final Optional<String> name;
 
+  private final Optional<String> prefix;
+
+  private final Optional<String> type;
+
+  private final Optional<Integer> limit;
+
+  private final Optional<String> cursor;
+
+  private final Optional<String> userGroup;
+
   private final Optional<String> include;
+
+  private final Optional<Boolean> resolve;
 
   private final Map<String, Object> additionalProperties;
 
-  private ListValuesRequest(Optional<String> name, Optional<String> include,
+  private ListValuesRequest(Optional<String> name, Optional<String> prefix, Optional<String> type,
+      Optional<Integer> limit, Optional<String> cursor, Optional<String> userGroup,
+      Optional<String> include, Optional<Boolean> resolve,
       Map<String, Object> additionalProperties) {
     this.name = name;
+    this.prefix = prefix;
+    this.type = type;
+    this.limit = limit;
+    this.cursor = cursor;
+    this.userGroup = userGroup;
     this.include = include;
+    this.resolve = resolve;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Query all dynamic values containing a specific name
+   * @return Query all vocabulary values containing a specific name
    */
   @JsonProperty("name")
   public Optional<String> getName() {
     return name;
+  }
+
+  /**
+   * @return Only return values whose name starts with this collection prefix (e.g. 'Countries.').
+   */
+  @JsonProperty("prefix")
+  public Optional<String> getPrefix() {
+    return prefix;
+  }
+
+  /**
+   * @return Only return values of this type (string, number, boolean, list, date, function).
+   */
+  @JsonProperty("type")
+  public Optional<String> getType() {
+    return type;
+  }
+
+  /**
+   * @return Page size (default 100, max 1000). Providing limit or cursor switches the response to the paginated { data, next_cursor } envelope.
+   */
+  @JsonProperty("limit")
+  public Optional<Integer> getLimit() {
+    return limit;
+  }
+
+  /**
+   * @return Opaque pagination cursor from a previous page's next_cursor.
+   */
+  @JsonProperty("cursor")
+  public Optional<String> getCursor() {
+    return cursor;
+  }
+
+  /**
+   * @return Filter results by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.
+   */
+  @JsonProperty("user_group")
+  public Optional<String> getUserGroup() {
+    return userGroup;
   }
 
   /**
@@ -52,6 +114,14 @@ public final class ListValuesRequest {
   @JsonProperty("include")
   public Optional<String> getInclude() {
     return include;
+  }
+
+  /**
+   * @return By default, payloads containing value-to-value references are returned materialized (references replaced with their resolved values). Pass 'false' to return stored payloads as-is, with { &quot;$rb&quot;: &quot;globalValue&quot;, &quot;id&quot;: &quot;...&quot; } reference markers intact, so the reference graph round-trips.
+   */
+  @JsonProperty("resolve")
+  public Optional<Boolean> getResolve() {
+    return resolve;
   }
 
   @java.lang.Override
@@ -66,12 +136,12 @@ public final class ListValuesRequest {
   }
 
   private boolean equalTo(ListValuesRequest other) {
-    return name.equals(other.name) && include.equals(other.include);
+    return name.equals(other.name) && prefix.equals(other.prefix) && type.equals(other.type) && limit.equals(other.limit) && cursor.equals(other.cursor) && userGroup.equals(other.userGroup) && include.equals(other.include) && resolve.equals(other.resolve);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.include);
+    return Objects.hash(this.name, this.prefix, this.type, this.limit, this.cursor, this.userGroup, this.include, this.resolve);
   }
 
   @java.lang.Override
@@ -89,7 +159,19 @@ public final class ListValuesRequest {
   public static final class Builder {
     private Optional<String> name = Optional.empty();
 
+    private Optional<String> prefix = Optional.empty();
+
+    private Optional<String> type = Optional.empty();
+
+    private Optional<Integer> limit = Optional.empty();
+
+    private Optional<String> cursor = Optional.empty();
+
+    private Optional<String> userGroup = Optional.empty();
+
     private Optional<String> include = Optional.empty();
+
+    private Optional<Boolean> resolve = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -99,12 +181,18 @@ public final class ListValuesRequest {
 
     public Builder from(ListValuesRequest other) {
       name(other.getName());
+      prefix(other.getPrefix());
+      type(other.getType());
+      limit(other.getLimit());
+      cursor(other.getCursor());
+      userGroup(other.getUserGroup());
       include(other.getInclude());
+      resolve(other.getResolve());
       return this;
     }
 
     /**
-     * <p>Query all dynamic values containing a specific name</p>
+     * <p>Query all vocabulary values containing a specific name</p>
      */
     @JsonSetter(
         value = "name",
@@ -117,6 +205,91 @@ public final class ListValuesRequest {
 
     public Builder name(String name) {
       this.name = Optional.ofNullable(name);
+      return this;
+    }
+
+    /**
+     * <p>Only return values whose name starts with this collection prefix (e.g. 'Countries.').</p>
+     */
+    @JsonSetter(
+        value = "prefix",
+        nulls = Nulls.SKIP
+    )
+    public Builder prefix(Optional<String> prefix) {
+      this.prefix = prefix;
+      return this;
+    }
+
+    public Builder prefix(String prefix) {
+      this.prefix = Optional.ofNullable(prefix);
+      return this;
+    }
+
+    /**
+     * <p>Only return values of this type (string, number, boolean, list, date, function).</p>
+     */
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public Builder type(Optional<String> type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder type(String type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    /**
+     * <p>Page size (default 100, max 1000). Providing limit or cursor switches the response to the paginated { data, next_cursor } envelope.</p>
+     */
+    @JsonSetter(
+        value = "limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder limit(Optional<Integer> limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public Builder limit(Integer limit) {
+      this.limit = Optional.ofNullable(limit);
+      return this;
+    }
+
+    /**
+     * <p>Opaque pagination cursor from a previous page's next_cursor.</p>
+     */
+    @JsonSetter(
+        value = "cursor",
+        nulls = Nulls.SKIP
+    )
+    public Builder cursor(Optional<String> cursor) {
+      this.cursor = cursor;
+      return this;
+    }
+
+    public Builder cursor(String cursor) {
+      this.cursor = Optional.ofNullable(cursor);
+      return this;
+    }
+
+    /**
+     * <p>Filter results by user group name or ID. The value is validated against workspace groups. Admin/unrestricted API keys can request any group-specific view; restricted API keys may only filter to one of their assigned groups and receive a 403 when filtering outside those groups.</p>
+     */
+    @JsonSetter(
+        value = "user_group",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroup(Optional<String> userGroup) {
+      this.userGroup = userGroup;
+      return this;
+    }
+
+    public Builder userGroup(String userGroup) {
+      this.userGroup = Optional.ofNullable(userGroup);
       return this;
     }
 
@@ -137,8 +310,25 @@ public final class ListValuesRequest {
       return this;
     }
 
+    /**
+     * <p>By default, payloads containing value-to-value references are returned materialized (references replaced with their resolved values). Pass 'false' to return stored payloads as-is, with { &quot;$rb&quot;: &quot;globalValue&quot;, &quot;id&quot;: &quot;...&quot; } reference markers intact, so the reference graph round-trips.</p>
+     */
+    @JsonSetter(
+        value = "resolve",
+        nulls = Nulls.SKIP
+    )
+    public Builder resolve(Optional<Boolean> resolve) {
+      this.resolve = resolve;
+      return this;
+    }
+
+    public Builder resolve(Boolean resolve) {
+      this.resolve = Optional.ofNullable(resolve);
+      return this;
+    }
+
     public ListValuesRequest build() {
-      return new ListValuesRequest(name, include, additionalProperties);
+      return new ListValuesRequest(name, prefix, type, limit, cursor, userGroup, include, resolve, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

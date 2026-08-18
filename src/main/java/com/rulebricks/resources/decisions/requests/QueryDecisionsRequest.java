@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.resources.decisions.types.QueryDecisionsRequestCount;
+import com.rulebricks.resources.decisions.types.QueryDecisionsRequestIncludeTraces;
+import com.rulebricks.resources.decisions.types.QueryDecisionsRequestOrder;
+import com.rulebricks.resources.decisions.types.QueryDecisionsRequestSort;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -32,11 +35,25 @@ public final class QueryDecisionsRequest {
 
   private final Optional<String> rules;
 
+  private final Optional<String> flows;
+
+  private final Optional<String> contexts;
+
+  private final Optional<String> trace;
+
   private final Optional<String> statuses;
+
+  private final Optional<QueryDecisionsRequestIncludeTraces> includeTraces;
+
+  private final Optional<String> itemFilter;
 
   private final Optional<OffsetDateTime> start;
 
   private final Optional<OffsetDateTime> end;
+
+  private final Optional<QueryDecisionsRequestSort> sort;
+
+  private final Optional<QueryDecisionsRequestOrder> order;
 
   private final Optional<String> cursor;
 
@@ -44,28 +61,35 @@ public final class QueryDecisionsRequest {
 
   private final Optional<QueryDecisionsRequestCount> count;
 
-  private final Optional<String> slug;
-
   private final Map<String, Object> additionalProperties;
 
   private QueryDecisionsRequest(Optional<String> search, Optional<String> rules,
-      Optional<String> statuses, Optional<OffsetDateTime> start, Optional<OffsetDateTime> end,
+      Optional<String> flows, Optional<String> contexts, Optional<String> trace,
+      Optional<String> statuses, Optional<QueryDecisionsRequestIncludeTraces> includeTraces,
+      Optional<String> itemFilter, Optional<OffsetDateTime> start, Optional<OffsetDateTime> end,
+      Optional<QueryDecisionsRequestSort> sort, Optional<QueryDecisionsRequestOrder> order,
       Optional<String> cursor, Optional<Integer> limit, Optional<QueryDecisionsRequestCount> count,
-      Optional<String> slug, Map<String, Object> additionalProperties) {
+      Map<String, Object> additionalProperties) {
     this.search = search;
     this.rules = rules;
+    this.flows = flows;
+    this.contexts = contexts;
+    this.trace = trace;
     this.statuses = statuses;
+    this.includeTraces = includeTraces;
+    this.itemFilter = itemFilter;
     this.start = start;
     this.end = end;
+    this.sort = sort;
+    this.order = order;
     this.cursor = cursor;
     this.limit = limit;
     this.count = count;
-    this.slug = slug;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Decision data query language expression to filter logs by request/response data. Supports field comparisons (<code>field=value</code>, <code>field&gt;10</code>), contains (<code>field:text</code>), not-contains (<code>field!:text</code>), boolean operators (<code>AND</code>, <code>OR</code>), and parentheses.
+   * @return Decision data query language expression to filter logs by request/response data. Supports field comparisons (<code>field=value</code>, <code>field&gt;10</code>), contains (<code>field:text</code>), not-contains (<code>field!:text</code>), boolean operators (<code>AND</code>, <code>OR</code>), and parentheses. A bare UUID or 32-hex term resolves as an execution/correlation-id lookup automatically.
    */
   @JsonProperty("search")
   public Optional<String> getSearch() {
@@ -73,11 +97,35 @@ public final class QueryDecisionsRequest {
   }
 
   /**
-   * @return Comma-separated list of rule names to filter logs by.
+   * @return Comma-separated list of rule names, IDs, or slugs to filter logs by. Names match partially; IDs and slugs match exactly.
    */
   @JsonProperty("rules")
   public Optional<String> getRules() {
     return rules;
+  }
+
+  /**
+   * @return Comma-separated list of flow names, IDs, or slugs to filter logs by. Matches only flow-level execution logs; the rule executions that ran inside a flow are separate records and are not included.
+   */
+  @JsonProperty("flows")
+  public Optional<String> getFlows() {
+    return flows;
+  }
+
+  /**
+   * @return Comma-separated list of context names or slugs to filter logs by. Matches the rule and flow executions that were triggered by those contexts (batch and interactive updates).
+   */
+  @JsonProperty("contexts")
+  public Optional<String> getContexts() {
+    return contexts;
+  }
+
+  /**
+   * @return Execution-trace correlation id. Returns every decision log from one execution tree: pass a log's <code>decision.root_flow_execution_id</code> (or any <code>flow_execution_id</code> / <code>parallel_execution_id</code>, including a bulk run's per-item <code>item_execution_ids</code> entries) to retrieve the flow-level record plus all subflow and rule records from that run. On self-hosted deployments, a log's observability <code>trace_id</code> is also accepted. Combine with <code>rules</code> or <code>search</code> to narrow to a specific rule or payload within the run.
+   */
+  @JsonProperty("trace")
+  public Optional<String> getTrace() {
+    return trace;
   }
 
   /**
@@ -89,7 +137,23 @@ public final class QueryDecisionsRequest {
   }
 
   /**
-   * @return Start date for the query range (ISO8601 format).
+   * @return When <code>true</code>, each flow record in the response includes a decompressed <code>path_trace</code> field: the run's executed steps with their full inputs and outputs (an object for single runs, a null-aligned array matching the request array for bulk runs). Off by default - traces are stored compressed and can be large, so only enable this when you need them. Ignored in count mode.
+   */
+  @JsonProperty("include_traces")
+  public Optional<QueryDecisionsRequestIncludeTraces> getIncludeTraces() {
+    return includeTraces;
+  }
+
+  /**
+   * @return Bulk payload filter in the form <code>path=value</code>. For each bulk record in the results (array-shaped request/response), keeps only the items whose payload value at <code>path</code> equals <code>value</code>, slicing the <code>request</code> and <code>response</code> arrays and every index-aligned field (<code>decision.item_execution_ids</code>, <code>decision.item_indexes</code>, <code>decision.success_idxs</code>, and <code>path_trace</code> when <code>include_traces=true</code>) in lockstep so input/output alignment is preserved. Filtered records gain a <code>matched_items</code> array with the surviving items' original zero-based positions. Paths use dot notation into each item (<code>customer.id</code>, <code>lines.0.sku</code>); prefix with <code>request.</code> or <code>response.</code> to match only that side (unprefixed paths match either side). Values compare as exact scalar strings (<code>status=200</code>, <code>approved=true</code>). Non-bulk records are returned unchanged; bulk records with no matching items are returned with empty item arrays. Typical use: combine with <code>search</code>, <code>flows</code>, or <code>trace</code> to locate a bulk run, then isolate one item's payloads and its <code>item_execution_ids</code> entry without tracking indexes. Ignored in count mode.
+   */
+  @JsonProperty("item_filter")
+  public Optional<String> getItemFilter() {
+    return itemFilter;
+  }
+
+  /**
+   * @return Start date for the query range (ISO8601 format). Hosted queries may span at most 90 days. Persistent self-hosted queries may use any range within local ClickHouse retention; PVC-less archive mode is limited to 7 days. Defaults to the applicable maximum before <code>end</code> (or before now).
    */
   @JsonProperty("start")
   public Optional<OffsetDateTime> getStart() {
@@ -97,7 +161,7 @@ public final class QueryDecisionsRequest {
   }
 
   /**
-   * @return End date for the query range (ISO8601 format).
+   * @return End date for the query range (ISO8601 format). Defaults to now. When supplied without <code>start</code>, the query covers the preceding 90 days on hosted/table mode or 7 days in PVC-less archive mode.
    */
   @JsonProperty("end")
   public Optional<OffsetDateTime> getEnd() {
@@ -105,7 +169,23 @@ public final class QueryDecisionsRequest {
   }
 
   /**
-   * @return Cursor for pagination (returned from previous query).
+   * @return Column to sort results by. <code>time</code> orders by execution timestamp, <code>name</code> by rule/flow name, <code>status</code> by HTTP status code, and <code>type</code> by operation (solve, bulk-solve, flows, etc.). Defaults to <code>time</code>.
+   */
+  @JsonProperty("sort")
+  public Optional<QueryDecisionsRequestSort> getSort() {
+    return sort;
+  }
+
+  /**
+   * @return Sort direction. Defaults to <code>desc</code>.
+   */
+  @JsonProperty("order")
+  public Optional<QueryDecisionsRequestOrder> getOrder() {
+    return order;
+  }
+
+  /**
+   * @return Opaque pagination token returned by the previous response. Pass it back verbatim to fetch the next page; do not construct or modify cursor values.
    */
   @JsonProperty("cursor")
   public Optional<String> getCursor() {
@@ -113,7 +193,7 @@ public final class QueryDecisionsRequest {
   }
 
   /**
-   * @return Number of results to return per page (default: 100).
+   * @return Number of results to return per page (default: 100, maximum: 1000). Logs carry full request/response payloads, so use smaller limits when querying workspaces with large bulk operations. Time-sorted pagination uses a keyset cursor, so its scan cost does not grow with page depth.
    */
   @JsonProperty("limit")
   public Optional<Integer> getLimit() {
@@ -128,14 +208,6 @@ public final class QueryDecisionsRequest {
     return count;
   }
 
-  /**
-   * @return (Deprecated) Legacy parameter for filtering by rule slug. Use 'rules' parameter instead.
-   */
-  @JsonProperty("slug")
-  public Optional<String> getSlug() {
-    return slug;
-  }
-
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -148,12 +220,12 @@ public final class QueryDecisionsRequest {
   }
 
   private boolean equalTo(QueryDecisionsRequest other) {
-    return search.equals(other.search) && rules.equals(other.rules) && statuses.equals(other.statuses) && start.equals(other.start) && end.equals(other.end) && cursor.equals(other.cursor) && limit.equals(other.limit) && count.equals(other.count) && slug.equals(other.slug);
+    return search.equals(other.search) && rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && trace.equals(other.trace) && statuses.equals(other.statuses) && includeTraces.equals(other.includeTraces) && itemFilter.equals(other.itemFilter) && start.equals(other.start) && end.equals(other.end) && sort.equals(other.sort) && order.equals(other.order) && cursor.equals(other.cursor) && limit.equals(other.limit) && count.equals(other.count);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.search, this.rules, this.statuses, this.start, this.end, this.cursor, this.limit, this.count, this.slug);
+    return Objects.hash(this.search, this.rules, this.flows, this.contexts, this.trace, this.statuses, this.includeTraces, this.itemFilter, this.start, this.end, this.sort, this.order, this.cursor, this.limit, this.count);
   }
 
   @java.lang.Override
@@ -173,19 +245,31 @@ public final class QueryDecisionsRequest {
 
     private Optional<String> rules = Optional.empty();
 
+    private Optional<String> flows = Optional.empty();
+
+    private Optional<String> contexts = Optional.empty();
+
+    private Optional<String> trace = Optional.empty();
+
     private Optional<String> statuses = Optional.empty();
+
+    private Optional<QueryDecisionsRequestIncludeTraces> includeTraces = Optional.empty();
+
+    private Optional<String> itemFilter = Optional.empty();
 
     private Optional<OffsetDateTime> start = Optional.empty();
 
     private Optional<OffsetDateTime> end = Optional.empty();
+
+    private Optional<QueryDecisionsRequestSort> sort = Optional.empty();
+
+    private Optional<QueryDecisionsRequestOrder> order = Optional.empty();
 
     private Optional<String> cursor = Optional.empty();
 
     private Optional<Integer> limit = Optional.empty();
 
     private Optional<QueryDecisionsRequestCount> count = Optional.empty();
-
-    private Optional<String> slug = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -196,18 +280,24 @@ public final class QueryDecisionsRequest {
     public Builder from(QueryDecisionsRequest other) {
       search(other.getSearch());
       rules(other.getRules());
+      flows(other.getFlows());
+      contexts(other.getContexts());
+      trace(other.getTrace());
       statuses(other.getStatuses());
+      includeTraces(other.getIncludeTraces());
+      itemFilter(other.getItemFilter());
       start(other.getStart());
       end(other.getEnd());
+      sort(other.getSort());
+      order(other.getOrder());
       cursor(other.getCursor());
       limit(other.getLimit());
       count(other.getCount());
-      slug(other.getSlug());
       return this;
     }
 
     /**
-     * <p>Decision data query language expression to filter logs by request/response data. Supports field comparisons (<code>field=value</code>, <code>field&gt;10</code>), contains (<code>field:text</code>), not-contains (<code>field!:text</code>), boolean operators (<code>AND</code>, <code>OR</code>), and parentheses.</p>
+     * <p>Decision data query language expression to filter logs by request/response data. Supports field comparisons (<code>field=value</code>, <code>field&gt;10</code>), contains (<code>field:text</code>), not-contains (<code>field!:text</code>), boolean operators (<code>AND</code>, <code>OR</code>), and parentheses. A bare UUID or 32-hex term resolves as an execution/correlation-id lookup automatically.</p>
      */
     @JsonSetter(
         value = "search",
@@ -224,7 +314,7 @@ public final class QueryDecisionsRequest {
     }
 
     /**
-     * <p>Comma-separated list of rule names to filter logs by.</p>
+     * <p>Comma-separated list of rule names, IDs, or slugs to filter logs by. Names match partially; IDs and slugs match exactly.</p>
      */
     @JsonSetter(
         value = "rules",
@@ -237,6 +327,57 @@ public final class QueryDecisionsRequest {
 
     public Builder rules(String rules) {
       this.rules = Optional.ofNullable(rules);
+      return this;
+    }
+
+    /**
+     * <p>Comma-separated list of flow names, IDs, or slugs to filter logs by. Matches only flow-level execution logs; the rule executions that ran inside a flow are separate records and are not included.</p>
+     */
+    @JsonSetter(
+        value = "flows",
+        nulls = Nulls.SKIP
+    )
+    public Builder flows(Optional<String> flows) {
+      this.flows = flows;
+      return this;
+    }
+
+    public Builder flows(String flows) {
+      this.flows = Optional.ofNullable(flows);
+      return this;
+    }
+
+    /**
+     * <p>Comma-separated list of context names or slugs to filter logs by. Matches the rule and flow executions that were triggered by those contexts (batch and interactive updates).</p>
+     */
+    @JsonSetter(
+        value = "contexts",
+        nulls = Nulls.SKIP
+    )
+    public Builder contexts(Optional<String> contexts) {
+      this.contexts = contexts;
+      return this;
+    }
+
+    public Builder contexts(String contexts) {
+      this.contexts = Optional.ofNullable(contexts);
+      return this;
+    }
+
+    /**
+     * <p>Execution-trace correlation id. Returns every decision log from one execution tree: pass a log's <code>decision.root_flow_execution_id</code> (or any <code>flow_execution_id</code> / <code>parallel_execution_id</code>, including a bulk run's per-item <code>item_execution_ids</code> entries) to retrieve the flow-level record plus all subflow and rule records from that run. On self-hosted deployments, a log's observability <code>trace_id</code> is also accepted. Combine with <code>rules</code> or <code>search</code> to narrow to a specific rule or payload within the run.</p>
+     */
+    @JsonSetter(
+        value = "trace",
+        nulls = Nulls.SKIP
+    )
+    public Builder trace(Optional<String> trace) {
+      this.trace = trace;
+      return this;
+    }
+
+    public Builder trace(String trace) {
+      this.trace = Optional.ofNullable(trace);
       return this;
     }
 
@@ -258,7 +399,41 @@ public final class QueryDecisionsRequest {
     }
 
     /**
-     * <p>Start date for the query range (ISO8601 format).</p>
+     * <p>When <code>true</code>, each flow record in the response includes a decompressed <code>path_trace</code> field: the run's executed steps with their full inputs and outputs (an object for single runs, a null-aligned array matching the request array for bulk runs). Off by default - traces are stored compressed and can be large, so only enable this when you need them. Ignored in count mode.</p>
+     */
+    @JsonSetter(
+        value = "include_traces",
+        nulls = Nulls.SKIP
+    )
+    public Builder includeTraces(Optional<QueryDecisionsRequestIncludeTraces> includeTraces) {
+      this.includeTraces = includeTraces;
+      return this;
+    }
+
+    public Builder includeTraces(QueryDecisionsRequestIncludeTraces includeTraces) {
+      this.includeTraces = Optional.ofNullable(includeTraces);
+      return this;
+    }
+
+    /**
+     * <p>Bulk payload filter in the form <code>path=value</code>. For each bulk record in the results (array-shaped request/response), keeps only the items whose payload value at <code>path</code> equals <code>value</code>, slicing the <code>request</code> and <code>response</code> arrays and every index-aligned field (<code>decision.item_execution_ids</code>, <code>decision.item_indexes</code>, <code>decision.success_idxs</code>, and <code>path_trace</code> when <code>include_traces=true</code>) in lockstep so input/output alignment is preserved. Filtered records gain a <code>matched_items</code> array with the surviving items' original zero-based positions. Paths use dot notation into each item (<code>customer.id</code>, <code>lines.0.sku</code>); prefix with <code>request.</code> or <code>response.</code> to match only that side (unprefixed paths match either side). Values compare as exact scalar strings (<code>status=200</code>, <code>approved=true</code>). Non-bulk records are returned unchanged; bulk records with no matching items are returned with empty item arrays. Typical use: combine with <code>search</code>, <code>flows</code>, or <code>trace</code> to locate a bulk run, then isolate one item's payloads and its <code>item_execution_ids</code> entry without tracking indexes. Ignored in count mode.</p>
+     */
+    @JsonSetter(
+        value = "item_filter",
+        nulls = Nulls.SKIP
+    )
+    public Builder itemFilter(Optional<String> itemFilter) {
+      this.itemFilter = itemFilter;
+      return this;
+    }
+
+    public Builder itemFilter(String itemFilter) {
+      this.itemFilter = Optional.ofNullable(itemFilter);
+      return this;
+    }
+
+    /**
+     * <p>Start date for the query range (ISO8601 format). Hosted queries may span at most 90 days. Persistent self-hosted queries may use any range within local ClickHouse retention; PVC-less archive mode is limited to 7 days. Defaults to the applicable maximum before <code>end</code> (or before now).</p>
      */
     @JsonSetter(
         value = "start",
@@ -275,7 +450,7 @@ public final class QueryDecisionsRequest {
     }
 
     /**
-     * <p>End date for the query range (ISO8601 format).</p>
+     * <p>End date for the query range (ISO8601 format). Defaults to now. When supplied without <code>start</code>, the query covers the preceding 90 days on hosted/table mode or 7 days in PVC-less archive mode.</p>
      */
     @JsonSetter(
         value = "end",
@@ -292,7 +467,41 @@ public final class QueryDecisionsRequest {
     }
 
     /**
-     * <p>Cursor for pagination (returned from previous query).</p>
+     * <p>Column to sort results by. <code>time</code> orders by execution timestamp, <code>name</code> by rule/flow name, <code>status</code> by HTTP status code, and <code>type</code> by operation (solve, bulk-solve, flows, etc.). Defaults to <code>time</code>.</p>
+     */
+    @JsonSetter(
+        value = "sort",
+        nulls = Nulls.SKIP
+    )
+    public Builder sort(Optional<QueryDecisionsRequestSort> sort) {
+      this.sort = sort;
+      return this;
+    }
+
+    public Builder sort(QueryDecisionsRequestSort sort) {
+      this.sort = Optional.ofNullable(sort);
+      return this;
+    }
+
+    /**
+     * <p>Sort direction. Defaults to <code>desc</code>.</p>
+     */
+    @JsonSetter(
+        value = "order",
+        nulls = Nulls.SKIP
+    )
+    public Builder order(Optional<QueryDecisionsRequestOrder> order) {
+      this.order = order;
+      return this;
+    }
+
+    public Builder order(QueryDecisionsRequestOrder order) {
+      this.order = Optional.ofNullable(order);
+      return this;
+    }
+
+    /**
+     * <p>Opaque pagination token returned by the previous response. Pass it back verbatim to fetch the next page; do not construct or modify cursor values.</p>
      */
     @JsonSetter(
         value = "cursor",
@@ -309,7 +518,7 @@ public final class QueryDecisionsRequest {
     }
 
     /**
-     * <p>Number of results to return per page (default: 100).</p>
+     * <p>Number of results to return per page (default: 100, maximum: 1000). Logs carry full request/response payloads, so use smaller limits when querying workspaces with large bulk operations. Time-sorted pagination uses a keyset cursor, so its scan cost does not grow with page depth.</p>
      */
     @JsonSetter(
         value = "limit",
@@ -342,25 +551,8 @@ public final class QueryDecisionsRequest {
       return this;
     }
 
-    /**
-     * <p>(Deprecated) Legacy parameter for filtering by rule slug. Use 'rules' parameter instead.</p>
-     */
-    @JsonSetter(
-        value = "slug",
-        nulls = Nulls.SKIP
-    )
-    public Builder slug(Optional<String> slug) {
-      this.slug = slug;
-      return this;
-    }
-
-    public Builder slug(String slug) {
-      this.slug = Optional.ofNullable(slug);
-      return this;
-    }
-
     public QueryDecisionsRequest build() {
-      return new QueryDecisionsRequest(search, rules, statuses, start, end, cursor, limit, count, slug, additionalProperties);
+      return new QueryDecisionsRequest(search, rules, flows, contexts, trace, statuses, includeTraces, itemFilter, start, end, sort, order, cursor, limit, count, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

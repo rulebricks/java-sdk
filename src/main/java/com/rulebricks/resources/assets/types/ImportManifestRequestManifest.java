@@ -34,18 +34,21 @@ public final class ImportManifestRequestManifest {
 
   private final Optional<List<Map<String, Object>>> entities;
 
+  private final Optional<List<Map<String, Object>>> contexts;
+
   private final Optional<List<Map<String, Object>>> values;
 
   private final Map<String, Object> additionalProperties;
 
   private ImportManifestRequestManifest(Optional<String> version,
       Optional<List<Map<String, Object>>> rules, Optional<List<Map<String, Object>>> flows,
-      Optional<List<Map<String, Object>>> entities, Optional<List<Map<String, Object>>> values,
-      Map<String, Object> additionalProperties) {
+      Optional<List<Map<String, Object>>> entities, Optional<List<Map<String, Object>>> contexts,
+      Optional<List<Map<String, Object>>> values, Map<String, Object> additionalProperties) {
     this.version = version;
     this.rules = rules;
     this.flows = flows;
     this.entities = entities;
+    this.contexts = contexts;
     this.values = values;
     this.additionalProperties = additionalProperties;
   }
@@ -83,7 +86,15 @@ public final class ImportManifestRequestManifest {
   }
 
   /**
-   * @return Dynamic values to import.
+   * @return Alias for <code>entities</code>, accepted so manifests produced by the export endpoint (which names this array <code>contexts</code>) can be imported without modification. Ignored when <code>entities</code> is present and non-empty.
+   */
+  @JsonProperty("contexts")
+  public Optional<List<Map<String, Object>>> getContexts() {
+    return contexts;
+  }
+
+  /**
+   * @return Vocabulary values to import.
    */
   @JsonProperty("values")
   public Optional<List<Map<String, Object>>> getValues() {
@@ -102,12 +113,12 @@ public final class ImportManifestRequestManifest {
   }
 
   private boolean equalTo(ImportManifestRequestManifest other) {
-    return version.equals(other.version) && rules.equals(other.rules) && flows.equals(other.flows) && entities.equals(other.entities) && values.equals(other.values);
+    return version.equals(other.version) && rules.equals(other.rules) && flows.equals(other.flows) && entities.equals(other.entities) && contexts.equals(other.contexts) && values.equals(other.values);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.version, this.rules, this.flows, this.entities, this.values);
+    return Objects.hash(this.version, this.rules, this.flows, this.entities, this.contexts, this.values);
   }
 
   @java.lang.Override
@@ -131,6 +142,8 @@ public final class ImportManifestRequestManifest {
 
     private Optional<List<Map<String, Object>>> entities = Optional.empty();
 
+    private Optional<List<Map<String, Object>>> contexts = Optional.empty();
+
     private Optional<List<Map<String, Object>>> values = Optional.empty();
 
     @JsonAnySetter
@@ -144,6 +157,7 @@ public final class ImportManifestRequestManifest {
       rules(other.getRules());
       flows(other.getFlows());
       entities(other.getEntities());
+      contexts(other.getContexts());
       values(other.getValues());
       return this;
     }
@@ -217,7 +231,24 @@ public final class ImportManifestRequestManifest {
     }
 
     /**
-     * <p>Dynamic values to import.</p>
+     * <p>Alias for <code>entities</code>, accepted so manifests produced by the export endpoint (which names this array <code>contexts</code>) can be imported without modification. Ignored when <code>entities</code> is present and non-empty.</p>
+     */
+    @JsonSetter(
+        value = "contexts",
+        nulls = Nulls.SKIP
+    )
+    public Builder contexts(Optional<List<Map<String, Object>>> contexts) {
+      this.contexts = contexts;
+      return this;
+    }
+
+    public Builder contexts(List<Map<String, Object>> contexts) {
+      this.contexts = Optional.ofNullable(contexts);
+      return this;
+    }
+
+    /**
+     * <p>Vocabulary values to import.</p>
      */
     @JsonSetter(
         value = "values",
@@ -234,7 +265,7 @@ public final class ImportManifestRequestManifest {
     }
 
     public ImportManifestRequestManifest build() {
-      return new ImportManifestRequestManifest(version, rules, flows, entities, values, additionalProperties);
+      return new ImportManifestRequestManifest(version, rules, flows, entities, contexts, values, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

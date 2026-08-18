@@ -55,7 +55,7 @@ public final class DecisionLogResponse {
   }
 
   /**
-   * @return Pagination cursor for fetching the next page. Null if no more results. Only present when count parameter is not 'true'.
+   * @return Opaque pagination token for fetching the next page - pass it back verbatim via the cursor parameter. Null if no more results. Only present when count parameter is not 'true'.
    */
   @JsonIgnore
   public Optional<String> getCursor() {
@@ -152,7 +152,7 @@ public final class DecisionLogResponse {
     }
 
     /**
-     * <p>Pagination cursor for fetching the next page. Null if no more results. Only present when count parameter is not 'true'.</p>
+     * <p>Opaque pagination token for fetching the next page - pass it back verbatim via the cursor parameter. Null if no more results. Only present when count parameter is not 'true'.</p>
      */
     @JsonSetter(
         value = "cursor",

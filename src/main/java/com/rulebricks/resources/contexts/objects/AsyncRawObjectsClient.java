@@ -9,19 +9,23 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.core.QueryStringMapper;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.ConflictError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.contexts.objects.requests.CreateContextRequest;
 import com.rulebricks.resources.contexts.objects.requests.DeleteObjectsRequest;
 import com.rulebricks.resources.contexts.objects.requests.GetObjectsRequest;
+import com.rulebricks.resources.contexts.objects.requests.ListObjectsRequest;
 import com.rulebricks.resources.contexts.objects.requests.UpdateContextRequest;
 import com.rulebricks.types.ContextDetail;
 import com.rulebricks.types.ContextListItem;
+import com.rulebricks.types.CreateContextResponse;
 import com.rulebricks.types.DeleteContextResponse;
 import com.rulebricks.types.Error;
 import com.rulebricks.types.UpdateContextResponse;
@@ -50,30 +54,55 @@ public class AsyncRawObjectsClient {
   }
 
   /**
-   * Retrieve all contexts for the authenticated user.
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<ContextListItem>>> list() {
-    return list(null);
+    return list(ListObjectsRequest.builder().build());
   }
 
   /**
-   * Retrieve all contexts for the authenticated user.
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<ContextListItem>>> list(
       RequestOptions requestOptions) {
+    return list(ListObjectsRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<ContextListItem>>> list(
+      ListObjectsRequest request) {
+    return list(request,null);
+  }
+
+  /**
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<ContextListItem>>> list(
+      ListObjectsRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("admin/contexts");if (requestOptions != null) {
+      .addPathSegments("admin/contexts");if (request.getFolder().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
+      }
+      if (request.getUserGroup().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+      }
+      if (request.getName().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );
       }
-      Request okhttpRequest = new Request.Builder()
+      Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Accept", "application/json")
-        .build();
+        .addHeader("Accept", "application/json");
+      Request okhttpRequest = _requestBuilder.build();
       OkHttpClient client = clientOptions.httpClient();
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -117,7 +146,7 @@ public class AsyncRawObjectsClient {
     /**
      * Create a new context for the authenticated user.
      */
-    public CompletableFuture<RulebricksApiHttpResponse<ContextDetail>> create(
+    public CompletableFuture<RulebricksApiHttpResponse<CreateContextResponse>> create(
         CreateContextRequest request) {
       return create(request,null);
     }
@@ -125,7 +154,7 @@ public class AsyncRawObjectsClient {
     /**
      * Create a new context for the authenticated user.
      */
-    public CompletableFuture<RulebricksApiHttpResponse<ContextDetail>> create(
+    public CompletableFuture<RulebricksApiHttpResponse<CreateContextResponse>> create(
         CreateContextRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -152,19 +181,21 @@ public class AsyncRawObjectsClient {
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<RulebricksApiHttpResponse<ContextDetail>> future = new CompletableFuture<>();
+        CompletableFuture<RulebricksApiHttpResponse<CreateContextResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
           @Override
           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             try (ResponseBody responseBody = response.body()) {
               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
               if (response.isSuccessful()) {
-                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextDetail.class), response));
+                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateContextResponse.class), response));
                 return;
               }
               try {
                 switch (response.code()) {
                   case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  return;
+                  case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
                   case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;

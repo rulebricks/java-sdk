@@ -25,8 +25,4 @@ public interface IContextBase {
   Optional<Integer> getHistoryLimit();
 
   Optional<ContextBaseOnSchemaMismatch> getOnSchemaMismatch();
-
-  Optional<String> getWebhookOnSolve();
-
-  Optional<String> getWebhookOnExpire();
 }

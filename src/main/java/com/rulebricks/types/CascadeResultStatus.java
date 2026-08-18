@@ -10,6 +10,10 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class CascadeResultStatus {
+  public static final CascadeResultStatus SKIPPED_ALREADY_RUN = new CascadeResultStatus(Value.SKIPPED_ALREADY_RUN, "skipped_already_run");
+
+  public static final CascadeResultStatus PENDING = new CascadeResultStatus(Value.PENDING, "pending");
+
   public static final CascadeResultStatus ERROR = new CascadeResultStatus(Value.ERROR, "error");
 
   public static final CascadeResultStatus SOLVED = new CascadeResultStatus(Value.SOLVED, "solved");
@@ -46,6 +50,10 @@ public final class CascadeResultStatus {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case SKIPPED_ALREADY_RUN:
+        return visitor.visitSkippedAlreadyRun();
+      case PENDING:
+        return visitor.visitPending();
       case ERROR:
         return visitor.visitError();
       case SOLVED:
@@ -61,6 +69,10 @@ public final class CascadeResultStatus {
   )
   public static CascadeResultStatus valueOf(String value) {
     switch (value) {
+      case "skipped_already_run":
+        return SKIPPED_ALREADY_RUN;
+      case "pending":
+        return PENDING;
       case "error":
         return ERROR;
       case "solved":
@@ -75,6 +87,10 @@ public final class CascadeResultStatus {
 
     ERROR,
 
+    PENDING,
+
+    SKIPPED_ALREADY_RUN,
+
     UNKNOWN
   }
 
@@ -82,6 +98,10 @@ public final class CascadeResultStatus {
     T visitSolved();
 
     T visitError();
+
+    T visitPending();
+
+    T visitSkippedAlreadyRun();
 
     T visitUnknown(String unknownType);
   }

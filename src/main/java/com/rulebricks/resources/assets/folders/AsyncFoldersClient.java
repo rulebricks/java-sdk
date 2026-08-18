@@ -7,6 +7,7 @@ package com.rulebricks.resources.assets.folders;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.assets.folders.requests.DeleteFolderRequest;
+import com.rulebricks.resources.assets.folders.requests.ListFoldersRequest;
 import com.rulebricks.resources.assets.folders.requests.UpsertFolderRequest;
 import com.rulebricks.types.Folder;
 import java.util.List;
@@ -44,14 +45,29 @@ public class AsyncFoldersClient {
   }
 
   /**
-   * Create a new rule folder or update an existing one for the authenticated user.
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public CompletableFuture<List<Folder>> list(ListFoldersRequest request) {
+    return this.rawClient.list(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public CompletableFuture<List<Folder>> list(ListFoldersRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.list(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
    */
   public CompletableFuture<Folder> upsert(UpsertFolderRequest request) {
     return this.rawClient.upsert(request).thenApply(response -> response.body());
   }
 
   /**
-   * Create a new rule folder or update an existing one for the authenticated user.
+   * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
    */
   public CompletableFuture<Folder> upsert(UpsertFolderRequest request,
       RequestOptions requestOptions) {

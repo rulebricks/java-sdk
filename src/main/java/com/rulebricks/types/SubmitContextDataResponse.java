@@ -45,14 +45,15 @@ public final class SubmitContextDataResponse {
 
   private final Optional<OffsetDateTime> expiresAt;
 
-  private final Optional<List<CascadeResult>> cascaded;
+  private final Optional<List<SubmitContextDataResponseCascadedItem>> cascaded;
 
   private final Map<String, Object> additionalProperties;
 
   private SubmitContextDataResponse(Optional<String> context, Optional<Map<String, Object>> state,
       Optional<SubmitContextDataResponseStatus> status, Optional<List<String>> have,
       Optional<List<String>> need, Optional<Boolean> isNew, Optional<OffsetDateTime> expiresAt,
-      Optional<List<CascadeResult>> cascaded, Map<String, Object> additionalProperties) {
+      Optional<List<SubmitContextDataResponseCascadedItem>> cascaded,
+      Map<String, Object> additionalProperties) {
     this.context = context;
     this.state = state;
     this.status = status;
@@ -73,7 +74,7 @@ public final class SubmitContextDataResponse {
   }
 
   /**
-   * @return The merged state after submitting data and any auto-executed rules/flows.
+   * @return The merged state after submitting data and any auto-executed rules/flows. Includes derived facts inline (unlike GET, which reports them separately under <code>derived</code>).
    */
   @JsonProperty("state")
   public Optional<Map<String, Object>> getState() {
@@ -124,10 +125,10 @@ public final class SubmitContextDataResponse {
   }
 
   /**
-   * @return Results from auto-executed rules/flows and pending evaluation cascades.
+   * @return Results from auto-executed rules/flows and pending evaluation cascades, plus summaries when a relationship change re-evaluated dependent contexts.
    */
   @JsonProperty("cascaded")
-  public Optional<List<CascadeResult>> getCascaded() {
+  public Optional<List<SubmitContextDataResponseCascadedItem>> getCascaded() {
     return cascaded;
   }
 
@@ -187,7 +188,7 @@ public final class SubmitContextDataResponse {
 
     private Optional<OffsetDateTime> expiresAt = Optional.empty();
 
-    private Optional<List<CascadeResult>> cascaded = Optional.empty();
+    private Optional<List<SubmitContextDataResponseCascadedItem>> cascaded = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -225,7 +226,7 @@ public final class SubmitContextDataResponse {
     }
 
     /**
-     * <p>The merged state after submitting data and any auto-executed rules/flows.</p>
+     * <p>The merged state after submitting data and any auto-executed rules/flows. Includes derived facts inline (unlike GET, which reports them separately under <code>derived</code>).</p>
      */
     @JsonSetter(
         value = "state",
@@ -340,18 +341,18 @@ public final class SubmitContextDataResponse {
     }
 
     /**
-     * <p>Results from auto-executed rules/flows and pending evaluation cascades.</p>
+     * <p>Results from auto-executed rules/flows and pending evaluation cascades, plus summaries when a relationship change re-evaluated dependent contexts.</p>
      */
     @JsonSetter(
         value = "cascaded",
         nulls = Nulls.SKIP
     )
-    public Builder cascaded(Optional<List<CascadeResult>> cascaded) {
+    public Builder cascaded(Optional<List<SubmitContextDataResponseCascadedItem>> cascaded) {
       this.cascaded = cascaded;
       return this;
     }
 
-    public Builder cascaded(List<CascadeResult> cascaded) {
+    public Builder cascaded(List<SubmitContextDataResponseCascadedItem> cascaded) {
       this.cascaded = Optional.ofNullable(cascaded);
       return this;
     }

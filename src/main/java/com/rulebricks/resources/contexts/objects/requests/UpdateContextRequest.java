@@ -6,24 +6,20 @@ package com.rulebricks.resources.contexts.objects.requests;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.rulebricks.core.Nullable;
-import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.resources.contexts.objects.types.UpdateContextRequestOnSchemaMismatch;
-import com.rulebricks.resources.contexts.objects.types.UpdateContextRequestSchemaItem;
+import com.rulebricks.types.ContextSchema;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,11 +31,11 @@ import java.util.Optional;
 public final class UpdateContextRequest {
   private final Optional<String> name;
 
-  private final Optional<String> slug;
-
   private final Optional<String> description;
 
-  private final Optional<List<UpdateContextRequestSchemaItem>> schema;
+  private final Optional<ContextSchema> schema;
+
+  private final Optional<String> identityFact;
 
   private final Optional<Boolean> autoExecuteDecisions;
 
@@ -49,46 +45,31 @@ public final class UpdateContextRequest {
 
   private final Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch;
 
-  private final Optional<String> webhookOnSolve;
-
-  private final Optional<String> webhookOnExpire;
-
   private final Map<String, Object> additionalProperties;
 
-  private UpdateContextRequest(Optional<String> name, Optional<String> slug,
-      Optional<String> description, Optional<List<UpdateContextRequestSchemaItem>> schema,
+  private UpdateContextRequest(Optional<String> name, Optional<String> description,
+      Optional<ContextSchema> schema, Optional<String> identityFact,
       Optional<Boolean> autoExecuteDecisions, Optional<Integer> ttlSeconds,
       Optional<Integer> historyLimit,
       Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch,
-      Optional<String> webhookOnSolve, Optional<String> webhookOnExpire,
       Map<String, Object> additionalProperties) {
     this.name = name;
-    this.slug = slug;
     this.description = description;
     this.schema = schema;
+    this.identityFact = identityFact;
     this.autoExecuteDecisions = autoExecuteDecisions;
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
-    this.webhookOnSolve = webhookOnSolve;
-    this.webhookOnExpire = webhookOnExpire;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The name of the context.
+   * @return The name of the context. Changing it regenerates the context's slug.
    */
   @JsonProperty("name")
   public Optional<String> getName() {
     return name;
-  }
-
-  /**
-   * @return The slug of the context.
-   */
-  @JsonProperty("slug")
-  public Optional<String> getSlug() {
-    return slug;
   }
 
   /**
@@ -100,11 +81,19 @@ public final class UpdateContextRequest {
   }
 
   /**
-   * @return Updated schema fields for the context.
+   * @return Updated schema for the context: an object with <code>base</code> and optional <code>derived</code> field arrays.
    */
   @JsonProperty("schema")
-  public Optional<List<UpdateContextRequestSchemaItem>> getSchema() {
+  public Optional<ContextSchema> getSchema() {
     return schema;
+  }
+
+  /**
+   * @return The fact key to use as the unique identifier for instances. Must be a key from schema.base. Caution: changing this on a context with live instances changes how future writes resolve instances.
+   */
+  @JsonProperty("identity_fact")
+  public Optional<String> getIdentityFact() {
+    return identityFact;
   }
 
   /**
@@ -116,13 +105,10 @@ public final class UpdateContextRequest {
   }
 
   /**
-   * @return Time-to-live in seconds for live context instances. Instances expire after this duration.
+   * @return Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration.
    */
-  @JsonIgnore
+  @JsonProperty("ttl_seconds")
   public Optional<Integer> getTtlSeconds() {
-    if (ttlSeconds == null) {
-      return Optional.empty();
-    }
     return ttlSeconds;
   }
 
@@ -135,60 +121,11 @@ public final class UpdateContextRequest {
   }
 
   /**
-   * @return How to handle fields that don't match the schema.
+   * @return How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.
    */
   @JsonProperty("on_schema_mismatch")
   public Optional<UpdateContextRequestOnSchemaMismatch> getOnSchemaMismatch() {
     return onSchemaMismatch;
-  }
-
-  /**
-   * @return Webhook URL called when a rule or flow successfully solves.
-   */
-  @JsonIgnore
-  public Optional<String> getWebhookOnSolve() {
-    if (webhookOnSolve == null) {
-      return Optional.empty();
-    }
-    return webhookOnSolve;
-  }
-
-  /**
-   * @return Webhook URL called when a live context expires due to TTL.
-   */
-  @JsonIgnore
-  public Optional<String> getWebhookOnExpire() {
-    if (webhookOnExpire == null) {
-      return Optional.empty();
-    }
-    return webhookOnExpire;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("ttl_seconds")
-  private Optional<Integer> _getTtlSeconds() {
-    return ttlSeconds;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("webhook_on_solve")
-  private Optional<String> _getWebhookOnSolve() {
-    return webhookOnSolve;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("webhook_on_expire")
-  private Optional<String> _getWebhookOnExpire() {
-    return webhookOnExpire;
   }
 
   @java.lang.Override
@@ -203,12 +140,12 @@ public final class UpdateContextRequest {
   }
 
   private boolean equalTo(UpdateContextRequest other) {
-    return name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && schema.equals(other.schema) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && webhookOnSolve.equals(other.webhookOnSolve) && webhookOnExpire.equals(other.webhookOnExpire);
+    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.slug, this.description, this.schema, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.webhookOnSolve, this.webhookOnExpire);
+    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
   }
 
   @java.lang.Override
@@ -226,11 +163,11 @@ public final class UpdateContextRequest {
   public static final class Builder {
     private Optional<String> name = Optional.empty();
 
-    private Optional<String> slug = Optional.empty();
-
     private Optional<String> description = Optional.empty();
 
-    private Optional<List<UpdateContextRequestSchemaItem>> schema = Optional.empty();
+    private Optional<ContextSchema> schema = Optional.empty();
+
+    private Optional<String> identityFact = Optional.empty();
 
     private Optional<Boolean> autoExecuteDecisions = Optional.empty();
 
@@ -240,10 +177,6 @@ public final class UpdateContextRequest {
 
     private Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
-    private Optional<String> webhookOnSolve = Optional.empty();
-
-    private Optional<String> webhookOnExpire = Optional.empty();
-
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -252,20 +185,18 @@ public final class UpdateContextRequest {
 
     public Builder from(UpdateContextRequest other) {
       name(other.getName());
-      slug(other.getSlug());
       description(other.getDescription());
       schema(other.getSchema());
+      identityFact(other.getIdentityFact());
       autoExecuteDecisions(other.getAutoExecuteDecisions());
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
-      webhookOnSolve(other.getWebhookOnSolve());
-      webhookOnExpire(other.getWebhookOnExpire());
       return this;
     }
 
     /**
-     * <p>The name of the context.</p>
+     * <p>The name of the context. Changing it regenerates the context's slug.</p>
      */
     @JsonSetter(
         value = "name",
@@ -278,23 +209,6 @@ public final class UpdateContextRequest {
 
     public Builder name(String name) {
       this.name = Optional.ofNullable(name);
-      return this;
-    }
-
-    /**
-     * <p>The slug of the context.</p>
-     */
-    @JsonSetter(
-        value = "slug",
-        nulls = Nulls.SKIP
-    )
-    public Builder slug(Optional<String> slug) {
-      this.slug = slug;
-      return this;
-    }
-
-    public Builder slug(String slug) {
-      this.slug = Optional.ofNullable(slug);
       return this;
     }
 
@@ -316,19 +230,36 @@ public final class UpdateContextRequest {
     }
 
     /**
-     * <p>Updated schema fields for the context.</p>
+     * <p>Updated schema for the context: an object with <code>base</code> and optional <code>derived</code> field arrays.</p>
      */
     @JsonSetter(
         value = "schema",
         nulls = Nulls.SKIP
     )
-    public Builder schema(Optional<List<UpdateContextRequestSchemaItem>> schema) {
+    public Builder schema(Optional<ContextSchema> schema) {
       this.schema = schema;
       return this;
     }
 
-    public Builder schema(List<UpdateContextRequestSchemaItem> schema) {
+    public Builder schema(ContextSchema schema) {
       this.schema = Optional.ofNullable(schema);
+      return this;
+    }
+
+    /**
+     * <p>The fact key to use as the unique identifier for instances. Must be a key from schema.base. Caution: changing this on a context with live instances changes how future writes resolve instances.</p>
+     */
+    @JsonSetter(
+        value = "identity_fact",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityFact(Optional<String> identityFact) {
+      this.identityFact = identityFact;
+      return this;
+    }
+
+    public Builder identityFact(String identityFact) {
+      this.identityFact = Optional.ofNullable(identityFact);
       return this;
     }
 
@@ -350,7 +281,7 @@ public final class UpdateContextRequest {
     }
 
     /**
-     * <p>Time-to-live in seconds for live context instances. Instances expire after this duration.</p>
+     * <p>Time-to-live in seconds for live context instances (60 seconds to 30 days). Instances expire after this duration.</p>
      */
     @JsonSetter(
         value = "ttl_seconds",
@@ -363,19 +294,6 @@ public final class UpdateContextRequest {
 
     public Builder ttlSeconds(Integer ttlSeconds) {
       this.ttlSeconds = Optional.ofNullable(ttlSeconds);
-      return this;
-    }
-
-    public Builder ttlSeconds(Nullable<Integer> ttlSeconds) {
-      if (ttlSeconds.isNull()) {
-        this.ttlSeconds = null;
-      }
-      else if (ttlSeconds.isEmpty()) {
-        this.ttlSeconds = Optional.empty();
-      }
-      else {
-        this.ttlSeconds = Optional.of(ttlSeconds.get());
-      }
       return this;
     }
 
@@ -397,7 +315,7 @@ public final class UpdateContextRequest {
     }
 
     /**
-     * <p>How to handle fields that don't match the schema.</p>
+     * <p>How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or the batch item), <code>store</code> persists them alongside declared facts.</p>
      */
     @JsonSetter(
         value = "on_schema_mismatch",
@@ -414,68 +332,8 @@ public final class UpdateContextRequest {
       return this;
     }
 
-    /**
-     * <p>Webhook URL called when a rule or flow successfully solves.</p>
-     */
-    @JsonSetter(
-        value = "webhook_on_solve",
-        nulls = Nulls.SKIP
-    )
-    public Builder webhookOnSolve(Optional<String> webhookOnSolve) {
-      this.webhookOnSolve = webhookOnSolve;
-      return this;
-    }
-
-    public Builder webhookOnSolve(String webhookOnSolve) {
-      this.webhookOnSolve = Optional.ofNullable(webhookOnSolve);
-      return this;
-    }
-
-    public Builder webhookOnSolve(Nullable<String> webhookOnSolve) {
-      if (webhookOnSolve.isNull()) {
-        this.webhookOnSolve = null;
-      }
-      else if (webhookOnSolve.isEmpty()) {
-        this.webhookOnSolve = Optional.empty();
-      }
-      else {
-        this.webhookOnSolve = Optional.of(webhookOnSolve.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>Webhook URL called when a live context expires due to TTL.</p>
-     */
-    @JsonSetter(
-        value = "webhook_on_expire",
-        nulls = Nulls.SKIP
-    )
-    public Builder webhookOnExpire(Optional<String> webhookOnExpire) {
-      this.webhookOnExpire = webhookOnExpire;
-      return this;
-    }
-
-    public Builder webhookOnExpire(String webhookOnExpire) {
-      this.webhookOnExpire = Optional.ofNullable(webhookOnExpire);
-      return this;
-    }
-
-    public Builder webhookOnExpire(Nullable<String> webhookOnExpire) {
-      if (webhookOnExpire.isNull()) {
-        this.webhookOnExpire = null;
-      }
-      else if (webhookOnExpire.isEmpty()) {
-        this.webhookOnExpire = Optional.empty();
-      }
-      else {
-        this.webhookOnExpire = Optional.of(webhookOnExpire.get());
-      }
-      return this;
-    }
-
     public UpdateContextRequest build() {
-      return new UpdateContextRequest(name, slug, description, schema, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, webhookOnSolve, webhookOnExpire, additionalProperties);
+      return new UpdateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

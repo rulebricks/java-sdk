@@ -76,7 +76,7 @@ public final class CreateRelationshipRequest {
   }
 
   /**
-   * @return Display name for the relationship.
+   * @return Optional runtime relationship key. It is normalized to lowercase snake_case; the target context slug is used when omitted.
    */
   @JsonProperty("name")
   public Optional<String> getName() {
@@ -151,7 +151,7 @@ public final class CreateRelationshipRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Display name for the relationship.</p>
+     * <p>Optional runtime relationship key. It is normalized to lowercase snake_case; the target context slug is used when omitted.</p>
      */
     _FinalStage name(Optional<String> name);
 
@@ -256,7 +256,7 @@ public final class CreateRelationshipRequest {
     }
 
     /**
-     * <p>Display name for the relationship.</p>
+     * <p>Optional runtime relationship key. It is normalized to lowercase snake_case; the target context slug is used when omitted.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -266,7 +266,7 @@ public final class CreateRelationshipRequest {
     }
 
     /**
-     * <p>Display name for the relationship.</p>
+     * <p>Optional runtime relationship key. It is normalized to lowercase snake_case; the target context slug is used when omitted.</p>
      */
     @java.lang.Override
     @JsonSetter(

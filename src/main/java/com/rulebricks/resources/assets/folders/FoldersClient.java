@@ -7,6 +7,7 @@ package com.rulebricks.resources.assets.folders;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.assets.folders.requests.DeleteFolderRequest;
+import com.rulebricks.resources.assets.folders.requests.ListFoldersRequest;
 import com.rulebricks.resources.assets.folders.requests.UpsertFolderRequest;
 import com.rulebricks.types.Folder;
 import java.util.List;
@@ -43,14 +44,28 @@ public class FoldersClient {
   }
 
   /**
-   * Create a new rule folder or update an existing one for the authenticated user.
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public List<Folder> list(ListFoldersRequest request) {
+    return this.rawClient.list(request).body();
+  }
+
+  /**
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public List<Folder> list(ListFoldersRequest request, RequestOptions requestOptions) {
+    return this.rawClient.list(request, requestOptions).body();
+  }
+
+  /**
+   * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
    */
   public Folder upsert(UpsertFolderRequest request) {
     return this.rawClient.upsert(request).body();
   }
 
   /**
-   * Create a new rule folder or update an existing one for the authenticated user.
+   * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
    */
   public Folder upsert(UpsertFolderRequest request, RequestOptions requestOptions) {
     return this.rawClient.upsert(request, requestOptions).body();

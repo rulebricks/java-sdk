@@ -11,9 +11,9 @@ import java.util.Optional;
 public interface IContextRelationshipBase {
   Optional<String> getId();
 
-  Optional<ContextRelationshipBaseType> getType();
+  Optional<ContextRelationshipBaseRelationType> getRelationType();
 
-  Optional<String> getForeignKey();
+  Optional<String> getForeignKeyFact();
 
   Optional<String> getName();
 

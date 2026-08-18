@@ -46,12 +46,22 @@ public final class CascadeResult {
 
   private final Optional<String> error;
 
+  private final Optional<Boolean> rateLimited;
+
+  private final Optional<Boolean> usageLimited;
+
+  private final Optional<List<String>> need;
+
+  private final Optional<List<CascadeResult>> cascaded;
+
   private final Map<String, Object> additionalProperties;
 
   private CascadeResult(Optional<String> context, Optional<String> rule, Optional<String> flow,
       Optional<CascadeResultStatus> status, Optional<Map<String, Object>> result,
       Optional<Boolean> autoExecuted, Optional<List<String>> writtenToContext,
-      Optional<String> error, Map<String, Object> additionalProperties) {
+      Optional<String> error, Optional<Boolean> rateLimited, Optional<Boolean> usageLimited,
+      Optional<List<String>> need, Optional<List<CascadeResult>> cascaded,
+      Map<String, Object> additionalProperties) {
     this.context = context;
     this.rule = rule;
     this.flow = flow;
@@ -60,6 +70,10 @@ public final class CascadeResult {
     this.autoExecuted = autoExecuted;
     this.writtenToContext = writtenToContext;
     this.error = error;
+    this.rateLimited = rateLimited;
+    this.usageLimited = usageLimited;
+    this.need = need;
+    this.cascaded = cascaded;
     this.additionalProperties = additionalProperties;
   }
 
@@ -94,7 +108,7 @@ public final class CascadeResult {
   }
 
   /**
-   * @return Whether the evaluation succeeded.
+   * @return Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.
    */
   @JsonProperty("status")
   public Optional<CascadeResultStatus> getStatus() {
@@ -110,7 +124,7 @@ public final class CascadeResult {
   }
 
   /**
-   * @return Whether this was auto-executed (true) or from a registered pending evaluation (false).
+   * @return True for context auto-execution. Omitted for registered pending evaluations.
    */
   @JsonProperty("auto_executed")
   public Optional<Boolean> getAutoExecuted() {
@@ -134,6 +148,38 @@ public final class CascadeResult {
       return Optional.empty();
     }
     return error;
+  }
+
+  /**
+   * @return True when execution stopped at a rate limit.
+   */
+  @JsonProperty("rate_limited")
+  public Optional<Boolean> getRateLimited() {
+    return rateLimited;
+  }
+
+  /**
+   * @return True when execution stopped at a plan usage limit.
+   */
+  @JsonProperty("usage_limited")
+  public Optional<Boolean> getUsageLimited() {
+    return usageLimited;
+  }
+
+  /**
+   * @return Dependencies still missing when the evaluation remains pending.
+   */
+  @JsonProperty("need")
+  public Optional<List<String>> getNeed() {
+    return need;
+  }
+
+  /**
+   * @return Nested pending evaluations triggered by this rule's writeback.
+   */
+  @JsonProperty("cascaded")
+  public Optional<List<CascadeResult>> getCascaded() {
+    return cascaded;
   }
 
   @JsonInclude(
@@ -175,12 +221,12 @@ public final class CascadeResult {
   }
 
   private boolean equalTo(CascadeResult other) {
-    return context.equals(other.context) && rule.equals(other.rule) && flow.equals(other.flow) && status.equals(other.status) && result.equals(other.result) && autoExecuted.equals(other.autoExecuted) && writtenToContext.equals(other.writtenToContext) && error.equals(other.error);
+    return context.equals(other.context) && rule.equals(other.rule) && flow.equals(other.flow) && status.equals(other.status) && result.equals(other.result) && autoExecuted.equals(other.autoExecuted) && writtenToContext.equals(other.writtenToContext) && error.equals(other.error) && rateLimited.equals(other.rateLimited) && usageLimited.equals(other.usageLimited) && need.equals(other.need) && cascaded.equals(other.cascaded);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.rule, this.flow, this.status, this.result, this.autoExecuted, this.writtenToContext, this.error);
+    return Objects.hash(this.context, this.rule, this.flow, this.status, this.result, this.autoExecuted, this.writtenToContext, this.error, this.rateLimited, this.usageLimited, this.need, this.cascaded);
   }
 
   @java.lang.Override
@@ -212,6 +258,14 @@ public final class CascadeResult {
 
     private Optional<String> error = Optional.empty();
 
+    private Optional<Boolean> rateLimited = Optional.empty();
+
+    private Optional<Boolean> usageLimited = Optional.empty();
+
+    private Optional<List<String>> need = Optional.empty();
+
+    private Optional<List<CascadeResult>> cascaded = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -227,6 +281,10 @@ public final class CascadeResult {
       autoExecuted(other.getAutoExecuted());
       writtenToContext(other.getWrittenToContext());
       error(other.getError());
+      rateLimited(other.getRateLimited());
+      usageLimited(other.getUsageLimited());
+      need(other.getNeed());
+      cascaded(other.getCascaded());
       return this;
     }
 
@@ -308,7 +366,7 @@ public final class CascadeResult {
     }
 
     /**
-     * <p>Whether the evaluation succeeded.</p>
+     * <p>Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.</p>
      */
     @JsonSetter(
         value = "status",
@@ -342,7 +400,7 @@ public final class CascadeResult {
     }
 
     /**
-     * <p>Whether this was auto-executed (true) or from a registered pending evaluation (false).</p>
+     * <p>True for context auto-execution. Omitted for registered pending evaluations.</p>
      */
     @JsonSetter(
         value = "auto_executed",
@@ -405,8 +463,76 @@ public final class CascadeResult {
       return this;
     }
 
+    /**
+     * <p>True when execution stopped at a rate limit.</p>
+     */
+    @JsonSetter(
+        value = "rate_limited",
+        nulls = Nulls.SKIP
+    )
+    public Builder rateLimited(Optional<Boolean> rateLimited) {
+      this.rateLimited = rateLimited;
+      return this;
+    }
+
+    public Builder rateLimited(Boolean rateLimited) {
+      this.rateLimited = Optional.ofNullable(rateLimited);
+      return this;
+    }
+
+    /**
+     * <p>True when execution stopped at a plan usage limit.</p>
+     */
+    @JsonSetter(
+        value = "usage_limited",
+        nulls = Nulls.SKIP
+    )
+    public Builder usageLimited(Optional<Boolean> usageLimited) {
+      this.usageLimited = usageLimited;
+      return this;
+    }
+
+    public Builder usageLimited(Boolean usageLimited) {
+      this.usageLimited = Optional.ofNullable(usageLimited);
+      return this;
+    }
+
+    /**
+     * <p>Dependencies still missing when the evaluation remains pending.</p>
+     */
+    @JsonSetter(
+        value = "need",
+        nulls = Nulls.SKIP
+    )
+    public Builder need(Optional<List<String>> need) {
+      this.need = need;
+      return this;
+    }
+
+    public Builder need(List<String> need) {
+      this.need = Optional.ofNullable(need);
+      return this;
+    }
+
+    /**
+     * <p>Nested pending evaluations triggered by this rule's writeback.</p>
+     */
+    @JsonSetter(
+        value = "cascaded",
+        nulls = Nulls.SKIP
+    )
+    public Builder cascaded(Optional<List<CascadeResult>> cascaded) {
+      this.cascaded = cascaded;
+      return this;
+    }
+
+    public Builder cascaded(List<CascadeResult> cascaded) {
+      this.cascaded = Optional.ofNullable(cascaded);
+      return this;
+    }
+
     public CascadeResult build() {
-      return new CascadeResult(context, rule, flow, status, result, autoExecuted, writtenToContext, error, additionalProperties);
+      return new CascadeResult(context, rule, flow, status, result, autoExecuted, writtenToContext, error, rateLimited, usageLimited, need, cascaded, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -30,24 +30,20 @@ public final class ValueLimits {
 
   private final Optional<Integer> maxValueLength;
 
-  private final Optional<Integer> maxTotalSize;
-
   private final Optional<Integer> maxKeyLength;
 
   private final Map<String, Object> additionalProperties;
 
   private ValueLimits(Optional<Integer> maxKeys, Optional<Integer> maxValueLength,
-      Optional<Integer> maxTotalSize, Optional<Integer> maxKeyLength,
-      Map<String, Object> additionalProperties) {
+      Optional<Integer> maxKeyLength, Map<String, Object> additionalProperties) {
     this.maxKeys = maxKeys;
     this.maxValueLength = maxValueLength;
-    this.maxTotalSize = maxTotalSize;
     this.maxKeyLength = maxKeyLength;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Maximum number of value keys per user
+   * @return Maximum number of vocabulary values per workspace (a guardrail against runaway imports; the system is designed to operate at this scale)
    */
   @JsonProperty("MAX_KEYS")
   public Optional<Integer> getMaxKeys() {
@@ -55,7 +51,7 @@ public final class ValueLimits {
   }
 
   /**
-   * @return Maximum length of a single value in characters
+   * @return Maximum serialized length of a single value payload in characters
    */
   @JsonProperty("MAX_VALUE_LENGTH")
   public Optional<Integer> getMaxValueLength() {
@@ -63,15 +59,7 @@ public final class ValueLimits {
   }
 
   /**
-   * @return Maximum total size of all values in bytes
-   */
-  @JsonProperty("MAX_TOTAL_SIZE")
-  public Optional<Integer> getMaxTotalSize() {
-    return maxTotalSize;
-  }
-
-  /**
-   * @return Maximum length of a key name
+   * @return Maximum length of a value name in characters, including collection prefixes
    */
   @JsonProperty("MAX_KEY_LENGTH")
   public Optional<Integer> getMaxKeyLength() {
@@ -90,12 +78,12 @@ public final class ValueLimits {
   }
 
   private boolean equalTo(ValueLimits other) {
-    return maxKeys.equals(other.maxKeys) && maxValueLength.equals(other.maxValueLength) && maxTotalSize.equals(other.maxTotalSize) && maxKeyLength.equals(other.maxKeyLength);
+    return maxKeys.equals(other.maxKeys) && maxValueLength.equals(other.maxValueLength) && maxKeyLength.equals(other.maxKeyLength);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.maxKeys, this.maxValueLength, this.maxTotalSize, this.maxKeyLength);
+    return Objects.hash(this.maxKeys, this.maxValueLength, this.maxKeyLength);
   }
 
   @java.lang.Override
@@ -115,8 +103,6 @@ public final class ValueLimits {
 
     private Optional<Integer> maxValueLength = Optional.empty();
 
-    private Optional<Integer> maxTotalSize = Optional.empty();
-
     private Optional<Integer> maxKeyLength = Optional.empty();
 
     @JsonAnySetter
@@ -128,13 +114,12 @@ public final class ValueLimits {
     public Builder from(ValueLimits other) {
       maxKeys(other.getMaxKeys());
       maxValueLength(other.getMaxValueLength());
-      maxTotalSize(other.getMaxTotalSize());
       maxKeyLength(other.getMaxKeyLength());
       return this;
     }
 
     /**
-     * <p>Maximum number of value keys per user</p>
+     * <p>Maximum number of vocabulary values per workspace (a guardrail against runaway imports; the system is designed to operate at this scale)</p>
      */
     @JsonSetter(
         value = "MAX_KEYS",
@@ -151,7 +136,7 @@ public final class ValueLimits {
     }
 
     /**
-     * <p>Maximum length of a single value in characters</p>
+     * <p>Maximum serialized length of a single value payload in characters</p>
      */
     @JsonSetter(
         value = "MAX_VALUE_LENGTH",
@@ -168,24 +153,7 @@ public final class ValueLimits {
     }
 
     /**
-     * <p>Maximum total size of all values in bytes</p>
-     */
-    @JsonSetter(
-        value = "MAX_TOTAL_SIZE",
-        nulls = Nulls.SKIP
-    )
-    public Builder maxTotalSize(Optional<Integer> maxTotalSize) {
-      this.maxTotalSize = maxTotalSize;
-      return this;
-    }
-
-    public Builder maxTotalSize(Integer maxTotalSize) {
-      this.maxTotalSize = Optional.ofNullable(maxTotalSize);
-      return this;
-    }
-
-    /**
-     * <p>Maximum length of a key name</p>
+     * <p>Maximum length of a value name in characters, including collection prefixes</p>
      */
     @JsonSetter(
         value = "MAX_KEY_LENGTH",
@@ -202,7 +170,7 @@ public final class ValueLimits {
     }
 
     public ValueLimits build() {
-      return new ValueLimits(maxKeys, maxValueLength, maxTotalSize, maxKeyLength, additionalProperties);
+      return new ValueLimits(maxKeys, maxValueLength, maxKeyLength, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

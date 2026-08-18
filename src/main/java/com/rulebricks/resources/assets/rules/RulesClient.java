@@ -77,28 +77,28 @@ public class RulesClient {
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<RuleDetail> list() {
     return this.rawClient.list().body();
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<RuleDetail> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).body();
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<RuleDetail> list(ListRulesRequest request) {
     return this.rawClient.list(request).body();
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, or by user group name or ID when the API key has access to that group.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<RuleDetail> list(ListRulesRequest request, RequestOptions requestOptions) {
     return this.rawClient.list(request, requestOptions).body();

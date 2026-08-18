@@ -52,7 +52,7 @@ public final class ExportManifestResponse {
   }
 
   /**
-   * @return The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility.
+   * @return The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility. When the request sets <code>compress: true</code>, this field is instead the compress-json array encoding of the same manifest (a JSON array, not the object described below).
    */
   @JsonProperty("manifest")
   public Optional<ExportManifestResponseManifest> getManifest() {
@@ -137,7 +137,7 @@ public final class ExportManifestResponse {
     }
 
     /**
-     * <p>The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility.</p>
+     * <p>The exported manifest data. The wrapper uses snake_case, while asset objects inside <code>contexts</code>, <code>values</code>, <code>rules</code>, and <code>flows</code> intentionally preserve <code>.rbm</code>/database casing for round-trip compatibility. When the request sets <code>compress: true</code>, this field is instead the compress-json array encoding of the same manifest (a JSON array, not the object described below).</p>
      */
     @JsonSetter(
         value = "manifest",

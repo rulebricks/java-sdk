@@ -42,6 +42,10 @@ public final class ContextInstanceState {
 
   private final Optional<List<String>> need;
 
+  private final Optional<Map<String, Object>> relations;
+
+  private final Optional<Map<String, Object>> executions;
+
   private final Optional<OffsetDateTime> createdAt;
 
   private final Optional<OffsetDateTime> updatedAt;
@@ -52,15 +56,18 @@ public final class ContextInstanceState {
 
   private ContextInstanceState(Optional<String> context, Optional<Map<String, Object>> state,
       Optional<Map<String, Object>> derived, Optional<ContextInstanceStateStatus> status,
-      Optional<List<String>> have, Optional<List<String>> need, Optional<OffsetDateTime> createdAt,
-      Optional<OffsetDateTime> updatedAt, Optional<OffsetDateTime> expiresAt,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> have, Optional<List<String>> need,
+      Optional<Map<String, Object>> relations, Optional<Map<String, Object>> executions,
+      Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
+      Optional<OffsetDateTime> expiresAt, Map<String, Object> additionalProperties) {
     this.context = context;
     this.state = state;
     this.derived = derived;
     this.status = status;
     this.have = have;
     this.need = need;
+    this.relations = relations;
+    this.executions = executions;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.expiresAt = expiresAt;
@@ -76,7 +83,7 @@ public final class ContextInstanceState {
   }
 
   /**
-   * @return The current base field values for this instance.
+   * @return The current base fact values for this instance (derived facts are reported separately under <code>derived</code>; note that POST responses combine both under <code>state</code>).
    */
   @JsonProperty("state")
   public Optional<Map<String, Object>> getState() {
@@ -84,7 +91,7 @@ public final class ContextInstanceState {
   }
 
   /**
-   * @return Computed/derived field values from bound rules.
+   * @return Expression-computed derived fact values (recomputed on read from base facts, relations, and history).
    */
   @JsonProperty("derived")
   public Optional<Map<String, Object>> getDerived() {
@@ -113,6 +120,22 @@ public final class ContextInstanceState {
   @JsonProperty("need")
   public Optional<List<String>> getNeed() {
     return need;
+  }
+
+  /**
+   * @return Related instance data, present only when include_relations was requested. Keys are relationship names; has_many relations map to a list of related instance states, has_one/belongs_to to a single state or null.
+   */
+  @JsonProperty("relations")
+  public Optional<Map<String, Object>> getRelations() {
+    return relations;
+  }
+
+  /**
+   * @return Per-asset execution metadata, present after a bound rule or flow has run for this instance.
+   */
+  @JsonProperty("executions")
+  public Optional<Map<String, Object>> getExecutions() {
+    return executions;
   }
 
   /**
@@ -163,12 +186,12 @@ public final class ContextInstanceState {
   }
 
   private boolean equalTo(ContextInstanceState other) {
-    return context.equals(other.context) && state.equals(other.state) && derived.equals(other.derived) && status.equals(other.status) && have.equals(other.have) && need.equals(other.need) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && expiresAt.equals(other.expiresAt);
+    return context.equals(other.context) && state.equals(other.state) && derived.equals(other.derived) && status.equals(other.status) && have.equals(other.have) && need.equals(other.need) && relations.equals(other.relations) && executions.equals(other.executions) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && expiresAt.equals(other.expiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.state, this.derived, this.status, this.have, this.need, this.createdAt, this.updatedAt, this.expiresAt);
+    return Objects.hash(this.context, this.state, this.derived, this.status, this.have, this.need, this.relations, this.executions, this.createdAt, this.updatedAt, this.expiresAt);
   }
 
   @java.lang.Override
@@ -196,6 +219,10 @@ public final class ContextInstanceState {
 
     private Optional<List<String>> need = Optional.empty();
 
+    private Optional<Map<String, Object>> relations = Optional.empty();
+
+    private Optional<Map<String, Object>> executions = Optional.empty();
+
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
@@ -215,6 +242,8 @@ public final class ContextInstanceState {
       status(other.getStatus());
       have(other.getHave());
       need(other.getNeed());
+      relations(other.getRelations());
+      executions(other.getExecutions());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       expiresAt(other.getExpiresAt());
@@ -239,7 +268,7 @@ public final class ContextInstanceState {
     }
 
     /**
-     * <p>The current base field values for this instance.</p>
+     * <p>The current base fact values for this instance (derived facts are reported separately under <code>derived</code>; note that POST responses combine both under <code>state</code>).</p>
      */
     @JsonSetter(
         value = "state",
@@ -256,7 +285,7 @@ public final class ContextInstanceState {
     }
 
     /**
-     * <p>Computed/derived field values from bound rules.</p>
+     * <p>Expression-computed derived fact values (recomputed on read from base facts, relations, and history).</p>
      */
     @JsonSetter(
         value = "derived",
@@ -320,6 +349,40 @@ public final class ContextInstanceState {
 
     public Builder need(List<String> need) {
       this.need = Optional.ofNullable(need);
+      return this;
+    }
+
+    /**
+     * <p>Related instance data, present only when include_relations was requested. Keys are relationship names; has_many relations map to a list of related instance states, has_one/belongs_to to a single state or null.</p>
+     */
+    @JsonSetter(
+        value = "relations",
+        nulls = Nulls.SKIP
+    )
+    public Builder relations(Optional<Map<String, Object>> relations) {
+      this.relations = relations;
+      return this;
+    }
+
+    public Builder relations(Map<String, Object> relations) {
+      this.relations = Optional.ofNullable(relations);
+      return this;
+    }
+
+    /**
+     * <p>Per-asset execution metadata, present after a bound rule or flow has run for this instance.</p>
+     */
+    @JsonSetter(
+        value = "executions",
+        nulls = Nulls.SKIP
+    )
+    public Builder executions(Optional<Map<String, Object>> executions) {
+      this.executions = executions;
+      return this;
+    }
+
+    public Builder executions(Map<String, Object> executions) {
+      this.executions = Optional.ofNullable(executions);
       return this;
     }
 
@@ -388,7 +451,7 @@ public final class ContextInstanceState {
     }
 
     public ContextInstanceState build() {
-      return new ContextInstanceState(context, state, derived, status, have, need, createdAt, updatedAt, expiresAt, additionalProperties);
+      return new ContextInstanceState(context, state, derived, status, have, need, relations, executions, createdAt, updatedAt, expiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

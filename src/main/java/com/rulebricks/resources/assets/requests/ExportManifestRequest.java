@@ -42,18 +42,21 @@ public final class ExportManifestRequest {
 
   private final Optional<Boolean> previewOnly;
 
+  private final Optional<Boolean> compress;
+
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestRequest(ExportManifestRequestRootType rootType, List<String> rootIds,
       Optional<Boolean> includeDownstream, Optional<String> manifestName,
       Optional<String> manifestDescription, Optional<Boolean> previewOnly,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> compress, Map<String, Object> additionalProperties) {
     this.rootType = rootType;
     this.rootIds = rootIds;
     this.includeDownstream = includeDownstream;
     this.manifestName = manifestName;
     this.manifestDescription = manifestDescription;
     this.previewOnly = previewOnly;
+    this.compress = compress;
     this.additionalProperties = additionalProperties;
   }
 
@@ -105,6 +108,14 @@ public final class ExportManifestRequest {
     return previewOnly;
   }
 
+  /**
+   * @return If true, the manifest in the response is returned in compressed form: the JSON array produced by the compress-json library instead of a plain object. Compressed manifests are substantially smaller, can be saved directly as a .rbm file, and are accepted by the import endpoint as-is. Intended for raw HTTP usage and file tooling; typed SDK clients should omit this flag, since the generated response type models the manifest as an object.
+   */
+  @JsonProperty("compress")
+  public Optional<Boolean> getCompress() {
+    return compress;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -117,12 +128,12 @@ public final class ExportManifestRequest {
   }
 
   private boolean equalTo(ExportManifestRequest other) {
-    return rootType.equals(other.rootType) && rootIds.equals(other.rootIds) && includeDownstream.equals(other.includeDownstream) && manifestName.equals(other.manifestName) && manifestDescription.equals(other.manifestDescription) && previewOnly.equals(other.previewOnly);
+    return rootType.equals(other.rootType) && rootIds.equals(other.rootIds) && includeDownstream.equals(other.includeDownstream) && manifestName.equals(other.manifestName) && manifestDescription.equals(other.manifestDescription) && previewOnly.equals(other.previewOnly) && compress.equals(other.compress);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.rootType, this.rootIds, this.includeDownstream, this.manifestName, this.manifestDescription, this.previewOnly);
+    return Objects.hash(this.rootType, this.rootIds, this.includeDownstream, this.manifestName, this.manifestDescription, this.previewOnly, this.compress);
   }
 
   @java.lang.Override
@@ -186,6 +197,13 @@ public final class ExportManifestRequest {
     _FinalStage previewOnly(Optional<Boolean> previewOnly);
 
     _FinalStage previewOnly(Boolean previewOnly);
+
+    /**
+     * <p>If true, the manifest in the response is returned in compressed form: the JSON array produced by the compress-json library instead of a plain object. Compressed manifests are substantially smaller, can be saved directly as a .rbm file, and are accepted by the import endpoint as-is. Intended for raw HTTP usage and file tooling; typed SDK clients should omit this flag, since the generated response type models the manifest as an object.</p>
+     */
+    _FinalStage compress(Optional<Boolean> compress);
+
+    _FinalStage compress(Boolean compress);
   }
 
   @JsonIgnoreProperties(
@@ -193,6 +211,8 @@ public final class ExportManifestRequest {
   )
   public static final class Builder implements RootTypeStage, _FinalStage {
     private ExportManifestRequestRootType rootType;
+
+    private Optional<Boolean> compress = Optional.empty();
 
     private Optional<Boolean> previewOnly = Optional.empty();
 
@@ -218,6 +238,7 @@ public final class ExportManifestRequest {
       manifestName(other.getManifestName());
       manifestDescription(other.getManifestDescription());
       previewOnly(other.getPreviewOnly());
+      compress(other.getCompress());
       return this;
     }
 
@@ -230,6 +251,29 @@ public final class ExportManifestRequest {
     @JsonSetter("root_type")
     public _FinalStage rootType(@NotNull ExportManifestRequestRootType rootType) {
       this.rootType = Objects.requireNonNull(rootType, "rootType must not be null");
+      return this;
+    }
+
+    /**
+     * <p>If true, the manifest in the response is returned in compressed form: the JSON array produced by the compress-json library instead of a plain object. Compressed manifests are substantially smaller, can be saved directly as a .rbm file, and are accepted by the import endpoint as-is. Intended for raw HTTP usage and file tooling; typed SDK clients should omit this flag, since the generated response type models the manifest as an object.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage compress(Boolean compress) {
+      this.compress = Optional.ofNullable(compress);
+      return this;
+    }
+
+    /**
+     * <p>If true, the manifest in the response is returned in compressed form: the JSON array produced by the compress-json library instead of a plain object. Compressed manifests are substantially smaller, can be saved directly as a .rbm file, and are accepted by the import endpoint as-is. Intended for raw HTTP usage and file tooling; typed SDK clients should omit this flag, since the generated response type models the manifest as an object.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "compress",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage compress(Optional<Boolean> compress) {
+      this.compress = compress;
       return this;
     }
 
@@ -365,7 +409,7 @@ public final class ExportManifestRequest {
 
     @java.lang.Override
     public ExportManifestRequest build() {
-      return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, additionalProperties);
+      return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, compress, additionalProperties);
     }
 
     @java.lang.Override

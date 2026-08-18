@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.resources.assets.folders.types.UpsertFolderRequestType;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -32,13 +33,16 @@ public final class UpsertFolderRequest {
 
   private final Optional<String> description;
 
+  private final Optional<UpsertFolderRequestType> type;
+
   private final Map<String, Object> additionalProperties;
 
   private UpsertFolderRequest(Optional<String> id, String name, Optional<String> description,
-      Map<String, Object> additionalProperties) {
+      Optional<UpsertFolderRequestType> type, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.type = type;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +70,14 @@ public final class UpsertFolderRequest {
     return description;
   }
 
+  /**
+   * @return The type of assets the folder organizes. Applies on creation; ignored when updating an existing folder.
+   */
+  @JsonProperty("type")
+  public Optional<UpsertFolderRequestType> getType() {
+    return type;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +90,12 @@ public final class UpsertFolderRequest {
   }
 
   private boolean equalTo(UpsertFolderRequest other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && type.equals(other.type);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description);
+    return Objects.hash(this.id, this.name, this.description, this.type);
   }
 
   @java.lang.Override
@@ -124,6 +136,13 @@ public final class UpsertFolderRequest {
     _FinalStage description(Optional<String> description);
 
     _FinalStage description(String description);
+
+    /**
+     * <p>The type of assets the folder organizes. Applies on creation; ignored when updating an existing folder.</p>
+     */
+    _FinalStage type(Optional<UpsertFolderRequestType> type);
+
+    _FinalStage type(UpsertFolderRequestType type);
   }
 
   @JsonIgnoreProperties(
@@ -131,6 +150,8 @@ public final class UpsertFolderRequest {
   )
   public static final class Builder implements NameStage, _FinalStage {
     private String name;
+
+    private Optional<UpsertFolderRequestType> type = Optional.empty();
 
     private Optional<String> description = Optional.empty();
 
@@ -147,6 +168,7 @@ public final class UpsertFolderRequest {
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
+      type(other.getType());
       return this;
     }
 
@@ -159,6 +181,29 @@ public final class UpsertFolderRequest {
     @JsonSetter("name")
     public _FinalStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    /**
+     * <p>The type of assets the folder organizes. Applies on creation; ignored when updating an existing folder.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage type(UpsertFolderRequestType type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    /**
+     * <p>The type of assets the folder organizes. Applies on creation; ignored when updating an existing folder.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage type(Optional<UpsertFolderRequestType> type) {
+      this.type = type;
       return this;
     }
 
@@ -210,7 +255,7 @@ public final class UpsertFolderRequest {
 
     @java.lang.Override
     public UpsertFolderRequest build() {
-      return new UpsertFolderRequest(id, name, description, additionalProperties);
+      return new UpsertFolderRequest(id, name, description, type, additionalProperties);
     }
 
     @java.lang.Override

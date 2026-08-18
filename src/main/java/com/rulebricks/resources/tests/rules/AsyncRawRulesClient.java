@@ -19,7 +19,9 @@ import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.tests.rules.requests.CreateRulesRequest;
 import com.rulebricks.resources.tests.rules.requests.DeleteRulesRequest;
 import com.rulebricks.resources.tests.rules.requests.ListRulesRequest;
+import com.rulebricks.resources.tests.rules.requests.RunRulesRequest;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.RunTestsResponse;
 import com.rulebricks.types.Test;
 import java.io.IOException;
 import java.lang.Object;
@@ -295,4 +297,83 @@ public class AsyncRawRulesClient {
           });
           return future;
         }
-      }
+
+        /**
+         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+         */
+        public CompletableFuture<RulebricksApiHttpResponse<RunTestsResponse>> run(String slug,
+            RunRulesRequest request) {
+          return run(slug,request,null);
+        }
+
+        /**
+         * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+         */
+        public CompletableFuture<RulebricksApiHttpResponse<RunTestsResponse>> run(String slug,
+            RunRulesRequest request, RequestOptions requestOptions) {
+          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+            .addPathSegments("admin/rules")
+            .addPathSegment(slug)
+            .addPathSegments("tests")
+            .addPathSegments("run");if (requestOptions != null) {
+              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                httpUrl.addQueryParameter(_key, _value);
+              } );
+            }
+            RequestBody body;
+            try {
+              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+            }
+            catch(JsonProcessingException e) {
+              throw new RulebricksApiException("Failed to serialize request", e);
+            }
+            Request okhttpRequest = new Request.Builder()
+              .url(httpUrl.build())
+              .method("POST", body)
+              .headers(Headers.of(clientOptions.headers(requestOptions)))
+              .addHeader("Content-Type", "application/json")
+              .addHeader("Accept", "application/json")
+              .build();
+            OkHttpClient client = clientOptions.httpClient();
+            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+              client = clientOptions.httpClientWithTimeout(requestOptions);
+            }
+            CompletableFuture<RulebricksApiHttpResponse<RunTestsResponse>> future = new CompletableFuture<>();
+            client.newCall(okhttpRequest).enqueue(new Callback() {
+              @Override
+              public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                  String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                  if (response.isSuccessful()) {
+                    future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RunTestsResponse.class), response));
+                    return;
+                  }
+                  try {
+                    switch (response.code()) {
+                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      return;
+                      case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      return;
+                    }
+                  }
+                  catch (JsonProcessingException ignored) {
+                    // unable to map error response, throwing generic error
+                  }
+                  Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                  future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                  return;
+                }
+                catch (IOException e) {
+                  future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                }
+              }
+
+              @Override
+              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+              }
+            });
+            return future;
+          }
+        }

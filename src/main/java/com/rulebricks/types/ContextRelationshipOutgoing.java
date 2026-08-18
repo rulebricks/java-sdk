@@ -28,9 +28,9 @@ import java.util.Optional;
 public final class ContextRelationshipOutgoing implements IContextRelationshipBase {
   private final Optional<String> id;
 
-  private final Optional<ContextRelationshipBaseType> type;
+  private final Optional<ContextRelationshipBaseRelationType> relationType;
 
-  private final Optional<String> foreignKey;
+  private final Optional<String> foreignKeyFact;
 
   private final Optional<String> name;
 
@@ -43,13 +43,13 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
   private final Map<String, Object> additionalProperties;
 
   private ContextRelationshipOutgoing(Optional<String> id,
-      Optional<ContextRelationshipBaseType> type, Optional<String> foreignKey,
+      Optional<ContextRelationshipBaseRelationType> relationType, Optional<String> foreignKeyFact,
       Optional<String> name, Optional<String> description, Optional<OffsetDateTime> createdAt,
       Optional<ContextRelationshipOutgoingTargetContext> targetContext,
       Map<String, Object> additionalProperties) {
     this.id = id;
-    this.type = type;
-    this.foreignKey = foreignKey;
+    this.relationType = relationType;
+    this.foreignKeyFact = foreignKeyFact;
     this.name = name;
     this.description = description;
     this.createdAt = createdAt;
@@ -69,22 +69,22 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
   /**
    * @return The type of relationship.
    */
-  @JsonProperty("type")
-  public Optional<ContextRelationshipBaseType> getType() {
-    return type;
+  @JsonProperty("relation_type")
+  public Optional<ContextRelationshipBaseRelationType> getRelationType() {
+    return relationType;
   }
 
   /**
    * @return The field key used as the foreign key.
    */
-  @JsonProperty("foreign_key")
+  @JsonProperty("foreign_key_fact")
   @java.lang.Override
-  public Optional<String> getForeignKey() {
-    return foreignKey;
+  public Optional<String> getForeignKeyFact() {
+    return foreignKeyFact;
   }
 
   /**
-   * @return Display name for the relationship.
+   * @return Runtime relationship key used by derived expressions. It is normalized to lowercase snake_case.
    */
   @JsonProperty("name")
   @java.lang.Override
@@ -127,12 +127,12 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
   }
 
   private boolean equalTo(ContextRelationshipOutgoing other) {
-    return id.equals(other.id) && type.equals(other.type) && foreignKey.equals(other.foreignKey) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && targetContext.equals(other.targetContext);
+    return id.equals(other.id) && relationType.equals(other.relationType) && foreignKeyFact.equals(other.foreignKeyFact) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && targetContext.equals(other.targetContext);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.type, this.foreignKey, this.name, this.description, this.createdAt, this.targetContext);
+    return Objects.hash(this.id, this.relationType, this.foreignKeyFact, this.name, this.description, this.createdAt, this.targetContext);
   }
 
   @java.lang.Override
@@ -150,9 +150,9 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
   public static final class Builder {
     private Optional<String> id = Optional.empty();
 
-    private Optional<ContextRelationshipBaseType> type = Optional.empty();
+    private Optional<ContextRelationshipBaseRelationType> relationType = Optional.empty();
 
-    private Optional<String> foreignKey = Optional.empty();
+    private Optional<String> foreignKeyFact = Optional.empty();
 
     private Optional<String> name = Optional.empty();
 
@@ -170,8 +170,8 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
 
     public Builder from(ContextRelationshipOutgoing other) {
       id(other.getId());
-      type(other.getType());
-      foreignKey(other.getForeignKey());
+      relationType(other.getRelationType());
+      foreignKeyFact(other.getForeignKeyFact());
       name(other.getName());
       description(other.getDescription());
       createdAt(other.getCreatedAt());
@@ -200,16 +200,16 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
      * <p>The type of relationship.</p>
      */
     @JsonSetter(
-        value = "type",
+        value = "relation_type",
         nulls = Nulls.SKIP
     )
-    public Builder type(Optional<ContextRelationshipBaseType> type) {
-      this.type = type;
+    public Builder relationType(Optional<ContextRelationshipBaseRelationType> relationType) {
+      this.relationType = relationType;
       return this;
     }
 
-    public Builder type(ContextRelationshipBaseType type) {
-      this.type = Optional.ofNullable(type);
+    public Builder relationType(ContextRelationshipBaseRelationType relationType) {
+      this.relationType = Optional.ofNullable(relationType);
       return this;
     }
 
@@ -217,21 +217,21 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
      * <p>The field key used as the foreign key.</p>
      */
     @JsonSetter(
-        value = "foreign_key",
+        value = "foreign_key_fact",
         nulls = Nulls.SKIP
     )
-    public Builder foreignKey(Optional<String> foreignKey) {
-      this.foreignKey = foreignKey;
+    public Builder foreignKeyFact(Optional<String> foreignKeyFact) {
+      this.foreignKeyFact = foreignKeyFact;
       return this;
     }
 
-    public Builder foreignKey(String foreignKey) {
-      this.foreignKey = Optional.ofNullable(foreignKey);
+    public Builder foreignKeyFact(String foreignKeyFact) {
+      this.foreignKeyFact = Optional.ofNullable(foreignKeyFact);
       return this;
     }
 
     /**
-     * <p>Display name for the relationship.</p>
+     * <p>Runtime relationship key used by derived expressions. It is normalized to lowercase snake_case.</p>
      */
     @JsonSetter(
         value = "name",
@@ -296,7 +296,7 @@ public final class ContextRelationshipOutgoing implements IContextRelationshipBa
     }
 
     public ContextRelationshipOutgoing build() {
-      return new ContextRelationshipOutgoing(id, type, foreignKey, name, description, createdAt, targetContext, additionalProperties);
+      return new ContextRelationshipOutgoing(id, relationType, foreignKeyFact, name, description, createdAt, targetContext, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

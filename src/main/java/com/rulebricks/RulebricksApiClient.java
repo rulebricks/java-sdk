@@ -10,6 +10,8 @@ import com.rulebricks.resources.assets.AssetsClient;
 import com.rulebricks.resources.contexts.ContextsClient;
 import com.rulebricks.resources.decisions.DecisionsClient;
 import com.rulebricks.resources.flows.FlowsClient;
+import com.rulebricks.resources.infra.InfraClient;
+import com.rulebricks.resources.objects.ObjectsClient;
 import com.rulebricks.resources.rules.RulesClient;
 import com.rulebricks.resources.tests.TestsClient;
 import com.rulebricks.resources.users.UsersClient;
@@ -21,6 +23,8 @@ public class RulebricksApiClient {
 
   protected final Supplier<RulesClient> rulesClient;
 
+  protected final Supplier<InfraClient> infraClient;
+
   protected final Supplier<FlowsClient> flowsClient;
 
   protected final Supplier<DecisionsClient> decisionsClient;
@@ -31,6 +35,8 @@ public class RulebricksApiClient {
 
   protected final Supplier<ValuesClient> valuesClient;
 
+  protected final Supplier<ObjectsClient> objectsClient;
+
   protected final Supplier<ContextsClient> contextsClient;
 
   protected final Supplier<TestsClient> testsClient;
@@ -38,17 +44,23 @@ public class RulebricksApiClient {
   public RulebricksApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rulesClient = Suppliers.memoize(() -> new RulesClient(clientOptions));
+    this.infraClient = Suppliers.memoize(() -> new InfraClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new FlowsClient(clientOptions));
     this.decisionsClient = Suppliers.memoize(() -> new DecisionsClient(clientOptions));
     this.usersClient = Suppliers.memoize(() -> new UsersClient(clientOptions));
     this.assetsClient = Suppliers.memoize(() -> new AssetsClient(clientOptions));
     this.valuesClient = Suppliers.memoize(() -> new ValuesClient(clientOptions));
+    this.objectsClient = Suppliers.memoize(() -> new ObjectsClient(clientOptions));
     this.contextsClient = Suppliers.memoize(() -> new ContextsClient(clientOptions));
     this.testsClient = Suppliers.memoize(() -> new TestsClient(clientOptions));
   }
 
   public RulesClient rules() {
     return this.rulesClient.get();
+  }
+
+  public InfraClient infra() {
+    return this.infraClient.get();
   }
 
   public FlowsClient flows() {
@@ -69,6 +81,10 @@ public class RulebricksApiClient {
 
   public ValuesClient values() {
     return this.valuesClient.get();
+  }
+
+  public ObjectsClient objects() {
+    return this.objectsClient.get();
   }
 
   public ContextsClient contexts() {

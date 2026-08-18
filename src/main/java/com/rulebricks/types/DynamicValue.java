@@ -39,22 +39,25 @@ public final class DynamicValue {
 
   private final Optional<List<String>> userGroups;
 
+  private final Optional<Map<String, Object>> metadata;
+
   private final Map<String, Object> additionalProperties;
 
   private DynamicValue(String id, String name, String type, Optional<DynamicValueValue> value,
       Optional<List<RuleUsage>> usages, Optional<List<String>> userGroups,
-      Map<String, Object> additionalProperties) {
+      Optional<Map<String, Object>> metadata, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.type = type;
     this.value = value;
     this.usages = usages;
     this.userGroups = userGroups;
+    this.metadata = metadata;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Unique identifier for the dynamic value.
+   * @return Unique identifier for the vocabulary value.
    */
   @JsonProperty("id")
   public String getId() {
@@ -62,7 +65,7 @@ public final class DynamicValue {
   }
 
   /**
-   * @return Name of the dynamic value (may include dot notation for nested properties).
+   * @return Name of the vocabulary value (may include dot notation for nested properties).
    */
   @JsonProperty("name")
   public String getName() {
@@ -78,7 +81,7 @@ public final class DynamicValue {
   }
 
   /**
-   * @return The actual value - can be any valid JSON type
+   * @return The actual value - can be any valid JSON type. Materialized by default when the payload contains value-to-value references; with resolve=false the stored payload is returned as-is, with ValueReference markers intact.
    */
   @JsonProperty("value")
   public Optional<DynamicValueValue> getValue() {
@@ -86,7 +89,7 @@ public final class DynamicValue {
   }
 
   /**
-   * @return Rules that use this dynamic value (only included when 'include=usage' parameter is used).
+   * @return Rules that use this vocabulary value (only included when 'include=usage' parameter is used).
    */
   @JsonProperty("usages")
   public Optional<List<RuleUsage>> getUsages() {
@@ -101,6 +104,14 @@ public final class DynamicValue {
     return userGroups;
   }
 
+  /**
+   * @return Arbitrary metadata attached to this value (set via metadata_by_name on writes). System-managed values carry provenance here (e.g. the object that generated them).
+   */
+  @JsonProperty("metadata")
+  public Optional<Map<String, Object>> getMetadata() {
+    return metadata;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -113,12 +124,12 @@ public final class DynamicValue {
   }
 
   private boolean equalTo(DynamicValue other) {
-    return id.equals(other.id) && name.equals(other.name) && type.equals(other.type) && value.equals(other.value) && usages.equals(other.usages) && userGroups.equals(other.userGroups);
+    return id.equals(other.id) && name.equals(other.name) && type.equals(other.type) && value.equals(other.value) && usages.equals(other.usages) && userGroups.equals(other.userGroups) && metadata.equals(other.metadata);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.type, this.value, this.usages, this.userGroups);
+    return Objects.hash(this.id, this.name, this.type, this.value, this.usages, this.userGroups, this.metadata);
   }
 
   @java.lang.Override
@@ -132,7 +143,7 @@ public final class DynamicValue {
 
   public interface IdStage {
     /**
-     * <p>Unique identifier for the dynamic value.</p>
+     * <p>Unique identifier for the vocabulary value.</p>
      */
     NameStage id(@NotNull String id);
 
@@ -141,7 +152,7 @@ public final class DynamicValue {
 
   public interface NameStage {
     /**
-     * <p>Name of the dynamic value (may include dot notation for nested properties).</p>
+     * <p>Name of the vocabulary value (may include dot notation for nested properties).</p>
      */
     TypeStage name(@NotNull String name);
   }
@@ -161,14 +172,14 @@ public final class DynamicValue {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The actual value - can be any valid JSON type</p>
+     * <p>The actual value - can be any valid JSON type. Materialized by default when the payload contains value-to-value references; with resolve=false the stored payload is returned as-is, with ValueReference markers intact.</p>
      */
     _FinalStage value(Optional<DynamicValueValue> value);
 
     _FinalStage value(DynamicValueValue value);
 
     /**
-     * <p>Rules that use this dynamic value (only included when 'include=usage' parameter is used).</p>
+     * <p>Rules that use this vocabulary value (only included when 'include=usage' parameter is used).</p>
      */
     _FinalStage usages(Optional<List<RuleUsage>> usages);
 
@@ -180,6 +191,13 @@ public final class DynamicValue {
     _FinalStage userGroups(Optional<List<String>> userGroups);
 
     _FinalStage userGroups(List<String> userGroups);
+
+    /**
+     * <p>Arbitrary metadata attached to this value (set via metadata_by_name on writes). System-managed values carry provenance here (e.g. the object that generated them).</p>
+     */
+    _FinalStage metadata(Optional<Map<String, Object>> metadata);
+
+    _FinalStage metadata(Map<String, Object> metadata);
   }
 
   @JsonIgnoreProperties(
@@ -191,6 +209,8 @@ public final class DynamicValue {
     private String name;
 
     private String type;
+
+    private Optional<Map<String, Object>> metadata = Optional.empty();
 
     private Optional<List<String>> userGroups = Optional.empty();
 
@@ -212,12 +232,13 @@ public final class DynamicValue {
       value(other.getValue());
       usages(other.getUsages());
       userGroups(other.getUserGroups());
+      metadata(other.getMetadata());
       return this;
     }
 
     /**
-     * <p>Unique identifier for the dynamic value.</p>
-     * <p>Unique identifier for the dynamic value.</p>
+     * <p>Unique identifier for the vocabulary value.</p>
+     * <p>Unique identifier for the vocabulary value.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -228,8 +249,8 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>Name of the dynamic value (may include dot notation for nested properties).</p>
-     * <p>Name of the dynamic value (may include dot notation for nested properties).</p>
+     * <p>Name of the vocabulary value (may include dot notation for nested properties).</p>
+     * <p>Name of the vocabulary value (may include dot notation for nested properties).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -248,6 +269,29 @@ public final class DynamicValue {
     @JsonSetter("type")
     public _FinalStage type(@NotNull String type) {
       this.type = Objects.requireNonNull(type, "type must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Arbitrary metadata attached to this value (set via metadata_by_name on writes). System-managed values carry provenance here (e.g. the object that generated them).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage metadata(Map<String, Object> metadata) {
+      this.metadata = Optional.ofNullable(metadata);
+      return this;
+    }
+
+    /**
+     * <p>Arbitrary metadata attached to this value (set via metadata_by_name on writes). System-managed values carry provenance here (e.g. the object that generated them).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "metadata",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage metadata(Optional<Map<String, Object>> metadata) {
+      this.metadata = metadata;
       return this;
     }
 
@@ -275,7 +319,7 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>Rules that use this dynamic value (only included when 'include=usage' parameter is used).</p>
+     * <p>Rules that use this vocabulary value (only included when 'include=usage' parameter is used).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -285,7 +329,7 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>Rules that use this dynamic value (only included when 'include=usage' parameter is used).</p>
+     * <p>Rules that use this vocabulary value (only included when 'include=usage' parameter is used).</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -298,7 +342,7 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>The actual value - can be any valid JSON type</p>
+     * <p>The actual value - can be any valid JSON type. Materialized by default when the payload contains value-to-value references; with resolve=false the stored payload is returned as-is, with ValueReference markers intact.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -308,7 +352,7 @@ public final class DynamicValue {
     }
 
     /**
-     * <p>The actual value - can be any valid JSON type</p>
+     * <p>The actual value - can be any valid JSON type. Materialized by default when the payload contains value-to-value references; with resolve=false the stored payload is returned as-is, with ValueReference markers intact.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -322,7 +366,7 @@ public final class DynamicValue {
 
     @java.lang.Override
     public DynamicValue build() {
-      return new DynamicValue(id, name, type, value, usages, userGroups, additionalProperties);
+      return new DynamicValue(id, name, type, value, usages, userGroups, metadata, additionalProperties);
     }
 
     @java.lang.Override

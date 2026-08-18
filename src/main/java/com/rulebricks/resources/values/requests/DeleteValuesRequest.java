@@ -34,7 +34,7 @@ public final class DeleteValuesRequest {
   }
 
   /**
-   * @return ID of the dynamic value to delete
+   * @return ID of the vocabulary value to delete
    */
   @JsonProperty("id")
   public String getId() {
@@ -72,7 +72,7 @@ public final class DeleteValuesRequest {
 
   public interface IdStage {
     /**
-     * <p>ID of the dynamic value to delete</p>
+     * <p>ID of the vocabulary value to delete</p>
      */
     _FinalStage id(@NotNull String id);
 
@@ -106,8 +106,8 @@ public final class DeleteValuesRequest {
     }
 
     /**
-     * <p>ID of the dynamic value to delete</p>
-     * <p>ID of the dynamic value to delete</p>
+     * <p>ID of the vocabulary value to delete</p>
+     * <p>ID of the vocabulary value to delete</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

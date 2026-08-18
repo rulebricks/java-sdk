@@ -5,7 +5,6 @@
 package com.rulebricks.resources.values;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
@@ -15,19 +14,23 @@ import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.ConflictError;
 import com.rulebricks.errors.ForbiddenError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
+import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.values.requests.DeleteValuesRequest;
 import com.rulebricks.resources.values.requests.ListValuesRequest;
+import com.rulebricks.resources.values.requests.SyncValuesRequest;
 import com.rulebricks.resources.values.requests.UpdateValuesRequest;
-import com.rulebricks.types.DynamicValue;
+import com.rulebricks.resources.values.types.ListValuesResponse;
+import com.rulebricks.resources.values.types.UpdateValuesResponse;
+import com.rulebricks.types.DeleteValueResponse;
 import com.rulebricks.types.Error;
-import com.rulebricks.types.SuccessMessage;
+import com.rulebricks.types.SyncValuesResponse;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
-import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -44,38 +47,56 @@ public class RawValuesClient {
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   * Retrieve vocabulary values for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by user group name or ID when the API key has access to that group. Use the 'include' parameter to control whether usage information is returned. Small workspaces may omit pagination to receive the full catalog as an array (legacy behavior); workspaces above the catalog threshold must paginate with 'limit'/'cursor', which returns { data, next_cursor, total? } ordered by name. The 'prefix' and 'type' filters narrow results to a collection or value type.
    */
-  public RulebricksApiHttpResponse<List<DynamicValue>> list() {
+  public RulebricksApiHttpResponse<ListValuesResponse> list() {
     return list(ListValuesRequest.builder().build());
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   * Retrieve vocabulary values for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by user group name or ID when the API key has access to that group. Use the 'include' parameter to control whether usage information is returned. Small workspaces may omit pagination to receive the full catalog as an array (legacy behavior); workspaces above the catalog threshold must paginate with 'limit'/'cursor', which returns { data, next_cursor, total? } ordered by name. The 'prefix' and 'type' filters narrow results to a collection or value type.
    */
-  public RulebricksApiHttpResponse<List<DynamicValue>> list(RequestOptions requestOptions) {
+  public RulebricksApiHttpResponse<ListValuesResponse> list(RequestOptions requestOptions) {
     return list(ListValuesRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   * Retrieve vocabulary values for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by user group name or ID when the API key has access to that group. Use the 'include' parameter to control whether usage information is returned. Small workspaces may omit pagination to receive the full catalog as an array (legacy behavior); workspaces above the catalog threshold must paginate with 'limit'/'cursor', which returns { data, next_cursor, total? } ordered by name. The 'prefix' and 'type' filters narrow results to a collection or value type.
    */
-  public RulebricksApiHttpResponse<List<DynamicValue>> list(ListValuesRequest request) {
+  public RulebricksApiHttpResponse<ListValuesResponse> list(ListValuesRequest request) {
     return list(request,null);
   }
 
   /**
-   * Retrieve all dynamic values for the authenticated user. Use the 'include' parameter to control whether usage information is returned.
+   * Retrieve vocabulary values for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by user group name or ID when the API key has access to that group. Use the 'include' parameter to control whether usage information is returned. Small workspaces may omit pagination to receive the full catalog as an array (legacy behavior); workspaces above the catalog threshold must paginate with 'limit'/'cursor', which returns { data, next_cursor, total? } ordered by name. The 'prefix' and 'type' filters narrow results to a collection or value type.
    */
-  public RulebricksApiHttpResponse<List<DynamicValue>> list(ListValuesRequest request,
+  public RulebricksApiHttpResponse<ListValuesResponse> list(ListValuesRequest request,
       RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("values");if (request.getName().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
       }
+      if (request.getPrefix().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
+      }
+      if (request.getType().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
+      }
+      if (request.getLimit().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+      }
+      if (request.getCursor().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "cursor", request.getCursor().get(), false);
+      }
+      if (request.getUserGroup().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+      }
       if (request.getInclude().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+      }
+      if (request.getResolve().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "resolve", request.getResolve().get(), false);
       }
       if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -96,7 +117,7 @@ public class RawValuesClient {
         ResponseBody responseBody = response.body();
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response);
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ListValuesResponse.class), response);
         }
         try {
           switch (response.code()) {
@@ -116,16 +137,16 @@ public class RawValuesClient {
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
+     * Update existing vocabulary values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation with keys preserved exactly as sent (e.g. nested 'user_profile.first_name' becomes the value name 'user_profile.first_name'). Writes are set-based upserts keyed by value name - existing values keep their ids, so rule references stay valid - and each call is idempotent, so retrying a failed request is always safe. Imports of any size go through this endpoint (POST /values/bulk is an equivalent alias): drive large dictionaries as a sequence of chunked calls, each bounded by your deployment's request body limit. Payloads may compose values from other values with reference markers: { &quot;$ref&quot;: &quot;&lt;value name&gt;&quot; } references a value by name (existing values first, then values created by the same request), and { &quot;$rb&quot;: &quot;globalValue&quot;, &quot;id&quot;: &quot;&lt;value id&gt;&quot; } references by id. A scalar payload may be a single reference; list payloads may mix literal items and references. References are validated (existence, type match, cycles) before anything is written. Workspaces at or below the catalog threshold receive the full value list back (legacy behavior); larger workspaces receive summary counts ({ created, updated, processed }).
      */
-    public RulebricksApiHttpResponse<List<DynamicValue>> update(UpdateValuesRequest request) {
+    public RulebricksApiHttpResponse<UpdateValuesResponse> update(UpdateValuesRequest request) {
       return update(request,null);
     }
 
     /**
-     * Update existing dynamic values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation and keys are converted to readable format (e.g., 'user_name' becomes 'User Name', nested 'user.contact_info.email' becomes 'User.Contact Info.Email').
+     * Update existing vocabulary values or add new ones for the authenticated user. Supports both flat and nested object structures. Nested objects are automatically flattened using dot notation with keys preserved exactly as sent (e.g. nested 'user_profile.first_name' becomes the value name 'user_profile.first_name'). Writes are set-based upserts keyed by value name - existing values keep their ids, so rule references stay valid - and each call is idempotent, so retrying a failed request is always safe. Imports of any size go through this endpoint (POST /values/bulk is an equivalent alias): drive large dictionaries as a sequence of chunked calls, each bounded by your deployment's request body limit. Payloads may compose values from other values with reference markers: { &quot;$ref&quot;: &quot;&lt;value name&gt;&quot; } references a value by name (existing values first, then values created by the same request), and { &quot;$rb&quot;: &quot;globalValue&quot;, &quot;id&quot;: &quot;&lt;value id&gt;&quot; } references by id. A scalar payload may be a single reference; list payloads may mix literal items and references. References are validated (existence, type match, cycles) before anything is written. Workspaces at or below the catalog threshold receive the full value list back (legacy behavior); larger workspaces receive summary counts ({ created, updated, processed }).
      */
-    public RulebricksApiHttpResponse<List<DynamicValue>> update(UpdateValuesRequest request,
+    public RulebricksApiHttpResponse<UpdateValuesResponse> update(UpdateValuesRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -156,7 +177,7 @@ public class RawValuesClient {
           ResponseBody responseBody = response.body();
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<DynamicValue>>() {}), response);
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UpdateValuesResponse.class), response);
           }
           try {
             switch (response.code()) {
@@ -177,16 +198,16 @@ public class RawValuesClient {
       }
 
       /**
-       * Delete a specific dynamic value for the authenticated user by its ID.
+       * Delete a specific vocabulary value for the authenticated user by its ID. Deletion is blocked while the value is referenced by any rule or flow. Values whose entire payload references the deleted value are deleted with it (cascade), and list values referencing it lose the referencing items; both effects are reported in the response.
        */
-      public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request) {
+      public RulebricksApiHttpResponse<DeleteValueResponse> delete(DeleteValuesRequest request) {
         return delete(request,null);
       }
 
       /**
-       * Delete a specific dynamic value for the authenticated user by its ID.
+       * Delete a specific vocabulary value for the authenticated user by its ID. Deletion is blocked while the value is referenced by any rule or flow. Values whose entire payload references the deleted value are deleted with it (cascade), and list values referencing it lose the referencing items; both effects are reported in the response.
        */
-      public RulebricksApiHttpResponse<SuccessMessage> delete(DeleteValuesRequest request,
+      public RulebricksApiHttpResponse<DeleteValueResponse> delete(DeleteValuesRequest request,
           RequestOptions requestOptions) {
         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -210,7 +231,7 @@ public class RawValuesClient {
             ResponseBody responseBody = response.body();
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             if (response.isSuccessful()) {
-              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SuccessMessage.class), response);
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DeleteValueResponse.class), response);
             }
             try {
               switch (response.code()) {
@@ -229,4 +250,67 @@ public class RawValuesClient {
             throw new RulebricksApiException("Network error executing HTTP request", e);
           }
         }
-      }
+
+        /**
+         * Declaratively makes a collection exactly equal to the payload. Values in the payload are upserted (Existing values keep their IDs), and values under the collection that are absent from the payload are archived by default. The <code>sync</code> endpoint supports uploading a particularly large amount of values (100k+) in chunks, using the <code>sync_id</code> parameter to track the run.
+         */
+        public RulebricksApiHttpResponse<SyncValuesResponse> sync(SyncValuesRequest request) {
+          return sync(request,null);
+        }
+
+        /**
+         * Declaratively makes a collection exactly equal to the payload. Values in the payload are upserted (Existing values keep their IDs), and values under the collection that are absent from the payload are archived by default. The <code>sync</code> endpoint supports uploading a particularly large amount of values (100k+) in chunks, using the <code>sync_id</code> parameter to track the run.
+         */
+        public RulebricksApiHttpResponse<SyncValuesResponse> sync(SyncValuesRequest request,
+            RequestOptions requestOptions) {
+          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+            .addPathSegments("values/sync");if (requestOptions != null) {
+              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                httpUrl.addQueryParameter(_key, _value);
+              } );
+            }
+            RequestBody body;
+            try {
+              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+            }
+            catch(JsonProcessingException e) {
+              throw new RulebricksApiException("Failed to serialize request", e);
+            }
+            Request okhttpRequest = new Request.Builder()
+              .url(httpUrl.build())
+              .method("POST", body)
+              .headers(Headers.of(clientOptions.headers(requestOptions)))
+              .addHeader("Content-Type", "application/json")
+              .addHeader("Accept", "application/json")
+              .build();
+            OkHttpClient client = clientOptions.httpClient();
+            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+              client = clientOptions.httpClientWithTimeout(requestOptions);
+            }
+            try (Response response = client.newCall(okhttpRequest).execute()) {
+              ResponseBody responseBody = response.body();
+              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+              if (response.isSuccessful()) {
+                return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SyncValuesResponse.class), response);
+              }
+              try {
+                switch (response.code()) {
+                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                }
+              }
+              catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+              }
+              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+              throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+            }
+            catch (IOException e) {
+              throw new RulebricksApiException("Network error executing HTTP request", e);
+            }
+          }
+        }

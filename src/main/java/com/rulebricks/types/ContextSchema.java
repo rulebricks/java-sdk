@@ -48,7 +48,7 @@ public final class ContextSchema {
   }
 
   /**
-   * @return Fields derived from bound rule/flow outputs.
+   * @return Expression-computed fields. Each entry supplies an <code>expression</code> evaluated from base facts, tracked history, and configured relationships.
    */
   @JsonProperty("derived")
   public Optional<List<ContextSchemaField>> getDerived() {
@@ -122,7 +122,7 @@ public final class ContextSchema {
     }
 
     /**
-     * <p>Fields derived from bound rule/flow outputs.</p>
+     * <p>Expression-computed fields. Each entry supplies an <code>expression</code> evaluated from base facts, tracked history, and configured relationships.</p>
      */
     @JsonSetter(
         value = "derived",

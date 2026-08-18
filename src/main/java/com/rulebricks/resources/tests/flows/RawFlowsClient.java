@@ -19,7 +19,9 @@ import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.tests.flows.requests.CreateFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.DeleteFlowsRequest;
 import com.rulebricks.resources.tests.flows.requests.ListFlowsRequest;
+import com.rulebricks.resources.tests.flows.requests.RunFlowsRequest;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.RunTestsResponse;
 import com.rulebricks.types.Test;
 import java.io.IOException;
 import java.lang.Object;
@@ -241,4 +243,68 @@ public class RawFlowsClient {
             throw new RulebricksApiException("Network error executing HTTP request", e);
           }
         }
-      }
+
+        /**
+         * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+         */
+        public RulebricksApiHttpResponse<RunTestsResponse> run(String slug,
+            RunFlowsRequest request) {
+          return run(slug,request,null);
+        }
+
+        /**
+         * Executes every test in the flow's test suite (or only the critical tests when <code>critical_only</code> is true) against the flow's current graph and returns a summary of which passed, which failed, and whether any CRITICAL test failed.
+         */
+        public RulebricksApiHttpResponse<RunTestsResponse> run(String slug, RunFlowsRequest request,
+            RequestOptions requestOptions) {
+          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+            .addPathSegments("admin/flows")
+            .addPathSegment(slug)
+            .addPathSegments("tests")
+            .addPathSegments("run");if (requestOptions != null) {
+              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                httpUrl.addQueryParameter(_key, _value);
+              } );
+            }
+            RequestBody body;
+            try {
+              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+            }
+            catch(JsonProcessingException e) {
+              throw new RulebricksApiException("Failed to serialize request", e);
+            }
+            Request okhttpRequest = new Request.Builder()
+              .url(httpUrl.build())
+              .method("POST", body)
+              .headers(Headers.of(clientOptions.headers(requestOptions)))
+              .addHeader("Content-Type", "application/json")
+              .addHeader("Accept", "application/json")
+              .build();
+            OkHttpClient client = clientOptions.httpClient();
+            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+              client = clientOptions.httpClientWithTimeout(requestOptions);
+            }
+            try (Response response = client.newCall(okhttpRequest).execute()) {
+              ResponseBody responseBody = response.body();
+              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+              if (response.isSuccessful()) {
+                return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RunTestsResponse.class), response);
+              }
+              try {
+                switch (response.code()) {
+                  case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                }
+              }
+              catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+              }
+              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+              throw new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+            }
+            catch (IOException e) {
+              throw new RulebricksApiException("Network error executing HTTP request", e);
+            }
+          }
+        }

@@ -14,29 +14,33 @@ import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.ContentTooLargeError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
+import com.rulebricks.errors.PaymentRequiredError;
+import com.rulebricks.resources.contexts.requests.BulkIngestContextsRequest;
 import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
 import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
-import com.rulebricks.resources.contexts.requests.ExecuteContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
-import com.rulebricks.resources.contexts.requests.SolveContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
+import com.rulebricks.types.ContextBatchResponse;
 import com.rulebricks.types.ContextInstanceHistory;
 import com.rulebricks.types.ContextInstancePendingResponse;
 import com.rulebricks.types.ContextInstanceState;
 import com.rulebricks.types.DeleteContextInstanceResponse;
 import com.rulebricks.types.Error;
-import com.rulebricks.types.SolveContextFlowResponse;
-import com.rulebricks.types.SolveContextRuleResponse;
 import com.rulebricks.types.SubmitContextDataResponse;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.RuntimeException;
 import java.lang.String;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -89,7 +93,10 @@ public class AsyncRawContextsClient {
 
       .addPathSegments("contexts")
       .addPathSegment(slug)
-      .addPathSegment(instance);if (requestOptions != null) {
+      .addPathSegment(instance);if (request.getIncludeRelations().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "include_relations", request.getIncludeRelations().get(), false);
+      }
+      if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );
@@ -493,26 +500,25 @@ public class AsyncRawContextsClient {
             }
 
             /**
-             * Execute a specific rule using the context instance's state as input.
+             * Re-evaluate registered pending rule and flow executions for this instance after their fact or relationship dependencies may have become available. This does not run every bound asset.
              */
-            public CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> solve(
-                String slug, String instance, String ruleSlug, SolveContextsRequest request) {
-              return solve(slug,instance,ruleSlug,request,null);
+            public CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> cascade(
+                String slug, String instance, CascadeContextsRequest request) {
+              return cascade(slug,instance,request,null);
             }
 
             /**
-             * Execute a specific rule using the context instance's state as input.
+             * Re-evaluate registered pending rule and flow executions for this instance after their fact or relationship dependencies may have become available. This does not run every bound asset.
              */
-            public CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> solve(
-                String slug, String instance, String ruleSlug, SolveContextsRequest request,
+            public CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> cascade(
+                String slug, String instance, CascadeContextsRequest request,
                 RequestOptions requestOptions) {
               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                 .addPathSegments("contexts")
                 .addPathSegment(slug)
                 .addPathSegment(instance)
-                .addPathSegments("solve")
-                .addPathSegment(ruleSlug);if (requestOptions != null) {
+                .addPathSegments("cascade");if (requestOptions != null) {
                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                     httpUrl.addQueryParameter(_key, _value);
                   } );
@@ -535,20 +541,18 @@ public class AsyncRawContextsClient {
                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                   client = clientOptions.httpClientWithTimeout(requestOptions);
                 }
-                CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> future = new CompletableFuture<>();
+                CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> future = new CompletableFuture<>();
                 client.newCall(okhttpRequest).enqueue(new Callback() {
                   @Override
                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                       if (response.isSuccessful()) {
-                        future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SolveContextRuleResponse.class), response));
+                        future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CascadeContextResponse.class), response));
                         return;
                       }
                       try {
                         switch (response.code()) {
-                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
-                          return;
                           case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                           return;
                           case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
@@ -576,25 +580,41 @@ public class AsyncRawContextsClient {
               }
 
               /**
-               * Trigger re-evaluation of all bound rules and flows for the instance.
+               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
                */
-              public CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> cascade(
-                  String slug, String instance, CascadeContextsRequest request) {
-                return cascade(slug,instance,request,null);
+              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                  String slug, List<Map<String, Object>> body) {
+                return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build());
               }
 
               /**
-               * Trigger re-evaluation of all bound rules and flows for the instance.
+               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
                */
-              public CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> cascade(
-                  String slug, String instance, CascadeContextsRequest request,
-                  RequestOptions requestOptions) {
+              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                  String slug, List<Map<String, Object>> body, RequestOptions requestOptions) {
+                return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build(), requestOptions);
+              }
+
+              /**
+               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
+               */
+              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                  String slug, BulkIngestContextsRequest request) {
+                return bulkIngest(slug,request,null);
+              }
+
+              /**
+               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests. On the cloud platform, a batch may not exceed the plan's remaining monthly rule executions (402 above it) or a 4.5MB request body, and executed rules count toward plan usage. Private (self-hosted) deployments run batches through the high-performance server with no plan gating, a 10,000-records-per-request default cap (CONTEXT_BATCH_MAX_ITEMS), and NDJSON support (Content-Type: application/x-ndjson).
+               */
+              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                  String slug, BulkIngestContextsRequest request, RequestOptions requestOptions) {
                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                  .addPathSegments("contexts")
-                  .addPathSegment(slug)
-                  .addPathSegment(instance)
-                  .addPathSegments("cascade");if (requestOptions != null) {
+                  .addPathSegments("contexts/batch")
+                  .addPathSegment(slug);if (request.getInclude().isPresent()) {
+                    QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+                  }
+                  if (requestOptions != null) {
                     requestOptions.getQueryParameters().forEach((_key, _value) -> {
                       httpUrl.addQueryParameter(_key, _value);
                     } );
@@ -603,33 +623,39 @@ public class AsyncRawContextsClient {
                   try {
                     body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                   }
-                  catch(JsonProcessingException e) {
-                    throw new RulebricksApiException("Failed to serialize request", e);
+                  catch(Exception e) {
+                    throw new RuntimeException(e);
                   }
-                  Request okhttpRequest = new Request.Builder()
+                  Request.Builder _requestBuilder = new Request.Builder()
                     .url(httpUrl.build())
                     .method("POST", body)
                     .headers(Headers.of(clientOptions.headers(requestOptions)))
                     .addHeader("Content-Type", "application/json")
-                    .addHeader("Accept", "application/json")
-                    .build();
+                    .addHeader("Accept", "application/json");
+                  Request okhttpRequest = _requestBuilder.build();
                   OkHttpClient client = clientOptions.httpClient();
                   if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                     client = clientOptions.httpClientWithTimeout(requestOptions);
                   }
-                  CompletableFuture<RulebricksApiHttpResponse<CascadeContextResponse>> future = new CompletableFuture<>();
+                  CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> future = new CompletableFuture<>();
                   client.newCall(okhttpRequest).enqueue(new Callback() {
                     @Override
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                       try (ResponseBody responseBody = response.body()) {
                         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                         if (response.isSuccessful()) {
-                          future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CascadeContextResponse.class), response));
+                          future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextBatchResponse.class), response));
                           return;
                         }
                         try {
                           switch (response.code()) {
+                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            return;
+                            case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            return;
                             case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            return;
+                            case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                             return;
                             case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                             return;
@@ -654,87 +680,4 @@ public class AsyncRawContextsClient {
                   });
                   return future;
                 }
-
-                /**
-                 * Execute a specific flow using the context instance's state as input.
-                 */
-                public CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> execute(
-                    String slug, String instance, String flowSlug, ExecuteContextsRequest request) {
-                  return execute(slug,instance,flowSlug,request,null);
-                }
-
-                /**
-                 * Execute a specific flow using the context instance's state as input.
-                 */
-                public CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> execute(
-                    String slug, String instance, String flowSlug, ExecuteContextsRequest request,
-                    RequestOptions requestOptions) {
-                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-                    .addPathSegments("contexts")
-                    .addPathSegment(slug)
-                    .addPathSegment(instance)
-                    .addPathSegments("flows")
-                    .addPathSegment(flowSlug);if (requestOptions != null) {
-                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
-                        httpUrl.addQueryParameter(_key, _value);
-                      } );
-                    }
-                    RequestBody body;
-                    try {
-                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
-                    }
-                    catch(JsonProcessingException e) {
-                      throw new RulebricksApiException("Failed to serialize request", e);
-                    }
-                    Request okhttpRequest = new Request.Builder()
-                      .url(httpUrl.build())
-                      .method("POST", body)
-                      .headers(Headers.of(clientOptions.headers(requestOptions)))
-                      .addHeader("Content-Type", "application/json")
-                      .addHeader("Accept", "application/json")
-                      .build();
-                    OkHttpClient client = clientOptions.httpClient();
-                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-                      client = clientOptions.httpClientWithTimeout(requestOptions);
-                    }
-                    CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> future = new CompletableFuture<>();
-                    client.newCall(okhttpRequest).enqueue(new Callback() {
-                      @Override
-                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        try (ResponseBody responseBody = response.body()) {
-                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-                          if (response.isSuccessful()) {
-                            future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SolveContextFlowResponse.class), response));
-                            return;
-                          }
-                          try {
-                            switch (response.code()) {
-                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
-                              return;
-                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
-                              return;
-                              case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
-                              return;
-                            }
-                          }
-                          catch (JsonProcessingException ignored) {
-                            // unable to map error response, throwing generic error
-                          }
-                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-                          future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
-                          return;
-                        }
-                        catch (IOException e) {
-                          future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
-                        }
-                      }
-
-                      @Override
-                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
-                      }
-                    });
-                    return future;
-                  }
-                }
+              }

@@ -8,33 +8,59 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = GetContextsRequest.Builder.class
 )
 public final class GetContextsRequest {
+  private final Optional<String> includeRelations;
+
   private final Map<String, Object> additionalProperties;
 
-  private GetContextsRequest(Map<String, Object> additionalProperties) {
+  private GetContextsRequest(Optional<String> includeRelations,
+      Map<String, Object> additionalProperties) {
+    this.includeRelations = includeRelations;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Comma-separated relationship names to include in the response under a 'relations' key (has_many relations return a list of related instance states; has_one/belongs_to return a single state or null). Use '*' for all relationships. Omitted by default - related instances are never fetched into the payload unrequested.
+   */
+  @JsonProperty("include_relations")
+  public Optional<String> getIncludeRelations() {
+    return includeRelations;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetContextsRequest;
+    return other instanceof GetContextsRequest && equalTo((GetContextsRequest) other);
   }
 
   @JsonAnyGetter
   public Map<String, Object> getAdditionalProperties() {
     return this.additionalProperties;
+  }
+
+  private boolean equalTo(GetContextsRequest other) {
+    return includeRelations.equals(other.includeRelations);
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.includeRelations);
   }
 
   @java.lang.Override
@@ -50,6 +76,8 @@ public final class GetContextsRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> includeRelations = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -57,11 +85,29 @@ public final class GetContextsRequest {
     }
 
     public Builder from(GetContextsRequest other) {
+      includeRelations(other.getIncludeRelations());
+      return this;
+    }
+
+    /**
+     * <p>Comma-separated relationship names to include in the response under a 'relations' key (has_many relations return a list of related instance states; has_one/belongs_to return a single state or null). Use '*' for all relationships. Omitted by default - related instances are never fetched into the payload unrequested.</p>
+     */
+    @JsonSetter(
+        value = "include_relations",
+        nulls = Nulls.SKIP
+    )
+    public Builder includeRelations(Optional<String> includeRelations) {
+      this.includeRelations = includeRelations;
+      return this;
+    }
+
+    public Builder includeRelations(String includeRelations) {
+      this.includeRelations = Optional.ofNullable(includeRelations);
       return this;
     }
 
     public GetContextsRequest build() {
-      return new GetContextsRequest(additionalProperties);
+      return new GetContextsRequest(includeRelations, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

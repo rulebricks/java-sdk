@@ -21,6 +21,7 @@ import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,11 +47,16 @@ public final class FlowDetail implements IFlowBase {
 
   private final Optional<FlowDetailContext> context;
 
+  private final Optional<List<String>> userGroups;
+
+  private final Optional<Folder> folder;
+
   private final Map<String, Object> additionalProperties;
 
   private FlowDetail(Optional<String> id, Optional<String> name, Optional<String> description,
       Optional<String> slug, Optional<Boolean> published, Optional<OffsetDateTime> updatedAt,
       Optional<FlowDetailOriginRule> originRule, Optional<FlowDetailContext> context,
+      Optional<List<String>> userGroups, Optional<Folder> folder,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
@@ -60,6 +66,8 @@ public final class FlowDetail implements IFlowBase {
     this.updatedAt = updatedAt;
     this.originRule = originRule;
     this.context = context;
+    this.userGroups = userGroups;
+    this.folder = folder;
     this.additionalProperties = additionalProperties;
   }
 
@@ -137,6 +145,25 @@ public final class FlowDetail implements IFlowBase {
     return context;
   }
 
+  /**
+   * @return The user groups this flow is assigned to.
+   */
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
+  }
+
+  /**
+   * @return The folder this flow belongs to, if any.
+   */
+  @JsonIgnore
+  public Optional<Folder> getFolder() {
+    if (folder == null) {
+      return Optional.empty();
+    }
+    return folder;
+  }
+
   @JsonInclude(
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
@@ -155,6 +182,15 @@ public final class FlowDetail implements IFlowBase {
     return context;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("folder")
+  private Optional<Folder> _getFolder() {
+    return folder;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -167,12 +203,12 @@ public final class FlowDetail implements IFlowBase {
   }
 
   private boolean equalTo(FlowDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && originRule.equals(other.originRule) && context.equals(other.context);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && originRule.equals(other.originRule) && context.equals(other.context) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.originRule, this.context);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.originRule, this.context, this.userGroups, this.folder);
   }
 
   @java.lang.Override
@@ -204,6 +240,10 @@ public final class FlowDetail implements IFlowBase {
 
     private Optional<FlowDetailContext> context = Optional.empty();
 
+    private Optional<List<String>> userGroups = Optional.empty();
+
+    private Optional<Folder> folder = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -219,6 +259,8 @@ public final class FlowDetail implements IFlowBase {
       updatedAt(other.getUpdatedAt());
       originRule(other.getOriginRule());
       context(other.getContext());
+      userGroups(other.getUserGroups());
+      folder(other.getFolder());
       return this;
     }
 
@@ -384,8 +426,55 @@ public final class FlowDetail implements IFlowBase {
       return this;
     }
 
+    /**
+     * <p>The user groups this flow is assigned to.</p>
+     */
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
+    /**
+     * <p>The folder this flow belongs to, if any.</p>
+     */
+    @JsonSetter(
+        value = "folder",
+        nulls = Nulls.SKIP
+    )
+    public Builder folder(Optional<Folder> folder) {
+      this.folder = folder;
+      return this;
+    }
+
+    public Builder folder(Folder folder) {
+      this.folder = Optional.ofNullable(folder);
+      return this;
+    }
+
+    public Builder folder(Nullable<Folder> folder) {
+      if (folder.isNull()) {
+        this.folder = null;
+      }
+      else if (folder.isEmpty()) {
+        this.folder = Optional.empty();
+      }
+      else {
+        this.folder = Optional.of(folder.get());
+      }
+      return this;
+    }
+
     public FlowDetail build() {
-      return new FlowDetail(id, name, description, slug, published, updatedAt, originRule, context, additionalProperties);
+      return new FlowDetail(id, name, description, slug, published, updatedAt, originRule, context, userGroups, folder, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

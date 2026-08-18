@@ -46,17 +46,13 @@ public final class ContextBase implements IContextBase {
 
   private final Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch;
 
-  private final Optional<String> webhookOnSolve;
-
-  private final Optional<String> webhookOnExpire;
-
   private final Map<String, Object> additionalProperties;
 
   private ContextBase(Optional<String> id, Optional<String> name, Optional<String> slug,
       Optional<String> description, Optional<Boolean> autoExecuteDecisions,
       Optional<Integer> ttlSeconds, Optional<Integer> historyLimit,
-      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<String> webhookOnSolve,
-      Optional<String> webhookOnExpire, Map<String, Object> additionalProperties) {
+      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.slug = slug;
@@ -65,8 +61,6 @@ public final class ContextBase implements IContextBase {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
-    this.webhookOnSolve = webhookOnSolve;
-    this.webhookOnExpire = webhookOnExpire;
     this.additionalProperties = additionalProperties;
   }
 
@@ -107,7 +101,7 @@ public final class ContextBase implements IContextBase {
   }
 
   /**
-   * @return When true, bound rules and flows automatically execute when their inputs are satisfied. When false, users must manually call /solve or /flows endpoints.
+   * @return When true, bound rules and flows automatically execute when their inputs are satisfied. When false, callers must execute them explicitly via /contexts/{slug}/{instance}/solve/{ruleSlug} or /contexts/{slug}/{instance}/flows/{flowSlug}.
    */
   @JsonProperty("auto_execute_decisions")
   @java.lang.Override
@@ -137,35 +131,11 @@ public final class ContextBase implements IContextBase {
   }
 
   /**
-   * @return How to handle fields that don't match the schema: 'ignore' filters them out, 'reject' returns an error.
+   * @return How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or batch item), and <code>store</code> persists them alongside declared facts.
    */
   @JsonProperty("on_schema_mismatch")
   public Optional<ContextBaseOnSchemaMismatch> getOnSchemaMismatch() {
     return onSchemaMismatch;
-  }
-
-  /**
-   * @return Webhook URL called when a rule or flow successfully solves for a live context.
-   */
-  @JsonIgnore
-  @java.lang.Override
-  public Optional<String> getWebhookOnSolve() {
-    if (webhookOnSolve == null) {
-      return Optional.empty();
-    }
-    return webhookOnSolve;
-  }
-
-  /**
-   * @return Webhook URL called when a live context expires due to TTL.
-   */
-  @JsonIgnore
-  @java.lang.Override
-  public Optional<String> getWebhookOnExpire() {
-    if (webhookOnExpire == null) {
-      return Optional.empty();
-    }
-    return webhookOnExpire;
   }
 
   @JsonInclude(
@@ -175,24 +145,6 @@ public final class ContextBase implements IContextBase {
   @JsonProperty("ttl_seconds")
   private Optional<Integer> _getTtlSeconds() {
     return ttlSeconds;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("webhook_on_solve")
-  private Optional<String> _getWebhookOnSolve() {
-    return webhookOnSolve;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("webhook_on_expire")
-  private Optional<String> _getWebhookOnExpire() {
-    return webhookOnExpire;
   }
 
   @java.lang.Override
@@ -207,12 +159,12 @@ public final class ContextBase implements IContextBase {
   }
 
   private boolean equalTo(ContextBase other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && webhookOnSolve.equals(other.webhookOnSolve) && webhookOnExpire.equals(other.webhookOnExpire);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.webhookOnSolve, this.webhookOnExpire);
+    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
   }
 
   @java.lang.Override
@@ -244,10 +196,6 @@ public final class ContextBase implements IContextBase {
 
     private Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
-    private Optional<String> webhookOnSolve = Optional.empty();
-
-    private Optional<String> webhookOnExpire = Optional.empty();
-
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -263,8 +211,6 @@ public final class ContextBase implements IContextBase {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
-      webhookOnSolve(other.getWebhookOnSolve());
-      webhookOnExpire(other.getWebhookOnExpire());
       return this;
     }
 
@@ -337,7 +283,7 @@ public final class ContextBase implements IContextBase {
     }
 
     /**
-     * <p>When true, bound rules and flows automatically execute when their inputs are satisfied. When false, users must manually call /solve or /flows endpoints.</p>
+     * <p>When true, bound rules and flows automatically execute when their inputs are satisfied. When false, callers must execute them explicitly via /contexts/{slug}/{instance}/solve/{ruleSlug} or /contexts/{slug}/{instance}/flows/{flowSlug}.</p>
      */
     @JsonSetter(
         value = "auto_execute_decisions",
@@ -401,7 +347,7 @@ public final class ContextBase implements IContextBase {
     }
 
     /**
-     * <p>How to handle fields that don't match the schema: 'ignore' filters them out, 'reject' returns an error.</p>
+     * <p>How to handle submitted fields that don't match the schema: <code>ignore</code> drops them, <code>reject</code> fails the request (or batch item), and <code>store</code> persists them alongside declared facts.</p>
      */
     @JsonSetter(
         value = "on_schema_mismatch",
@@ -417,68 +363,8 @@ public final class ContextBase implements IContextBase {
       return this;
     }
 
-    /**
-     * <p>Webhook URL called when a rule or flow successfully solves for a live context.</p>
-     */
-    @JsonSetter(
-        value = "webhook_on_solve",
-        nulls = Nulls.SKIP
-    )
-    public Builder webhookOnSolve(Optional<String> webhookOnSolve) {
-      this.webhookOnSolve = webhookOnSolve;
-      return this;
-    }
-
-    public Builder webhookOnSolve(String webhookOnSolve) {
-      this.webhookOnSolve = Optional.ofNullable(webhookOnSolve);
-      return this;
-    }
-
-    public Builder webhookOnSolve(Nullable<String> webhookOnSolve) {
-      if (webhookOnSolve.isNull()) {
-        this.webhookOnSolve = null;
-      }
-      else if (webhookOnSolve.isEmpty()) {
-        this.webhookOnSolve = Optional.empty();
-      }
-      else {
-        this.webhookOnSolve = Optional.of(webhookOnSolve.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>Webhook URL called when a live context expires due to TTL.</p>
-     */
-    @JsonSetter(
-        value = "webhook_on_expire",
-        nulls = Nulls.SKIP
-    )
-    public Builder webhookOnExpire(Optional<String> webhookOnExpire) {
-      this.webhookOnExpire = webhookOnExpire;
-      return this;
-    }
-
-    public Builder webhookOnExpire(String webhookOnExpire) {
-      this.webhookOnExpire = Optional.ofNullable(webhookOnExpire);
-      return this;
-    }
-
-    public Builder webhookOnExpire(Nullable<String> webhookOnExpire) {
-      if (webhookOnExpire.isNull()) {
-        this.webhookOnExpire = null;
-      }
-      else if (webhookOnExpire.isEmpty()) {
-        this.webhookOnExpire = Optional.empty();
-      }
-      else {
-        this.webhookOnExpire = Optional.of(webhookOnExpire.get());
-      }
-      return this;
-    }
-
     public ContextBase build() {
-      return new ContextBase(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, webhookOnSolve, webhookOnExpire, additionalProperties);
+      return new ContextBase(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

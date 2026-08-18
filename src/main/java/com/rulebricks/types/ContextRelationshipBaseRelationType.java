@@ -9,18 +9,18 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.lang.Object;
 import java.lang.String;
 
-public final class ContextRelationshipBaseType {
-  public static final ContextRelationshipBaseType HAS_MANY = new ContextRelationshipBaseType(Value.HAS_MANY, "has_many");
+public final class ContextRelationshipBaseRelationType {
+  public static final ContextRelationshipBaseRelationType HAS_MANY = new ContextRelationshipBaseRelationType(Value.HAS_MANY, "has_many");
 
-  public static final ContextRelationshipBaseType BELONGS_TO = new ContextRelationshipBaseType(Value.BELONGS_TO, "belongs_to");
+  public static final ContextRelationshipBaseRelationType BELONGS_TO = new ContextRelationshipBaseRelationType(Value.BELONGS_TO, "belongs_to");
 
-  public static final ContextRelationshipBaseType HAS_ONE = new ContextRelationshipBaseType(Value.HAS_ONE, "has_one");
+  public static final ContextRelationshipBaseRelationType HAS_ONE = new ContextRelationshipBaseRelationType(Value.HAS_ONE, "has_one");
 
   private final Value value;
 
   private final String string;
 
-  ContextRelationshipBaseType(Value value, String string) {
+  ContextRelationshipBaseRelationType(Value value, String string) {
     this.value = value;
     this.string = string;
   }
@@ -38,7 +38,7 @@ public final class ContextRelationshipBaseType {
   @java.lang.Override
   public boolean equals(Object other) {
     return (this == other) 
-      || (other instanceof ContextRelationshipBaseType && this.string.equals(((ContextRelationshipBaseType) other).string));
+      || (other instanceof ContextRelationshipBaseRelationType && this.string.equals(((ContextRelationshipBaseRelationType) other).string));
   }
 
   @java.lang.Override
@@ -63,7 +63,7 @@ public final class ContextRelationshipBaseType {
   @JsonCreator(
       mode = JsonCreator.Mode.DELEGATING
   )
-  public static ContextRelationshipBaseType valueOf(String value) {
+  public static ContextRelationshipBaseRelationType valueOf(String value) {
     switch (value) {
       case "has_many":
         return HAS_MANY;
@@ -72,7 +72,7 @@ public final class ContextRelationshipBaseType {
       case "has_one":
         return HAS_ONE;
       default:
-        return new ContextRelationshipBaseType(Value.UNKNOWN, value);
+        return new ContextRelationshipBaseRelationType(Value.UNKNOWN, value);
     }
   }
 

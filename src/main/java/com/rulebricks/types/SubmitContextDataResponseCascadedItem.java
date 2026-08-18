@@ -20,14 +20,14 @@ import java.lang.SuppressWarnings;
 import java.util.Objects;
 
 @JsonDeserialize(
-    using = ContextInstancePendingEvaluationWaitingOnItem.Deserializer.class
+    using = SubmitContextDataResponseCascadedItem.Deserializer.class
 )
-public final class ContextInstancePendingEvaluationWaitingOnItem {
+public final class SubmitContextDataResponseCascadedItem {
   private final Object value;
 
   private final int type;
 
-  private ContextInstancePendingEvaluationWaitingOnItem(Object value, int type) {
+  private SubmitContextDataResponseCascadedItem(Object value, int type) {
     this.value = value;
     this.type = type;
   }
@@ -40,9 +40,9 @@ public final class ContextInstancePendingEvaluationWaitingOnItem {
   @SuppressWarnings("unchecked")
   public <T> T visit(Visitor<T> visitor) {
     if(this.type == 0) {
-      return visitor.visit((String) this.value);
+      return visitor.visit((CascadeResult) this.value);
     } else if(this.type == 1) {
-      return visitor.visit((ContextInstancePendingEvaluationWaitingOnItemField) this.value);
+      return visitor.visit((ContextCascadeSummary) this.value);
     }
     throw new IllegalStateException("Failed to visit value. This should never happen.");
   }
@@ -50,10 +50,10 @@ public final class ContextInstancePendingEvaluationWaitingOnItem {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ContextInstancePendingEvaluationWaitingOnItem && equalTo((ContextInstancePendingEvaluationWaitingOnItem) other);
+    return other instanceof SubmitContextDataResponseCascadedItem && equalTo((SubmitContextDataResponseCascadedItem) other);
   }
 
-  private boolean equalTo(ContextInstancePendingEvaluationWaitingOnItem other) {
+  private boolean equalTo(SubmitContextDataResponseCascadedItem other) {
     return value.equals(other.value);
   }
 
@@ -67,36 +67,35 @@ public final class ContextInstancePendingEvaluationWaitingOnItem {
     return this.value.toString();
   }
 
-  public static ContextInstancePendingEvaluationWaitingOnItem of(String value) {
-    return new ContextInstancePendingEvaluationWaitingOnItem(value, 0);
+  public static SubmitContextDataResponseCascadedItem of(CascadeResult value) {
+    return new SubmitContextDataResponseCascadedItem(value, 0);
   }
 
-  public static ContextInstancePendingEvaluationWaitingOnItem of(
-      ContextInstancePendingEvaluationWaitingOnItemField value) {
-    return new ContextInstancePendingEvaluationWaitingOnItem(value, 1);
+  public static SubmitContextDataResponseCascadedItem of(ContextCascadeSummary value) {
+    return new SubmitContextDataResponseCascadedItem(value, 1);
   }
 
   public interface Visitor<T> {
-    T visit(String value);
+    T visit(CascadeResult value);
 
-    T visit(ContextInstancePendingEvaluationWaitingOnItemField value);
+    T visit(ContextCascadeSummary value);
   }
 
-  static final class Deserializer extends StdDeserializer<ContextInstancePendingEvaluationWaitingOnItem> {
+  static final class Deserializer extends StdDeserializer<SubmitContextDataResponseCascadedItem> {
     Deserializer() {
-      super(ContextInstancePendingEvaluationWaitingOnItem.class);
+      super(SubmitContextDataResponseCascadedItem.class);
     }
 
     @java.lang.Override
-    public ContextInstancePendingEvaluationWaitingOnItem deserialize(JsonParser p,
+    public SubmitContextDataResponseCascadedItem deserialize(JsonParser p,
         DeserializationContext context) throws IOException {
       Object value = p.readValueAs(Object.class);
       try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, String.class));
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, CascadeResult.class));
       } catch(RuntimeException e) {
       }
       try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, ContextInstancePendingEvaluationWaitingOnItemField.class));
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, ContextCascadeSummary.class));
       } catch(RuntimeException e) {
       }
       throw new JsonParseException(p, "Failed to deserialize");

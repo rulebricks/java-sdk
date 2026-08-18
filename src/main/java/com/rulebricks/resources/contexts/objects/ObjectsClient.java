@@ -9,9 +9,11 @@ import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.contexts.objects.requests.CreateContextRequest;
 import com.rulebricks.resources.contexts.objects.requests.DeleteObjectsRequest;
 import com.rulebricks.resources.contexts.objects.requests.GetObjectsRequest;
+import com.rulebricks.resources.contexts.objects.requests.ListObjectsRequest;
 import com.rulebricks.resources.contexts.objects.requests.UpdateContextRequest;
 import com.rulebricks.types.ContextDetail;
 import com.rulebricks.types.ContextListItem;
+import com.rulebricks.types.CreateContextResponse;
 import com.rulebricks.types.DeleteContextResponse;
 import com.rulebricks.types.UpdateContextResponse;
 import java.lang.String;
@@ -35,30 +37,44 @@ public class ObjectsClient {
   }
 
   /**
-   * Retrieve all contexts for the authenticated user.
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<ContextListItem> list() {
     return this.rawClient.list().body();
   }
 
   /**
-   * Retrieve all contexts for the authenticated user.
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public List<ContextListItem> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).body();
   }
 
   /**
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public List<ContextListItem> list(ListObjectsRequest request) {
+    return this.rawClient.list(request).body();
+  }
+
+  /**
+   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public List<ContextListItem> list(ListObjectsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.list(request, requestOptions).body();
+  }
+
+  /**
    * Create a new context for the authenticated user.
    */
-  public ContextDetail create(CreateContextRequest request) {
+  public CreateContextResponse create(CreateContextRequest request) {
     return this.rawClient.create(request).body();
   }
 
   /**
    * Create a new context for the authenticated user.
    */
-  public ContextDetail create(CreateContextRequest request, RequestOptions requestOptions) {
+  public CreateContextResponse create(CreateContextRequest request, RequestOptions requestOptions) {
     return this.rawClient.create(request, requestOptions).body();
   }
 

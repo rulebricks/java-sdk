@@ -9,6 +9,8 @@ import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.tests.rules.requests.CreateRulesRequest;
 import com.rulebricks.resources.tests.rules.requests.DeleteRulesRequest;
 import com.rulebricks.resources.tests.rules.requests.ListRulesRequest;
+import com.rulebricks.resources.tests.rules.requests.RunRulesRequest;
+import com.rulebricks.types.RunTestsResponse;
 import com.rulebricks.types.Test;
 import java.lang.String;
 import java.util.List;
@@ -102,5 +104,20 @@ public class AsyncRulesClient {
   public CompletableFuture<Test> delete(String slug, String testId, DeleteRulesRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.delete(slug, testId, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+   */
+  public CompletableFuture<RunTestsResponse> run(String slug, RunRulesRequest request) {
+    return this.rawClient.run(slug, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Executes every test in the rule's test suite (or only the critical tests when <code>critical_only</code> is true) and returns a summary of which passed, which failed, and whether any CRITICAL test failed. Use the <code>critical_failure</code> flag as the signal for whether a release should be blocked.
+   */
+  public CompletableFuture<RunTestsResponse> run(String slug, RunRulesRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.run(slug, request, requestOptions).thenApply(response -> response.body());
   }
 }

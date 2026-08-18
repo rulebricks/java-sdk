@@ -99,7 +99,7 @@ public final class ExportManifestResponseManifest {
   }
 
   /**
-   * @return Exported dynamic values.
+   * @return Exported vocabulary values.
    */
   @JsonProperty("values")
   public Optional<List<Map<String, Object>>> getValues() {
@@ -272,7 +272,7 @@ public final class ExportManifestResponseManifest {
     }
 
     /**
-     * <p>Exported dynamic values.</p>
+     * <p>Exported vocabulary values.</p>
      */
     @JsonSetter(
         value = "values",

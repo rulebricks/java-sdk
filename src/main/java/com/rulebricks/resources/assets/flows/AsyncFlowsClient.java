@@ -6,7 +6,14 @@ package com.rulebricks.resources.assets.flows;
 
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
+import com.rulebricks.resources.assets.flows.requests.DeleteFlowRequest;
+import com.rulebricks.resources.assets.flows.requests.ImportFlowRequest;
+import com.rulebricks.resources.assets.flows.requests.ListFlowsRequest;
+import com.rulebricks.resources.assets.flows.requests.PullFlowsRequest;
 import com.rulebricks.types.FlowDetail;
+import com.rulebricks.types.FlowImportPayload;
+import com.rulebricks.types.FlowImportResponse;
+import com.rulebricks.types.SuccessMessage;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,16 +35,90 @@ public class AsyncFlowsClient {
   }
 
   /**
-   * List all flows in the organization.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<FlowDetail>> list() {
     return this.rawClient.list().thenApply(response -> response.body());
   }
 
   /**
-   * List all flows in the organization.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<FlowDetail>> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<List<FlowDetail>> list(ListFlowsRequest request) {
+    return this.rawClient.list(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   */
+  public CompletableFuture<List<FlowDetail>> list(ListFlowsRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.list(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Create or update a flow from the Rulebricks Flow Schema (a list of <code>nodes</code> and <code>connections</code>). The server expands the Rulebricks Flow Schema definition into the full flow graph - laying it out, wiring property/control handles, resolving referenced published rules, and backfilling node defaults - so the result both renders in the editor and executes via <code>/flows/{slug}</code> without any manual editing. If <code>id</code> is provided the matching flow is updated; otherwise a new flow is created (<code>id</code>/<code>slug</code> auto-generated). Flows auto-publish unless <code>_publish</code> is set to <code>false</code>.
+   */
+  public CompletableFuture<FlowImportResponse> push(ImportFlowRequest request) {
+    return this.rawClient.push(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Create or update a flow from the Rulebricks Flow Schema (a list of <code>nodes</code> and <code>connections</code>). The server expands the Rulebricks Flow Schema definition into the full flow graph - laying it out, wiring property/control handles, resolving referenced published rules, and backfilling node defaults - so the result both renders in the editor and executes via <code>/flows/{slug}</code> without any manual editing. If <code>id</code> is provided the matching flow is updated; otherwise a new flow is created (<code>id</code>/<code>slug</code> auto-generated). Flows auto-publish unless <code>_publish</code> is set to <code>false</code>.
+   */
+  public CompletableFuture<FlowImportResponse> push(ImportFlowRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.push(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+   */
+  public CompletableFuture<FlowImportPayload> pull() {
+    return this.rawClient.pull().thenApply(response -> response.body());
+  }
+
+  /**
+   * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+   */
+  public CompletableFuture<FlowImportPayload> pull(RequestOptions requestOptions) {
+    return this.rawClient.pull(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+   */
+  public CompletableFuture<FlowImportPayload> pull(PullFlowsRequest request) {
+    return this.rawClient.pull(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export a flow into the Rulebricks Flow Schema (nodes + connections), the same shape accepted by <code>/admin/flows/import</code>. Works for flows built entirely by hand in the editor, so they can be round-tripped or version-controlled. This is distinct from the top-level <code>/admin/export</code>, which produces <code>.rbm</code> manifests.
+   */
+  public CompletableFuture<FlowImportPayload> pull(PullFlowsRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.pull(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Delete a specific flow by its ID.
+   */
+  public CompletableFuture<SuccessMessage> delete(DeleteFlowRequest request) {
+    return this.rawClient.delete(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Delete a specific flow by its ID.
+   */
+  public CompletableFuture<SuccessMessage> delete(DeleteFlowRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.delete(request, requestOptions).thenApply(response -> response.body());
   }
 }

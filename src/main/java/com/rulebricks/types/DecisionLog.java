@@ -22,6 +22,7 @@ import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,6 +46,12 @@ public final class DecisionLog {
 
   private final Optional<Map<String, Object>> decision;
 
+  private final Optional<String> traceId;
+
+  private final Optional<DecisionLogPathTrace> pathTrace;
+
+  private final Optional<List<Integer>> matchedItems;
+
   private final Optional<String> error;
 
   private final Optional<Boolean> abbreviated;
@@ -54,7 +61,8 @@ public final class DecisionLog {
   private DecisionLog(Optional<OffsetDateTime> timestamp, Optional<String> name,
       Optional<String> endpoint, Optional<Integer> status, Optional<DecisionLogRequest> request,
       Optional<DecisionLogResponse> response, Optional<Map<String, Object>> decision,
-      Optional<String> error, Optional<Boolean> abbreviated,
+      Optional<String> traceId, Optional<DecisionLogPathTrace> pathTrace,
+      Optional<List<Integer>> matchedItems, Optional<String> error, Optional<Boolean> abbreviated,
       Map<String, Object> additionalProperties) {
     this.timestamp = timestamp;
     this.name = name;
@@ -63,6 +71,9 @@ public final class DecisionLog {
     this.request = request;
     this.response = response;
     this.decision = decision;
+    this.traceId = traceId;
+    this.pathTrace = pathTrace;
+    this.matchedItems = matchedItems;
     this.error = error;
     this.abbreviated = abbreviated;
     this.additionalProperties = additionalProperties;
@@ -135,7 +146,7 @@ public final class DecisionLog {
   }
 
   /**
-   * @return Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, such as <code>rule_id</code>, <code>rule_slug</code>, <code>rule_version</code>, <code>success_idxs</code>, <code>total_usage</code>, and <code>entity_count</code>; user-defined request/response schema keys are preserved.
+   * @return Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, including rule, flow, context, item, and correlation fields such as <code>rule_id</code>, <code>flow_execution_id</code>, <code>root_flow_execution_id</code>, <code>parallel_execution_id</code>, <code>context_instance_id</code>, <code>item_indexes</code>, and <code>item_execution_ids</code> (bulk flow runs' per-item execution ids, aligned 1:1 with the request array). Rule decisions also expose the bounded execution-time vocabulary snapshot under <code>referenced_values</code>; <code>referenced_values_truncated</code> indicates that one or more payloads or entries were omitted. Executions backed by a frozen published vocabulary include its asset/version pointer under <code>value_world</code>. User-defined request/response schema keys are preserved.
    */
   @JsonIgnore
   public Optional<Map<String, Object>> getDecision() {
@@ -143,6 +154,36 @@ public final class DecisionLog {
       return Optional.empty();
     }
     return decision;
+  }
+
+  /**
+   * @return Observability (OpenTelemetry) trace ID for this execution. Populated on self-hosted deployments only; always null on cloud.
+   */
+  @JsonIgnore
+  public Optional<String> getTraceId() {
+    if (traceId == null) {
+      return Optional.empty();
+    }
+    return traceId;
+  }
+
+  /**
+   * @return Decompressed execution path trace for flow records: the executed steps with their inputs and outputs. An object for single flow runs, or a null-aligned array (1:1 with the request array) for bulk runs. Only present when <code>include_traces=true</code>; null for non-flow records, runs without a stored trace, and traces dropped by the size cap (see the decision's <code>path_trace_omitted</code>).
+   */
+  @JsonIgnore
+  public Optional<DecisionLogPathTrace> getPathTrace() {
+    if (pathTrace == null) {
+      return Optional.empty();
+    }
+    return pathTrace;
+  }
+
+  /**
+   * @return Only present when <code>item_filter</code> was supplied and this record is bulk-shaped: the original zero-based positions (within this record's stored request array) of the items that matched the filter, in order. The record's <code>request</code>, <code>response</code>, and index-aligned decision fields are sliced to these items; <code>decision.item_count</code> keeps the original total. Empty when no items matched. On self-hosted deployments where large bulk runs are logged in chunks, the absolute position within the original API call is <code>decision.logChunk.offset</code> plus this value.
+   */
+  @JsonProperty("matched_items")
+  public Optional<List<Integer>> getMatchedItems() {
+    return matchedItems;
   }
 
   /**
@@ -157,7 +198,7 @@ public final class DecisionLog {
   }
 
   /**
-   * @return Whether the request/response data was truncated due to size limits.
+   * @return Whether the request/response data was truncated due to size limits or unavailable payload columns. Responses carry full payloads whenever they were stored.
    */
   @JsonProperty("abbreviated")
   public Optional<Boolean> getAbbreviated() {
@@ -231,6 +272,24 @@ public final class DecisionLog {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
+  @JsonProperty("trace_id")
+  private Optional<String> _getTraceId() {
+    return traceId;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("path_trace")
+  private Optional<DecisionLogPathTrace> _getPathTrace() {
+    return pathTrace;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
   @JsonProperty("error")
   private Optional<String> _getError() {
     return error;
@@ -248,12 +307,12 @@ public final class DecisionLog {
   }
 
   private boolean equalTo(DecisionLog other) {
-    return timestamp.equals(other.timestamp) && name.equals(other.name) && endpoint.equals(other.endpoint) && status.equals(other.status) && request.equals(other.request) && response.equals(other.response) && decision.equals(other.decision) && error.equals(other.error) && abbreviated.equals(other.abbreviated);
+    return timestamp.equals(other.timestamp) && name.equals(other.name) && endpoint.equals(other.endpoint) && status.equals(other.status) && request.equals(other.request) && response.equals(other.response) && decision.equals(other.decision) && traceId.equals(other.traceId) && pathTrace.equals(other.pathTrace) && matchedItems.equals(other.matchedItems) && error.equals(other.error) && abbreviated.equals(other.abbreviated);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.timestamp, this.name, this.endpoint, this.status, this.request, this.response, this.decision, this.error, this.abbreviated);
+    return Objects.hash(this.timestamp, this.name, this.endpoint, this.status, this.request, this.response, this.decision, this.traceId, this.pathTrace, this.matchedItems, this.error, this.abbreviated);
   }
 
   @java.lang.Override
@@ -283,6 +342,12 @@ public final class DecisionLog {
 
     private Optional<Map<String, Object>> decision = Optional.empty();
 
+    private Optional<String> traceId = Optional.empty();
+
+    private Optional<DecisionLogPathTrace> pathTrace = Optional.empty();
+
+    private Optional<List<Integer>> matchedItems = Optional.empty();
+
     private Optional<String> error = Optional.empty();
 
     private Optional<Boolean> abbreviated = Optional.empty();
@@ -301,6 +366,9 @@ public final class DecisionLog {
       request(other.getRequest());
       response(other.getResponse());
       decision(other.getDecision());
+      traceId(other.getTraceId());
+      pathTrace(other.getPathTrace());
+      matchedItems(other.getMatchedItems());
       error(other.getError());
       abbreviated(other.getAbbreviated());
       return this;
@@ -487,7 +555,7 @@ public final class DecisionLog {
     }
 
     /**
-     * <p>Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, such as <code>rule_id</code>, <code>rule_slug</code>, <code>rule_version</code>, <code>success_idxs</code>, <code>total_usage</code>, and <code>entity_count</code>; user-defined request/response schema keys are preserved.</p>
+     * <p>Decision details including matched conditions, rows, and evaluation metadata. API-owned metadata keys are normalized to snake_case where known, including rule, flow, context, item, and correlation fields such as <code>rule_id</code>, <code>flow_execution_id</code>, <code>root_flow_execution_id</code>, <code>parallel_execution_id</code>, <code>context_instance_id</code>, <code>item_indexes</code>, and <code>item_execution_ids</code> (bulk flow runs' per-item execution ids, aligned 1:1 with the request array). Rule decisions also expose the bounded execution-time vocabulary snapshot under <code>referenced_values</code>; <code>referenced_values_truncated</code> indicates that one or more payloads or entries were omitted. Executions backed by a frozen published vocabulary include its asset/version pointer under <code>value_world</code>. User-defined request/response schema keys are preserved.</p>
      */
     @JsonSetter(
         value = "decision",
@@ -513,6 +581,83 @@ public final class DecisionLog {
       else {
         this.decision = Optional.of(decision.get());
       }
+      return this;
+    }
+
+    /**
+     * <p>Observability (OpenTelemetry) trace ID for this execution. Populated on self-hosted deployments only; always null on cloud.</p>
+     */
+    @JsonSetter(
+        value = "trace_id",
+        nulls = Nulls.SKIP
+    )
+    public Builder traceId(Optional<String> traceId) {
+      this.traceId = traceId;
+      return this;
+    }
+
+    public Builder traceId(String traceId) {
+      this.traceId = Optional.ofNullable(traceId);
+      return this;
+    }
+
+    public Builder traceId(Nullable<String> traceId) {
+      if (traceId.isNull()) {
+        this.traceId = null;
+      }
+      else if (traceId.isEmpty()) {
+        this.traceId = Optional.empty();
+      }
+      else {
+        this.traceId = Optional.of(traceId.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Decompressed execution path trace for flow records: the executed steps with their inputs and outputs. An object for single flow runs, or a null-aligned array (1:1 with the request array) for bulk runs. Only present when <code>include_traces=true</code>; null for non-flow records, runs without a stored trace, and traces dropped by the size cap (see the decision's <code>path_trace_omitted</code>).</p>
+     */
+    @JsonSetter(
+        value = "path_trace",
+        nulls = Nulls.SKIP
+    )
+    public Builder pathTrace(Optional<DecisionLogPathTrace> pathTrace) {
+      this.pathTrace = pathTrace;
+      return this;
+    }
+
+    public Builder pathTrace(DecisionLogPathTrace pathTrace) {
+      this.pathTrace = Optional.ofNullable(pathTrace);
+      return this;
+    }
+
+    public Builder pathTrace(Nullable<DecisionLogPathTrace> pathTrace) {
+      if (pathTrace.isNull()) {
+        this.pathTrace = null;
+      }
+      else if (pathTrace.isEmpty()) {
+        this.pathTrace = Optional.empty();
+      }
+      else {
+        this.pathTrace = Optional.of(pathTrace.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Only present when <code>item_filter</code> was supplied and this record is bulk-shaped: the original zero-based positions (within this record's stored request array) of the items that matched the filter, in order. The record's <code>request</code>, <code>response</code>, and index-aligned decision fields are sliced to these items; <code>decision.item_count</code> keeps the original total. Empty when no items matched. On self-hosted deployments where large bulk runs are logged in chunks, the absolute position within the original API call is <code>decision.logChunk.offset</code> plus this value.</p>
+     */
+    @JsonSetter(
+        value = "matched_items",
+        nulls = Nulls.SKIP
+    )
+    public Builder matchedItems(Optional<List<Integer>> matchedItems) {
+      this.matchedItems = matchedItems;
+      return this;
+    }
+
+    public Builder matchedItems(List<Integer> matchedItems) {
+      this.matchedItems = Optional.ofNullable(matchedItems);
       return this;
     }
 
@@ -547,7 +692,7 @@ public final class DecisionLog {
     }
 
     /**
-     * <p>Whether the request/response data was truncated due to size limits.</p>
+     * <p>Whether the request/response data was truncated due to size limits or unavailable payload columns. Responses carry full payloads whenever they were stored.</p>
      */
     @JsonSetter(
         value = "abbreviated",
@@ -564,7 +709,7 @@ public final class DecisionLog {
     }
 
     public DecisionLog build() {
-      return new DecisionLog(timestamp, name, endpoint, status, request, response, decision, error, abbreviated, additionalProperties);
+      return new DecisionLog(timestamp, name, endpoint, status, request, response, decision, traceId, pathTrace, matchedItems, error, abbreviated, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.core.QueryStringMapper;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
@@ -17,6 +18,7 @@ import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.assets.folders.requests.DeleteFolderRequest;
+import com.rulebricks.resources.assets.folders.requests.ListFoldersRequest;
 import com.rulebricks.resources.assets.folders.requests.UpsertFolderRequest;
 import com.rulebricks.types.Error;
 import com.rulebricks.types.Folder;
@@ -48,7 +50,7 @@ public class AsyncRawFoldersClient {
    * Retrieve all rule folders for the authenticated user.
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<Folder>>> list() {
-    return list(null);
+    return list(ListFoldersRequest.builder().build());
   }
 
   /**
@@ -56,19 +58,41 @@ public class AsyncRawFoldersClient {
    */
   public CompletableFuture<RulebricksApiHttpResponse<List<Folder>>> list(
       RequestOptions requestOptions) {
+    return list(ListFoldersRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<Folder>>> list(
+      ListFoldersRequest request) {
+    return list(request,null);
+  }
+
+  /**
+   * Retrieve all rule folders for the authenticated user.
+   */
+  public CompletableFuture<RulebricksApiHttpResponse<List<Folder>>> list(ListFoldersRequest request,
+      RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("admin/folders");if (requestOptions != null) {
+      .addPathSegments("admin/folders");if (request.getUserGroup().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "user_group", request.getUserGroup().get(), false);
+      }
+      if (request.getName().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
         } );
       }
-      Request okhttpRequest = new Request.Builder()
+      Request.Builder _requestBuilder = new Request.Builder()
         .url(httpUrl.build())
         .method("GET", null)
         .headers(Headers.of(clientOptions.headers(requestOptions)))
-        .addHeader("Accept", "application/json")
-        .build();
+        .addHeader("Accept", "application/json");
+      Request okhttpRequest = _requestBuilder.build();
       OkHttpClient client = clientOptions.httpClient();
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -110,7 +134,7 @@ public class AsyncRawFoldersClient {
     }
 
     /**
-     * Create a new rule folder or update an existing one for the authenticated user.
+     * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
      */
     public CompletableFuture<RulebricksApiHttpResponse<Folder>> upsert(
         UpsertFolderRequest request) {
@@ -118,7 +142,7 @@ public class AsyncRawFoldersClient {
     }
 
     /**
-     * Create a new rule folder or update an existing one for the authenticated user.
+     * Create a new folder or update an existing one for the authenticated user. Folders are typed to organize rules (the default), flows, or contexts.
      */
     public CompletableFuture<RulebricksApiHttpResponse<Folder>> upsert(UpsertFolderRequest request,
         RequestOptions requestOptions) {

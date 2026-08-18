@@ -39,30 +39,37 @@ public final class ContextSchemaField {
 
   private final Optional<Object> defaultValue;
 
-  private final Optional<Boolean> derived;
+  private final Optional<Boolean> required;
 
-  private final Optional<String> sourceRule;
+  private final Optional<Boolean> outputOnly;
 
-  private final Optional<String> sourceFlow;
+  private final Optional<Boolean> trackHistory;
 
-  private final Optional<String> sourceField;
+  private final Optional<Boolean> valuesOnly;
+
+  private final Optional<String> valuesCollection;
+
+  private final Optional<String> expression;
 
   private final Map<String, Object> additionalProperties;
 
   private ContextSchemaField(Optional<String> key, Optional<String> name,
       Optional<String> description, Optional<ContextSchemaFieldType> type,
-      Optional<Object> defaultValue, Optional<Boolean> derived, Optional<String> sourceRule,
-      Optional<String> sourceFlow, Optional<String> sourceField,
+      Optional<Object> defaultValue, Optional<Boolean> required, Optional<Boolean> outputOnly,
+      Optional<Boolean> trackHistory, Optional<Boolean> valuesOnly,
+      Optional<String> valuesCollection, Optional<String> expression,
       Map<String, Object> additionalProperties) {
     this.key = key;
     this.name = name;
     this.description = description;
     this.type = type;
     this.defaultValue = defaultValue;
-    this.derived = derived;
-    this.sourceRule = sourceRule;
-    this.sourceFlow = sourceFlow;
-    this.sourceField = sourceField;
+    this.required = required;
+    this.outputOnly = outputOnly;
+    this.trackHistory = trackHistory;
+    this.valuesOnly = valuesOnly;
+    this.valuesCollection = valuesCollection;
+    this.expression = expression;
     this.additionalProperties = additionalProperties;
   }
 
@@ -91,7 +98,7 @@ public final class ContextSchemaField {
   }
 
   /**
-   * @return Data type of this field. 'function' type fields compute values dynamically.
+   * @return Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.
    */
   @JsonProperty("type")
   public Optional<ContextSchemaFieldType> getType() {
@@ -110,44 +117,54 @@ public final class ContextSchemaField {
   }
 
   /**
-   * @return Whether this field is derived from rule/flow outputs.
+   * @return Whether this base fact is required for overall context completeness.
    */
-  @JsonProperty("derived")
-  public Optional<Boolean> getDerived() {
-    return derived;
+  @JsonProperty("required")
+  public Optional<Boolean> getRequired() {
+    return required;
   }
 
   /**
-   * @return The rule ID that derives this field (if derived).
+   * @return Whether external submissions are rejected for this base fact. Rule writebacks may still set it.
    */
-  @JsonIgnore
-  public Optional<String> getSourceRule() {
-    if (sourceRule == null) {
-      return Optional.empty();
-    }
-    return sourceRule;
+  @JsonProperty("output_only")
+  public Optional<Boolean> getOutputOnly() {
+    return outputOnly;
   }
 
   /**
-   * @return The flow ID that derives this field (if derived).
+   * @return Whether changed values for this base fact are retained for history expressions and the history endpoint.
    */
-  @JsonIgnore
-  public Optional<String> getSourceFlow() {
-    if (sourceFlow == null) {
-      return Optional.empty();
-    }
-    return sourceFlow;
+  @JsonProperty("track_history")
+  public Optional<Boolean> getTrackHistory() {
+    return trackHistory;
   }
 
   /**
-   * @return The source field key in the rule/flow output.
+   * @return Whether values must come from the configured vocabulary collection.
+   */
+  @JsonProperty("values_only")
+  public Optional<Boolean> getValuesOnly() {
+    return valuesOnly;
+  }
+
+  /**
+   * @return Vocabulary collection identifier, when configured.
    */
   @JsonIgnore
-  public Optional<String> getSourceField() {
-    if (sourceField == null) {
+  public Optional<String> getValuesCollection() {
+    if (valuesCollection == null) {
       return Optional.empty();
     }
-    return sourceField;
+    return valuesCollection;
+  }
+
+  /**
+   * @return Required for derived facts: the expression evaluated from base, history, and relation values.
+   */
+  @JsonProperty("expression")
+  public Optional<String> getExpression() {
+    return expression;
   }
 
   @JsonInclude(
@@ -163,27 +180,9 @@ public final class ContextSchemaField {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
-  @JsonProperty("source_rule")
-  private Optional<String> _getSourceRule() {
-    return sourceRule;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("source_flow")
-  private Optional<String> _getSourceFlow() {
-    return sourceFlow;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("source_field")
-  private Optional<String> _getSourceField() {
-    return sourceField;
+  @JsonProperty("values_collection")
+  private Optional<String> _getValuesCollection() {
+    return valuesCollection;
   }
 
   @java.lang.Override
@@ -198,12 +197,12 @@ public final class ContextSchemaField {
   }
 
   private boolean equalTo(ContextSchemaField other) {
-    return key.equals(other.key) && name.equals(other.name) && description.equals(other.description) && type.equals(other.type) && defaultValue.equals(other.defaultValue) && derived.equals(other.derived) && sourceRule.equals(other.sourceRule) && sourceFlow.equals(other.sourceFlow) && sourceField.equals(other.sourceField);
+    return key.equals(other.key) && name.equals(other.name) && description.equals(other.description) && type.equals(other.type) && defaultValue.equals(other.defaultValue) && required.equals(other.required) && outputOnly.equals(other.outputOnly) && trackHistory.equals(other.trackHistory) && valuesOnly.equals(other.valuesOnly) && valuesCollection.equals(other.valuesCollection) && expression.equals(other.expression);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.key, this.name, this.description, this.type, this.defaultValue, this.derived, this.sourceRule, this.sourceFlow, this.sourceField);
+    return Objects.hash(this.key, this.name, this.description, this.type, this.defaultValue, this.required, this.outputOnly, this.trackHistory, this.valuesOnly, this.valuesCollection, this.expression);
   }
 
   @java.lang.Override
@@ -229,13 +228,17 @@ public final class ContextSchemaField {
 
     private Optional<Object> defaultValue = Optional.empty();
 
-    private Optional<Boolean> derived = Optional.empty();
+    private Optional<Boolean> required = Optional.empty();
 
-    private Optional<String> sourceRule = Optional.empty();
+    private Optional<Boolean> outputOnly = Optional.empty();
 
-    private Optional<String> sourceFlow = Optional.empty();
+    private Optional<Boolean> trackHistory = Optional.empty();
 
-    private Optional<String> sourceField = Optional.empty();
+    private Optional<Boolean> valuesOnly = Optional.empty();
+
+    private Optional<String> valuesCollection = Optional.empty();
+
+    private Optional<String> expression = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -249,10 +252,12 @@ public final class ContextSchemaField {
       description(other.getDescription());
       type(other.getType());
       defaultValue(other.getDefaultValue());
-      derived(other.getDerived());
-      sourceRule(other.getSourceRule());
-      sourceFlow(other.getSourceFlow());
-      sourceField(other.getSourceField());
+      required(other.getRequired());
+      outputOnly(other.getOutputOnly());
+      trackHistory(other.getTrackHistory());
+      valuesOnly(other.getValuesOnly());
+      valuesCollection(other.getValuesCollection());
+      expression(other.getExpression());
       return this;
     }
 
@@ -308,7 +313,7 @@ public final class ContextSchemaField {
     }
 
     /**
-     * <p>Data type of this field. 'function' type fields compute values dynamically.</p>
+     * <p>Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.</p>
      */
     @JsonSetter(
         value = "type",
@@ -355,114 +360,122 @@ public final class ContextSchemaField {
     }
 
     /**
-     * <p>Whether this field is derived from rule/flow outputs.</p>
+     * <p>Whether this base fact is required for overall context completeness.</p>
      */
     @JsonSetter(
-        value = "derived",
+        value = "required",
         nulls = Nulls.SKIP
     )
-    public Builder derived(Optional<Boolean> derived) {
-      this.derived = derived;
+    public Builder required(Optional<Boolean> required) {
+      this.required = required;
       return this;
     }
 
-    public Builder derived(Boolean derived) {
-      this.derived = Optional.ofNullable(derived);
+    public Builder required(Boolean required) {
+      this.required = Optional.ofNullable(required);
       return this;
     }
 
     /**
-     * <p>The rule ID that derives this field (if derived).</p>
+     * <p>Whether external submissions are rejected for this base fact. Rule writebacks may still set it.</p>
      */
     @JsonSetter(
-        value = "source_rule",
+        value = "output_only",
         nulls = Nulls.SKIP
     )
-    public Builder sourceRule(Optional<String> sourceRule) {
-      this.sourceRule = sourceRule;
+    public Builder outputOnly(Optional<Boolean> outputOnly) {
+      this.outputOnly = outputOnly;
       return this;
     }
 
-    public Builder sourceRule(String sourceRule) {
-      this.sourceRule = Optional.ofNullable(sourceRule);
+    public Builder outputOnly(Boolean outputOnly) {
+      this.outputOnly = Optional.ofNullable(outputOnly);
       return this;
     }
 
-    public Builder sourceRule(Nullable<String> sourceRule) {
-      if (sourceRule.isNull()) {
-        this.sourceRule = null;
+    /**
+     * <p>Whether changed values for this base fact are retained for history expressions and the history endpoint.</p>
+     */
+    @JsonSetter(
+        value = "track_history",
+        nulls = Nulls.SKIP
+    )
+    public Builder trackHistory(Optional<Boolean> trackHistory) {
+      this.trackHistory = trackHistory;
+      return this;
+    }
+
+    public Builder trackHistory(Boolean trackHistory) {
+      this.trackHistory = Optional.ofNullable(trackHistory);
+      return this;
+    }
+
+    /**
+     * <p>Whether values must come from the configured vocabulary collection.</p>
+     */
+    @JsonSetter(
+        value = "values_only",
+        nulls = Nulls.SKIP
+    )
+    public Builder valuesOnly(Optional<Boolean> valuesOnly) {
+      this.valuesOnly = valuesOnly;
+      return this;
+    }
+
+    public Builder valuesOnly(Boolean valuesOnly) {
+      this.valuesOnly = Optional.ofNullable(valuesOnly);
+      return this;
+    }
+
+    /**
+     * <p>Vocabulary collection identifier, when configured.</p>
+     */
+    @JsonSetter(
+        value = "values_collection",
+        nulls = Nulls.SKIP
+    )
+    public Builder valuesCollection(Optional<String> valuesCollection) {
+      this.valuesCollection = valuesCollection;
+      return this;
+    }
+
+    public Builder valuesCollection(String valuesCollection) {
+      this.valuesCollection = Optional.ofNullable(valuesCollection);
+      return this;
+    }
+
+    public Builder valuesCollection(Nullable<String> valuesCollection) {
+      if (valuesCollection.isNull()) {
+        this.valuesCollection = null;
       }
-      else if (sourceRule.isEmpty()) {
-        this.sourceRule = Optional.empty();
+      else if (valuesCollection.isEmpty()) {
+        this.valuesCollection = Optional.empty();
       }
       else {
-        this.sourceRule = Optional.of(sourceRule.get());
+        this.valuesCollection = Optional.of(valuesCollection.get());
       }
       return this;
     }
 
     /**
-     * <p>The flow ID that derives this field (if derived).</p>
+     * <p>Required for derived facts: the expression evaluated from base, history, and relation values.</p>
      */
     @JsonSetter(
-        value = "source_flow",
+        value = "expression",
         nulls = Nulls.SKIP
     )
-    public Builder sourceFlow(Optional<String> sourceFlow) {
-      this.sourceFlow = sourceFlow;
+    public Builder expression(Optional<String> expression) {
+      this.expression = expression;
       return this;
     }
 
-    public Builder sourceFlow(String sourceFlow) {
-      this.sourceFlow = Optional.ofNullable(sourceFlow);
-      return this;
-    }
-
-    public Builder sourceFlow(Nullable<String> sourceFlow) {
-      if (sourceFlow.isNull()) {
-        this.sourceFlow = null;
-      }
-      else if (sourceFlow.isEmpty()) {
-        this.sourceFlow = Optional.empty();
-      }
-      else {
-        this.sourceFlow = Optional.of(sourceFlow.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>The source field key in the rule/flow output.</p>
-     */
-    @JsonSetter(
-        value = "source_field",
-        nulls = Nulls.SKIP
-    )
-    public Builder sourceField(Optional<String> sourceField) {
-      this.sourceField = sourceField;
-      return this;
-    }
-
-    public Builder sourceField(String sourceField) {
-      this.sourceField = Optional.ofNullable(sourceField);
-      return this;
-    }
-
-    public Builder sourceField(Nullable<String> sourceField) {
-      if (sourceField.isNull()) {
-        this.sourceField = null;
-      }
-      else if (sourceField.isEmpty()) {
-        this.sourceField = Optional.empty();
-      }
-      else {
-        this.sourceField = Optional.of(sourceField.get());
-      }
+    public Builder expression(String expression) {
+      this.expression = Optional.ofNullable(expression);
       return this;
     }
 
     public ContextSchemaField build() {
-      return new ContextSchemaField(key, name, description, type, defaultValue, derived, sourceRule, sourceFlow, sourceField, additionalProperties);
+      return new ContextSchemaField(key, name, description, type, defaultValue, required, outputOnly, trackHistory, valuesOnly, valuesCollection, expression, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

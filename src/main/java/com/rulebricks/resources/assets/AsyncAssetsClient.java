@@ -59,14 +59,14 @@ public class AsyncAssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm). Both plain manifests and compressed ones (the compress-json array form produced by exporting with <code>compress: true</code>) are accepted and detected automatically. Run Flow (subflow) references between flows in the manifest are resolved to the slugs, IDs, and published versions the flows receive in this workspace.
    */
   public CompletableFuture<ImportManifestResponse> importRbm(ImportManifestRequest request) {
     return this.rawClient.importRbm(request).thenApply(response -> response.body());
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm). Both plain manifests and compressed ones (the compress-json array form produced by exporting with <code>compress: true</code>) are accepted and detected automatically. Run Flow (subflow) references between flows in the manifest are resolved to the slugs, IDs, and published versions the flows receive in this workspace.
    */
   public CompletableFuture<ImportManifestResponse> importRbm(ImportManifestRequest request,
       RequestOptions requestOptions) {
@@ -74,14 +74,14 @@ public class AsyncAssetsClient {
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
    */
   public CompletableFuture<ExportRbmAssetsResponse> exportRbm(ExportManifestRequest request) {
     return this.rawClient.exportRbm(request).thenApply(response -> response.body());
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm).
+   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
    */
   public CompletableFuture<ExportRbmAssetsResponse> exportRbm(ExportManifestRequest request,
       RequestOptions requestOptions) {
