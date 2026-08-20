@@ -39,16 +39,16 @@ public final class ExportManifestResponseManifest {
 
   private final Optional<List<Map<String, Object>>> values;
 
-  private final Optional<List<Map<String, Object>>> rules;
+  private final Optional<List<ManifestLabeledAsset>> rules;
 
-  private final Optional<List<Map<String, Object>>> flows;
+  private final Optional<List<ManifestLabeledAsset>> flows;
 
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestResponseManifest(Optional<String> version, Optional<String> name,
       Optional<String> description, Optional<OffsetDateTime> exportedAt,
       Optional<List<Map<String, Object>>> contexts, Optional<List<Map<String, Object>>> values,
-      Optional<List<Map<String, Object>>> rules, Optional<List<Map<String, Object>>> flows,
+      Optional<List<ManifestLabeledAsset>> rules, Optional<List<ManifestLabeledAsset>> flows,
       Map<String, Object> additionalProperties) {
     this.version = version;
     this.name = name;
@@ -110,7 +110,7 @@ public final class ExportManifestResponseManifest {
    * @return Exported rules.
    */
   @JsonProperty("rules")
-  public Optional<List<Map<String, Object>>> getRules() {
+  public Optional<List<ManifestLabeledAsset>> getRules() {
     return rules;
   }
 
@@ -118,7 +118,7 @@ public final class ExportManifestResponseManifest {
    * @return Exported flows.
    */
   @JsonProperty("flows")
-  public Optional<List<Map<String, Object>>> getFlows() {
+  public Optional<List<ManifestLabeledAsset>> getFlows() {
     return flows;
   }
 
@@ -167,9 +167,9 @@ public final class ExportManifestResponseManifest {
 
     private Optional<List<Map<String, Object>>> values = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> rules = Optional.empty();
+    private Optional<List<ManifestLabeledAsset>> rules = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> flows = Optional.empty();
+    private Optional<List<ManifestLabeledAsset>> flows = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -295,12 +295,12 @@ public final class ExportManifestResponseManifest {
         value = "rules",
         nulls = Nulls.SKIP
     )
-    public Builder rules(Optional<List<Map<String, Object>>> rules) {
+    public Builder rules(Optional<List<ManifestLabeledAsset>> rules) {
       this.rules = rules;
       return this;
     }
 
-    public Builder rules(List<Map<String, Object>> rules) {
+    public Builder rules(List<ManifestLabeledAsset> rules) {
       this.rules = Optional.ofNullable(rules);
       return this;
     }
@@ -312,12 +312,12 @@ public final class ExportManifestResponseManifest {
         value = "flows",
         nulls = Nulls.SKIP
     )
-    public Builder flows(Optional<List<Map<String, Object>>> flows) {
+    public Builder flows(Optional<List<ManifestLabeledAsset>> flows) {
       this.flows = flows;
       return this;
     }
 
-    public Builder flows(List<Map<String, Object>> flows) {
+    public Builder flows(List<ManifestLabeledAsset> flows) {
       this.flows = Optional.ofNullable(flows);
       return this;
     }

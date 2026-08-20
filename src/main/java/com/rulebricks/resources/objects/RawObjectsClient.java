@@ -21,9 +21,9 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
 import com.rulebricks.resources.objects.requests.DeleteObjectsRequest;
 import com.rulebricks.resources.objects.requests.GetObjectsRequest;
-import com.rulebricks.resources.objects.requests.UpsertObjectRequest;
 import com.rulebricks.types.DeleteObjectResponse;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.UpsertObjectRequest;
 import com.rulebricks.types.UpsertObjectResponse;
 import com.rulebricks.types.WorkspaceObject;
 import java.io.IOException;
@@ -46,14 +46,14 @@ public class RawObjectsClient {
   }
 
   /**
-   * Lists the workspace's objects (JSON Schemas). Results are scoped to the API key holder's user groups, matching the visibility model of values, rules, and flows: group-restricted keys only see objects whose user_groups overlap theirs.
+   * Lists the workspace's objects (JSON Schemas). The provided API key must have permission to view vocabulary values. Results are scoped to the API key holder's user groups.
    */
   public RulebricksApiHttpResponse<List<WorkspaceObject>> list() {
     return list(null);
   }
 
   /**
-   * Lists the workspace's objects (JSON Schemas). Results are scoped to the API key holder's user groups, matching the visibility model of values, rules, and flows: group-restricted keys only see objects whose user_groups overlap theirs.
+   * Lists the workspace's objects (JSON Schemas). The provided API key must have permission to view vocabulary values. Results are scoped to the API key holder's user groups.
    */
   public RulebricksApiHttpResponse<List<WorkspaceObject>> list(RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
@@ -80,8 +80,9 @@ public class RawObjectsClient {
           return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<WorkspaceObject>>() {}), response);
         }
         try {
-          if (response.code() == 500) {
-            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+          switch (response.code()) {
+            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
           }
         }
         catch (JsonProcessingException ignored) {
@@ -96,14 +97,14 @@ public class RawObjectsClient {
     }
 
     /**
-     * Creates or updates an object by ID or name and syncs enum values it generates. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source.
+     * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
      */
     public RulebricksApiHttpResponse<UpsertObjectResponse> upsert(UpsertObjectRequest request) {
       return upsert(request,null);
     }
 
     /**
-     * Creates or updates an object by ID or name and syncs enum values it generates. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source.
+     * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
      */
     public RulebricksApiHttpResponse<UpsertObjectResponse> upsert(UpsertObjectRequest request,
         RequestOptions requestOptions) {
@@ -142,7 +143,8 @@ public class RawObjectsClient {
             switch (response.code()) {
               case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-              case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             }
           }
@@ -158,14 +160,14 @@ public class RawObjectsClient {
       }
 
       /**
-       * Fetches one object by ID or exact name.
+       * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
        */
       public RulebricksApiHttpResponse<WorkspaceObject> get(String objectId) {
         return get(objectId,GetObjectsRequest.builder().build());
       }
 
       /**
-       * Fetches one object by ID or exact name.
+       * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
        */
       public RulebricksApiHttpResponse<WorkspaceObject> get(String objectId,
           RequestOptions requestOptions) {
@@ -173,7 +175,7 @@ public class RawObjectsClient {
       }
 
       /**
-       * Fetches one object by ID or exact name.
+       * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
        */
       public RulebricksApiHttpResponse<WorkspaceObject> get(String objectId,
           GetObjectsRequest request) {
@@ -181,7 +183,7 @@ public class RawObjectsClient {
       }
 
       /**
-       * Fetches one object by ID or exact name.
+       * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
        */
       public RulebricksApiHttpResponse<WorkspaceObject> get(String objectId,
           GetObjectsRequest request, RequestOptions requestOptions) {
@@ -211,6 +213,7 @@ public class RawObjectsClient {
             }
             try {
               switch (response.code()) {
+                case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               }
@@ -227,14 +230,14 @@ public class RawObjectsClient {
         }
 
         /**
-         * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+         * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
          */
         public RulebricksApiHttpResponse<DeleteObjectResponse> delete(String objectId) {
           return delete(objectId,DeleteObjectsRequest.builder().build());
         }
 
         /**
-         * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+         * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
          */
         public RulebricksApiHttpResponse<DeleteObjectResponse> delete(String objectId,
             RequestOptions requestOptions) {
@@ -242,7 +245,7 @@ public class RawObjectsClient {
         }
 
         /**
-         * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+         * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
          */
         public RulebricksApiHttpResponse<DeleteObjectResponse> delete(String objectId,
             DeleteObjectsRequest request) {
@@ -250,7 +253,7 @@ public class RawObjectsClient {
         }
 
         /**
-         * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+         * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
          */
         public RulebricksApiHttpResponse<DeleteObjectResponse> delete(String objectId,
             DeleteObjectsRequest request, RequestOptions requestOptions) {

@@ -26,13 +26,13 @@ import com.rulebricks.resources.assets.rules.requests.ListRulesRequest;
 import com.rulebricks.resources.assets.rules.requests.PullRulesRequest;
 import com.rulebricks.types.Error;
 import com.rulebricks.types.RuleDetail;
+import com.rulebricks.types.RuleExport;
 import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -133,16 +133,15 @@ public class AsyncRawRulesClient {
     /**
      * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> pull(
-        PullRulesRequest request) {
+    public CompletableFuture<RulebricksApiHttpResponse<RuleExport>> pull(PullRulesRequest request) {
       return pull(request,null);
     }
 
     /**
      * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> pull(
-        PullRulesRequest request, RequestOptions requestOptions) {
+    public CompletableFuture<RulebricksApiHttpResponse<RuleExport>> pull(PullRulesRequest request,
+        RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("admin/rules/export");QueryStringMapper.addQueryParameter(httpUrl, "id", request.getId(), false);
@@ -161,14 +160,14 @@ public class AsyncRawRulesClient {
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> future = new CompletableFuture<>();
+        CompletableFuture<RulebricksApiHttpResponse<RuleExport>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
           @Override
           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             try (ResponseBody responseBody = response.body()) {
               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
               if (response.isSuccessful()) {
-                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response));
+                future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExport.class), response));
                 return;
               }
               try {
@@ -204,7 +203,7 @@ public class AsyncRawRulesClient {
       /**
        * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
        */
-      public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> push(
+      public CompletableFuture<RulebricksApiHttpResponse<RuleExport>> push(
           ImportRuleRequest request) {
         return push(request,null);
       }
@@ -212,7 +211,7 @@ public class AsyncRawRulesClient {
       /**
        * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
        */
-      public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> push(
+      public CompletableFuture<RulebricksApiHttpResponse<RuleExport>> push(
           ImportRuleRequest request, RequestOptions requestOptions) {
         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -239,14 +238,14 @@ public class AsyncRawRulesClient {
           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
           }
-          CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> future = new CompletableFuture<>();
+          CompletableFuture<RulebricksApiHttpResponse<RuleExport>> future = new CompletableFuture<>();
           client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
               try (ResponseBody responseBody = response.body()) {
                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                 if (response.isSuccessful()) {
-                  future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response));
+                  future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExport.class), response));
                   return;
                 }
                 try {
@@ -257,7 +256,7 @@ public class AsyncRawRulesClient {
                     return;
                     case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                     return;
-                    case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
                     case 422:future.completeExceptionally(new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                     return;
@@ -286,14 +285,14 @@ public class AsyncRawRulesClient {
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public CompletableFuture<RulebricksApiHttpResponse<List<RuleDetail>>> list() {
           return list(ListRulesRequest.builder().build());
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public CompletableFuture<RulebricksApiHttpResponse<List<RuleDetail>>> list(
             RequestOptions requestOptions) {
@@ -301,7 +300,7 @@ public class AsyncRawRulesClient {
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public CompletableFuture<RulebricksApiHttpResponse<List<RuleDetail>>> list(
             ListRulesRequest request) {
@@ -309,7 +308,7 @@ public class AsyncRawRulesClient {
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public CompletableFuture<RulebricksApiHttpResponse<List<RuleDetail>>> list(
             ListRulesRequest request, RequestOptions requestOptions) {
@@ -323,6 +322,9 @@ public class AsyncRawRulesClient {
             }
             if (request.getName().isPresent()) {
               QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+            }
+            if (request.getLabels().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "labels", request.getLabels().get(), true);
             }
             if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {

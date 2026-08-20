@@ -8,8 +8,8 @@ import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.objects.requests.DeleteObjectsRequest;
 import com.rulebricks.resources.objects.requests.GetObjectsRequest;
-import com.rulebricks.resources.objects.requests.UpsertObjectRequest;
 import com.rulebricks.types.DeleteObjectResponse;
+import com.rulebricks.types.UpsertObjectRequest;
 import com.rulebricks.types.UpsertObjectResponse;
 import com.rulebricks.types.WorkspaceObject;
 import java.lang.String;
@@ -34,28 +34,28 @@ public class AsyncObjectsClient {
   }
 
   /**
-   * Lists the workspace's objects (JSON Schemas). Results are scoped to the API key holder's user groups, matching the visibility model of values, rules, and flows: group-restricted keys only see objects whose user_groups overlap theirs.
+   * Lists the workspace's objects (JSON Schemas). The provided API key must have permission to view vocabulary values. Results are scoped to the API key holder's user groups.
    */
   public CompletableFuture<List<WorkspaceObject>> list() {
     return this.rawClient.list().thenApply(response -> response.body());
   }
 
   /**
-   * Lists the workspace's objects (JSON Schemas). Results are scoped to the API key holder's user groups, matching the visibility model of values, rules, and flows: group-restricted keys only see objects whose user_groups overlap theirs.
+   * Lists the workspace's objects (JSON Schemas). The provided API key must have permission to view vocabulary values. Results are scoped to the API key holder's user groups.
    */
   public CompletableFuture<List<WorkspaceObject>> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Creates or updates an object by ID or name and syncs enum values it generates. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source.
+   * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
    */
   public CompletableFuture<UpsertObjectResponse> upsert(UpsertObjectRequest request) {
     return this.rawClient.upsert(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates or updates an object by ID or name and syncs enum values it generates. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source.
+   * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
    */
   public CompletableFuture<UpsertObjectResponse> upsert(UpsertObjectRequest request,
       RequestOptions requestOptions) {
@@ -63,28 +63,28 @@ public class AsyncObjectsClient {
   }
 
   /**
-   * Fetches one object by ID or exact name.
+   * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
    */
   public CompletableFuture<WorkspaceObject> get(String objectId) {
     return this.rawClient.get(objectId).thenApply(response -> response.body());
   }
 
   /**
-   * Fetches one object by ID or exact name.
+   * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
    */
   public CompletableFuture<WorkspaceObject> get(String objectId, RequestOptions requestOptions) {
     return this.rawClient.get(objectId, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Fetches one object by ID or exact name.
+   * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
    */
   public CompletableFuture<WorkspaceObject> get(String objectId, GetObjectsRequest request) {
     return this.rawClient.get(objectId, request).thenApply(response -> response.body());
   }
 
   /**
-   * Fetches one object by ID or exact name.
+   * Fetches one object by ID or exact name. The provided API key must have permission to view vocabulary values.
    */
   public CompletableFuture<WorkspaceObject> get(String objectId, GetObjectsRequest request,
       RequestOptions requestOptions) {
@@ -92,14 +92,14 @@ public class AsyncObjectsClient {
   }
 
   /**
-   * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+   * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
    */
   public CompletableFuture<DeleteObjectResponse> delete(String objectId) {
     return this.rawClient.delete(objectId).thenApply(response -> response.body());
   }
 
   /**
-   * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+   * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
    */
   public CompletableFuture<DeleteObjectResponse> delete(String objectId,
       RequestOptions requestOptions) {
@@ -107,7 +107,7 @@ public class AsyncObjectsClient {
   }
 
   /**
-   * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+   * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
    */
   public CompletableFuture<DeleteObjectResponse> delete(String objectId,
       DeleteObjectsRequest request) {
@@ -115,7 +115,7 @@ public class AsyncObjectsClient {
   }
 
   /**
-   * Deletes the object. Its generated values always lose their management lock; by default they are also archived (published rules keep resolving them by id). Pass values=detach to keep them active as ordinary, hand-editable values instead. Requires the manage objects entitlement.
+   * Deletes the object. By default, unused values are permanently deleted while values referenced by draft, current, or historical rules, flows, or other vocabulary values are archived. Pass values=detach to keep every generated value active as an ordinary, hand-editable value.
    */
   public CompletableFuture<DeleteObjectResponse> delete(String objectId,
       DeleteObjectsRequest request, RequestOptions requestOptions) {

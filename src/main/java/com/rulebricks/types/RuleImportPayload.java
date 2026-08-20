@@ -41,6 +41,8 @@ public final class RuleImportPayload {
 
   private final Optional<String> description;
 
+  private final Optional<List<String>> labels;
+
   private final Optional<OffsetDateTime> createdAt;
 
   private final Optional<OffsetDateTime> updatedAt;
@@ -86,10 +88,11 @@ public final class RuleImportPayload {
   private final Map<String, Object> additionalProperties;
 
   private RuleImportPayload(Optional<String> id, Optional<String> stableId, Optional<String> slug,
-      Optional<String> name, Optional<String> description, Optional<OffsetDateTime> createdAt,
-      Optional<OffsetDateTime> updatedAt, Optional<Boolean> published,
-      Optional<Map<String, Object>> metadata, Optional<Boolean> publish,
-      Optional<Boolean> unpublish, Optional<List<RuleImportSchemaField>> requestSchema,
+      Optional<String> name, Optional<String> description, Optional<List<String>> labels,
+      Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
+      Optional<Boolean> published, Optional<Map<String, Object>> metadata,
+      Optional<Boolean> publish, Optional<Boolean> unpublish,
+      Optional<List<RuleImportSchemaField>> requestSchema,
       Optional<List<RuleImportSchemaField>> responseSchema,
       Optional<Map<String, Object>> sampleRequest, Optional<Map<String, Object>> testRequest,
       Optional<Map<String, Object>> sampleResponse,
@@ -107,6 +110,7 @@ public final class RuleImportPayload {
     this.slug = slug;
     this.name = name;
     this.description = description;
+    this.labels = labels;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.published = published;
@@ -169,6 +173,11 @@ public final class RuleImportPayload {
   @JsonProperty("description")
   public Optional<String> getDescription() {
     return description;
+  }
+
+  @JsonProperty("labels")
+  public Optional<List<String>> getLabels() {
+    return labels;
   }
 
   /**
@@ -411,12 +420,12 @@ public final class RuleImportPayload {
   }
 
   private boolean equalTo(RuleImportPayload other) {
-    return id.equals(other.id) && stableId.equals(other.stableId) && slug.equals(other.slug) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && published.equals(other.published) && metadata.equals(other.metadata) && publish.equals(other.publish) && unpublish.equals(other.unpublish) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema) && sampleRequest.equals(other.sampleRequest) && testRequest.equals(other.testRequest) && sampleResponse.equals(other.sampleResponse) && conditions.equals(other.conditions) && groups.equals(other.groups) && settings.equals(other.settings) && testSuite.equals(other.testSuite) && history.equals(other.history) && publishedAt.equals(other.publishedAt) && publishedRequestSchema.equals(other.publishedRequestSchema) && publishedResponseSchema.equals(other.publishedResponseSchema) && publishedConditions.equals(other.publishedConditions) && publishedGroups.equals(other.publishedGroups);
+    return id.equals(other.id) && stableId.equals(other.stableId) && slug.equals(other.slug) && name.equals(other.name) && description.equals(other.description) && labels.equals(other.labels) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && published.equals(other.published) && metadata.equals(other.metadata) && publish.equals(other.publish) && unpublish.equals(other.unpublish) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema) && sampleRequest.equals(other.sampleRequest) && testRequest.equals(other.testRequest) && sampleResponse.equals(other.sampleResponse) && conditions.equals(other.conditions) && groups.equals(other.groups) && settings.equals(other.settings) && testSuite.equals(other.testSuite) && history.equals(other.history) && publishedAt.equals(other.publishedAt) && publishedRequestSchema.equals(other.publishedRequestSchema) && publishedResponseSchema.equals(other.publishedResponseSchema) && publishedConditions.equals(other.publishedConditions) && publishedGroups.equals(other.publishedGroups);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.stableId, this.slug, this.name, this.description, this.createdAt, this.updatedAt, this.published, this.metadata, this.publish, this.unpublish, this.requestSchema, this.responseSchema, this.sampleRequest, this.testRequest, this.sampleResponse, this.conditions, this.groups, this.settings, this.testSuite, this.history, this.publishedAt, this.publishedRequestSchema, this.publishedResponseSchema, this.publishedConditions, this.publishedGroups);
+    return Objects.hash(this.id, this.stableId, this.slug, this.name, this.description, this.labels, this.createdAt, this.updatedAt, this.published, this.metadata, this.publish, this.unpublish, this.requestSchema, this.responseSchema, this.sampleRequest, this.testRequest, this.sampleResponse, this.conditions, this.groups, this.settings, this.testSuite, this.history, this.publishedAt, this.publishedRequestSchema, this.publishedResponseSchema, this.publishedConditions, this.publishedGroups);
   }
 
   @java.lang.Override
@@ -441,6 +450,8 @@ public final class RuleImportPayload {
     private Optional<String> name = Optional.empty();
 
     private Optional<String> description = Optional.empty();
+
+    private Optional<List<String>> labels = Optional.empty();
 
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
@@ -496,6 +507,7 @@ public final class RuleImportPayload {
       slug(other.getSlug());
       name(other.getName());
       description(other.getDescription());
+      labels(other.getLabels());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       published(other.getPublished());
@@ -602,6 +614,20 @@ public final class RuleImportPayload {
 
     public Builder description(String description) {
       this.description = Optional.ofNullable(description);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "labels",
+        nulls = Nulls.SKIP
+    )
+    public Builder labels(Optional<List<String>> labels) {
+      this.labels = labels;
+      return this;
+    }
+
+    public Builder labels(List<String> labels) {
+      this.labels = Optional.ofNullable(labels);
       return this;
     }
 
@@ -1034,7 +1060,7 @@ public final class RuleImportPayload {
     }
 
     public RuleImportPayload build() {
-      return new RuleImportPayload(id, stableId, slug, name, description, createdAt, updatedAt, published, metadata, publish, unpublish, requestSchema, responseSchema, sampleRequest, testRequest, sampleResponse, conditions, groups, settings, testSuite, history, publishedAt, publishedRequestSchema, publishedResponseSchema, publishedConditions, publishedGroups, additionalProperties);
+      return new RuleImportPayload(id, stableId, slug, name, description, labels, createdAt, updatedAt, published, metadata, publish, unpublish, requestSchema, responseSchema, sampleRequest, testRequest, sampleResponse, conditions, groups, settings, testSuite, history, publishedAt, publishedRequestSchema, publishedResponseSchema, publishedConditions, publishedGroups, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

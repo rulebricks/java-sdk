@@ -81,7 +81,7 @@ public class RawAssetsClient {
     }
 
     /**
-     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm). Both plain manifests and compressed ones (the compress-json array form produced by exporting with <code>compress: true</code>) are accepted and detected automatically. Run Flow (subflow) references between flows in the manifest are resolved to the slugs, IDs, and published versions the flows receive in this workspace.
+     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
      */
     public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(
         ImportManifestRequest request) {
@@ -89,7 +89,7 @@ public class RawAssetsClient {
     }
 
     /**
-     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm). Both plain manifests and compressed ones (the compress-json array form produced by exporting with <code>compress: true</code>) are accepted and detected automatically. Run Flow (subflow) references between flows in the manifest are resolved to the slugs, IDs, and published versions the flows receive in this workspace.
+     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
      */
     public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(
         ImportManifestRequest request, RequestOptions requestOptions) {

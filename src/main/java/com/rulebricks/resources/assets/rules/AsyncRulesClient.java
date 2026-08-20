@@ -11,11 +11,9 @@ import com.rulebricks.resources.assets.rules.requests.ImportRuleRequest;
 import com.rulebricks.resources.assets.rules.requests.ListRulesRequest;
 import com.rulebricks.resources.assets.rules.requests.PullRulesRequest;
 import com.rulebricks.types.RuleDetail;
+import com.rulebricks.types.RuleExport;
 import com.rulebricks.types.SuccessMessage;
-import java.lang.Object;
-import java.lang.String;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncRulesClient {
@@ -53,14 +51,14 @@ public class AsyncRulesClient {
   /**
    * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
    */
-  public CompletableFuture<Map<String, Object>> pull(PullRulesRequest request) {
+  public CompletableFuture<RuleExport> pull(PullRulesRequest request) {
     return this.rawClient.pull(request).thenApply(response -> response.body());
   }
 
   /**
    * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
    */
-  public CompletableFuture<Map<String, Object>> pull(PullRulesRequest request,
+  public CompletableFuture<RuleExport> pull(PullRulesRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.pull(request, requestOptions).thenApply(response -> response.body());
   }
@@ -68,41 +66,41 @@ public class AsyncRulesClient {
   /**
    * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
    */
-  public CompletableFuture<Map<String, Object>> push(ImportRuleRequest request) {
+  public CompletableFuture<RuleExport> push(ImportRuleRequest request) {
     return this.rawClient.push(request).thenApply(response -> response.body());
   }
 
   /**
    * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
    */
-  public CompletableFuture<Map<String, Object>> push(ImportRuleRequest request,
+  public CompletableFuture<RuleExport> push(ImportRuleRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.push(request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<RuleDetail>> list() {
     return this.rawClient.list().thenApply(response -> response.body());
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<RuleDetail>> list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<RuleDetail>> list(ListRulesRequest request) {
     return this.rawClient.list(request).thenApply(response -> response.body());
   }
 
   /**
-   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public CompletableFuture<List<RuleDetail>> list(ListRulesRequest request,
       RequestOptions requestOptions) {

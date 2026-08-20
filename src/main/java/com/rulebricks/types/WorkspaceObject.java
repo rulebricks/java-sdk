@@ -41,7 +41,7 @@ public final class WorkspaceObject {
 
   private final Optional<String> sourceFormat;
 
-  private final Optional<List<Map<String, Object>>> parsedFields;
+  private final Optional<List<WorkspaceObjectParsedFieldsItem>> parsedFields;
 
   private final Optional<List<String>> userGroups;
 
@@ -54,7 +54,7 @@ public final class WorkspaceObject {
   private final Map<String, Object> additionalProperties;
 
   private WorkspaceObject(String id, String name, String content, Optional<String> schemaType,
-      Optional<String> sourceFormat, Optional<List<Map<String, Object>>> parsedFields,
+      Optional<String> sourceFormat, Optional<List<WorkspaceObjectParsedFieldsItem>> parsedFields,
       Optional<List<String>> userGroups, Optional<OffsetDateTime> archivedAt,
       Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
       Map<String, Object> additionalProperties) {
@@ -80,7 +80,7 @@ public final class WorkspaceObject {
   }
 
   /**
-   * @return Display name (unique in practice per workspace).
+   * @return Display name (unique in practice per workspace). Changing it does not move managed collection paths, which derive from schema field keys.
    */
   @JsonProperty("name")
   public String getName() {
@@ -118,10 +118,10 @@ public final class WorkspaceObject {
   }
 
   /**
-   * @return Flattened field descriptors derived from the schema.
+   * @return Flattened field descriptors derived from the schema. Fields inside arrays of objects use an item-relative key (for example, 'status'), a scope naming the containing array (for example, 'boss'), and a schemaPath for locating the field in the source schema (for example, 'boss[].status'). The object remains a single stored API resource.
    */
   @JsonProperty("parsed_fields")
-  public Optional<List<Map<String, Object>>> getParsedFields() {
+  public Optional<List<WorkspaceObjectParsedFieldsItem>> getParsedFields() {
     return parsedFields;
   }
 
@@ -209,7 +209,7 @@ public final class WorkspaceObject {
 
   public interface NameStage {
     /**
-     * <p>Display name (unique in practice per workspace).</p>
+     * <p>Display name (unique in practice per workspace). Changing it does not move managed collection paths, which derive from schema field keys.</p>
      */
     ContentStage name(@NotNull String name);
   }
@@ -247,11 +247,11 @@ public final class WorkspaceObject {
     _FinalStage sourceFormat(Nullable<String> sourceFormat);
 
     /**
-     * <p>Flattened field descriptors derived from the schema.</p>
+     * <p>Flattened field descriptors derived from the schema. Fields inside arrays of objects use an item-relative key (for example, 'status'), a scope naming the containing array (for example, 'boss'), and a schemaPath for locating the field in the source schema (for example, 'boss[].status'). The object remains a single stored API resource.</p>
      */
-    _FinalStage parsedFields(Optional<List<Map<String, Object>>> parsedFields);
+    _FinalStage parsedFields(Optional<List<WorkspaceObjectParsedFieldsItem>> parsedFields);
 
-    _FinalStage parsedFields(List<Map<String, Object>> parsedFields);
+    _FinalStage parsedFields(List<WorkspaceObjectParsedFieldsItem> parsedFields);
 
     /**
      * <p>User groups this object (and every value it generates) is visible to. Empty means workspace-wide.</p>
@@ -294,7 +294,7 @@ public final class WorkspaceObject {
 
     private Optional<List<String>> userGroups = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> parsedFields = Optional.empty();
+    private Optional<List<WorkspaceObjectParsedFieldsItem>> parsedFields = Optional.empty();
 
     private Optional<String> sourceFormat = Optional.empty();
 
@@ -334,8 +334,8 @@ public final class WorkspaceObject {
     }
 
     /**
-     * <p>Display name (unique in practice per workspace).</p>
-     * <p>Display name (unique in practice per workspace).</p>
+     * <p>Display name (unique in practice per workspace). Changing it does not move managed collection paths, which derive from schema field keys.</p>
+     * <p>Display name (unique in practice per workspace). Changing it does not move managed collection paths, which derive from schema field keys.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -436,24 +436,24 @@ public final class WorkspaceObject {
     }
 
     /**
-     * <p>Flattened field descriptors derived from the schema.</p>
+     * <p>Flattened field descriptors derived from the schema. Fields inside arrays of objects use an item-relative key (for example, 'status'), a scope naming the containing array (for example, 'boss'), and a schemaPath for locating the field in the source schema (for example, 'boss[].status'). The object remains a single stored API resource.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage parsedFields(List<Map<String, Object>> parsedFields) {
+    public _FinalStage parsedFields(List<WorkspaceObjectParsedFieldsItem> parsedFields) {
       this.parsedFields = Optional.ofNullable(parsedFields);
       return this;
     }
 
     /**
-     * <p>Flattened field descriptors derived from the schema.</p>
+     * <p>Flattened field descriptors derived from the schema. Fields inside arrays of objects use an item-relative key (for example, 'status'), a scope naming the containing array (for example, 'boss'), and a schemaPath for locating the field in the source schema (for example, 'boss[].status'). The object remains a single stored API resource.</p>
      */
     @java.lang.Override
     @JsonSetter(
         value = "parsed_fields",
         nulls = Nulls.SKIP
     )
-    public _FinalStage parsedFields(Optional<List<Map<String, Object>>> parsedFields) {
+    public _FinalStage parsedFields(Optional<List<WorkspaceObjectParsedFieldsItem>> parsedFields) {
       this.parsedFields = parsedFields;
       return this;
     }

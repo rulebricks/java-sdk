@@ -36,6 +36,8 @@ public final class FlowImportPayload {
 
   private final Optional<String> description;
 
+  private final Optional<List<String>> labels;
+
   private final List<RulebricksFlowNode> nodes;
 
   private final Optional<List<RulebricksFlowConnection>> connections;
@@ -51,11 +53,13 @@ public final class FlowImportPayload {
   private final Map<String, Object> additionalProperties;
 
   private FlowImportPayload(String name, Optional<String> description,
-      List<RulebricksFlowNode> nodes, Optional<List<RulebricksFlowConnection>> connections,
-      Optional<Boolean> publish, Optional<String> id, Optional<String> stableId,
-      Optional<String> slug, Map<String, Object> additionalProperties) {
+      Optional<List<String>> labels, List<RulebricksFlowNode> nodes,
+      Optional<List<RulebricksFlowConnection>> connections, Optional<Boolean> publish,
+      Optional<String> id, Optional<String> stableId, Optional<String> slug,
+      Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
+    this.labels = labels;
     this.nodes = nodes;
     this.connections = connections;
     this.publish = publish;
@@ -82,6 +86,11 @@ public final class FlowImportPayload {
       return Optional.empty();
     }
     return description;
+  }
+
+  @JsonProperty("labels")
+  public Optional<List<String>> getLabels() {
+    return labels;
   }
 
   /**
@@ -153,12 +162,12 @@ public final class FlowImportPayload {
   }
 
   private boolean equalTo(FlowImportPayload other) {
-    return name.equals(other.name) && description.equals(other.description) && nodes.equals(other.nodes) && connections.equals(other.connections) && publish.equals(other.publish) && id.equals(other.id) && stableId.equals(other.stableId) && slug.equals(other.slug);
+    return name.equals(other.name) && description.equals(other.description) && labels.equals(other.labels) && nodes.equals(other.nodes) && connections.equals(other.connections) && publish.equals(other.publish) && id.equals(other.id) && stableId.equals(other.stableId) && slug.equals(other.slug);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.description, this.nodes, this.connections, this.publish, this.id, this.stableId, this.slug);
+    return Objects.hash(this.name, this.description, this.labels, this.nodes, this.connections, this.publish, this.id, this.stableId, this.slug);
   }
 
   @java.lang.Override
@@ -194,6 +203,10 @@ public final class FlowImportPayload {
     _FinalStage description(String description);
 
     _FinalStage description(Nullable<String> description);
+
+    _FinalStage labels(Optional<List<String>> labels);
+
+    _FinalStage labels(List<String> labels);
 
     /**
      * <p>The flow's nodes. Exactly one must be an <code>origin</code>.</p>
@@ -258,6 +271,8 @@ public final class FlowImportPayload {
 
     private List<RulebricksFlowNode> nodes = new ArrayList<>();
 
+    private Optional<List<String>> labels = Optional.empty();
+
     private Optional<String> description = Optional.empty();
 
     @JsonAnySetter
@@ -270,6 +285,7 @@ public final class FlowImportPayload {
     public Builder from(FlowImportPayload other) {
       name(other.getName());
       description(other.getDescription());
+      labels(other.getLabels());
       nodes(other.getNodes());
       connections(other.getConnections());
       publish(other.getPublish());
@@ -444,6 +460,22 @@ public final class FlowImportPayload {
       return this;
     }
 
+    @java.lang.Override
+    public _FinalStage labels(List<String> labels) {
+      this.labels = Optional.ofNullable(labels);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "labels",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage labels(Optional<List<String>> labels) {
+      this.labels = labels;
+      return this;
+    }
+
     /**
      * <p>Optional flow description.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
@@ -487,7 +519,7 @@ public final class FlowImportPayload {
 
     @java.lang.Override
     public FlowImportPayload build() {
-      return new FlowImportPayload(name, description, nodes, connections, publish, id, stableId, slug, additionalProperties);
+      return new FlowImportPayload(name, description, labels, nodes, connections, publish, id, stableId, slug, additionalProperties);
     }
 
     @java.lang.Override

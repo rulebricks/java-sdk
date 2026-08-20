@@ -26,6 +26,8 @@ import java.util.Optional;
     builder = UpsertObjectResponse.Builder.class
 )
 public final class UpsertObjectResponse {
+  private final Optional<Boolean> dryRun;
+
   private final Optional<Boolean> created;
 
   private final Optional<WorkspaceObject> object;
@@ -34,12 +36,22 @@ public final class UpsertObjectResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private UpsertObjectResponse(Optional<Boolean> created, Optional<WorkspaceObject> object,
-      Optional<UpsertObjectResponseValues> values, Map<String, Object> additionalProperties) {
+  private UpsertObjectResponse(Optional<Boolean> dryRun, Optional<Boolean> created,
+      Optional<WorkspaceObject> object, Optional<UpsertObjectResponseValues> values,
+      Map<String, Object> additionalProperties) {
+    this.dryRun = dryRun;
     this.created = created;
     this.object = object;
     this.values = values;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Present and true for a dry-run response; no object or managed values were written.
+   */
+  @JsonProperty("dry_run")
+  public Optional<Boolean> getDryRun() {
+    return dryRun;
   }
 
   /**
@@ -75,12 +87,12 @@ public final class UpsertObjectResponse {
   }
 
   private boolean equalTo(UpsertObjectResponse other) {
-    return created.equals(other.created) && object.equals(other.object) && values.equals(other.values);
+    return dryRun.equals(other.dryRun) && created.equals(other.created) && object.equals(other.object) && values.equals(other.values);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.object, this.values);
+    return Objects.hash(this.dryRun, this.created, this.object, this.values);
   }
 
   @java.lang.Override
@@ -96,6 +108,8 @@ public final class UpsertObjectResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> dryRun = Optional.empty();
+
     private Optional<Boolean> created = Optional.empty();
 
     private Optional<WorkspaceObject> object = Optional.empty();
@@ -109,9 +123,27 @@ public final class UpsertObjectResponse {
     }
 
     public Builder from(UpsertObjectResponse other) {
+      dryRun(other.getDryRun());
       created(other.getCreated());
       object(other.getObject());
       values(other.getValues());
+      return this;
+    }
+
+    /**
+     * <p>Present and true for a dry-run response; no object or managed values were written.</p>
+     */
+    @JsonSetter(
+        value = "dry_run",
+        nulls = Nulls.SKIP
+    )
+    public Builder dryRun(Optional<Boolean> dryRun) {
+      this.dryRun = dryRun;
+      return this;
+    }
+
+    public Builder dryRun(Boolean dryRun) {
+      this.dryRun = Optional.ofNullable(dryRun);
       return this;
     }
 
@@ -164,7 +196,7 @@ public final class UpsertObjectResponse {
     }
 
     public UpsertObjectResponse build() {
-      return new UpsertObjectResponse(created, object, values, additionalProperties);
+      return new UpsertObjectResponse(dryRun, created, object, values, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

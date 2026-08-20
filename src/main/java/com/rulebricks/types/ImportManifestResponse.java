@@ -88,7 +88,7 @@ public final class ImportManifestResponse {
   }
 
   /**
-   * @return Assets that were skipped during import.
+   * @return Assets that were skipped during import. Object-managed values are listed here with a reason such as 'Collection is managed by a workspace object' or 'Value is managed by a workspace object'; they do not cause a whole-import 409.
    */
   @JsonProperty("skipped")
   public Optional<List<ImportManifestResponseSkippedItem>> getSkipped() {
@@ -247,7 +247,7 @@ public final class ImportManifestResponse {
     }
 
     /**
-     * <p>Assets that were skipped during import.</p>
+     * <p>Assets that were skipped during import. Object-managed values are listed here with a reason such as 'Collection is managed by a workspace object' or 'Value is managed by a workspace object'; they do not cause a whole-import 409.</p>
      */
     @JsonSetter(
         value = "skipped",

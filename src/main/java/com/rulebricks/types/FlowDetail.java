@@ -43,6 +43,8 @@ public final class FlowDetail implements IFlowBase {
 
   private final Optional<OffsetDateTime> updatedAt;
 
+  private final Optional<List<String>> labels;
+
   private final Optional<FlowDetailOriginRule> originRule;
 
   private final Optional<FlowDetailContext> context;
@@ -55,15 +57,16 @@ public final class FlowDetail implements IFlowBase {
 
   private FlowDetail(Optional<String> id, Optional<String> name, Optional<String> description,
       Optional<String> slug, Optional<Boolean> published, Optional<OffsetDateTime> updatedAt,
-      Optional<FlowDetailOriginRule> originRule, Optional<FlowDetailContext> context,
-      Optional<List<String>> userGroups, Optional<Folder> folder,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> labels, Optional<FlowDetailOriginRule> originRule,
+      Optional<FlowDetailContext> context, Optional<List<String>> userGroups,
+      Optional<Folder> folder, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.slug = slug;
     this.published = published;
     this.updatedAt = updatedAt;
+    this.labels = labels;
     this.originRule = originRule;
     this.context = context;
     this.userGroups = userGroups;
@@ -121,6 +124,11 @@ public final class FlowDetail implements IFlowBase {
   @JsonProperty("updated_at")
   public Optional<OffsetDateTime> getUpdatedAt() {
     return updatedAt;
+  }
+
+  @JsonProperty("labels")
+  public Optional<List<String>> getLabels() {
+    return labels;
   }
 
   /**
@@ -203,12 +211,12 @@ public final class FlowDetail implements IFlowBase {
   }
 
   private boolean equalTo(FlowDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && originRule.equals(other.originRule) && context.equals(other.context) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && labels.equals(other.labels) && originRule.equals(other.originRule) && context.equals(other.context) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.originRule, this.context, this.userGroups, this.folder);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.labels, this.originRule, this.context, this.userGroups, this.folder);
   }
 
   @java.lang.Override
@@ -236,6 +244,8 @@ public final class FlowDetail implements IFlowBase {
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
 
+    private Optional<List<String>> labels = Optional.empty();
+
     private Optional<FlowDetailOriginRule> originRule = Optional.empty();
 
     private Optional<FlowDetailContext> context = Optional.empty();
@@ -257,6 +267,7 @@ public final class FlowDetail implements IFlowBase {
       slug(other.getSlug());
       published(other.getPublished());
       updatedAt(other.getUpdatedAt());
+      labels(other.getLabels());
       originRule(other.getOriginRule());
       context(other.getContext());
       userGroups(other.getUserGroups());
@@ -363,6 +374,20 @@ public final class FlowDetail implements IFlowBase {
 
     public Builder updatedAt(OffsetDateTime updatedAt) {
       this.updatedAt = Optional.ofNullable(updatedAt);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "labels",
+        nulls = Nulls.SKIP
+    )
+    public Builder labels(Optional<List<String>> labels) {
+      this.labels = labels;
+      return this;
+    }
+
+    public Builder labels(List<String> labels) {
+      this.labels = Optional.ofNullable(labels);
       return this;
     }
 
@@ -474,7 +499,7 @@ public final class FlowDetail implements IFlowBase {
     }
 
     public FlowDetail build() {
-      return new FlowDetail(id, name, description, slug, published, updatedAt, originRule, context, userGroups, folder, additionalProperties);
+      return new FlowDetail(id, name, description, slug, published, updatedAt, labels, originRule, context, userGroups, folder, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

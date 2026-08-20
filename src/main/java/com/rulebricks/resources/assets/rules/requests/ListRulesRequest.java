@@ -15,7 +15,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +27,8 @@ import java.util.Optional;
     builder = ListRulesRequest.Builder.class
 )
 public final class ListRulesRequest {
+  private final Optional<List<String>> labels;
+
   private final Optional<String> folder;
 
   private final Optional<String> userGroup;
@@ -33,12 +37,21 @@ public final class ListRulesRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListRulesRequest(Optional<String> folder, Optional<String> userGroup,
-      Optional<String> name, Map<String, Object> additionalProperties) {
+  private ListRulesRequest(Optional<List<String>> labels, Optional<String> folder,
+      Optional<String> userGroup, Optional<String> name, Map<String, Object> additionalProperties) {
+    this.labels = labels;
     this.folder = folder;
     this.userGroup = userGroup;
     this.name = name;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Filter results to assets containing all comma-separated labels.
+   */
+  @JsonProperty("labels")
+  public Optional<List<String>> getLabels() {
+    return labels;
   }
 
   /**
@@ -77,12 +90,12 @@ public final class ListRulesRequest {
   }
 
   private boolean equalTo(ListRulesRequest other) {
-    return folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
+    return labels.equals(other.labels) && folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.folder, this.userGroup, this.name);
+    return Objects.hash(this.labels, this.folder, this.userGroup, this.name);
   }
 
   @java.lang.Override
@@ -98,6 +111,8 @@ public final class ListRulesRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<List<String>> labels = Optional.empty();
+
     private Optional<String> folder = Optional.empty();
 
     private Optional<String> userGroup = Optional.empty();
@@ -111,9 +126,32 @@ public final class ListRulesRequest {
     }
 
     public Builder from(ListRulesRequest other) {
+      labels(other.getLabels());
       folder(other.getFolder());
       userGroup(other.getUserGroup());
       name(other.getName());
+      return this;
+    }
+
+    /**
+     * <p>Filter results to assets containing all comma-separated labels.</p>
+     */
+    @JsonSetter(
+        value = "labels",
+        nulls = Nulls.SKIP
+    )
+    public Builder labels(Optional<List<String>> labels) {
+      this.labels = labels;
+      return this;
+    }
+
+    public Builder labels(List<String> labels) {
+      this.labels = Optional.ofNullable(labels);
+      return this;
+    }
+
+    public Builder labels(String labels) {
+      this.labels = Optional.of(Collections.singletonList(labels));
       return this;
     }
 
@@ -169,7 +207,7 @@ public final class ListRulesRequest {
     }
 
     public ListRulesRequest build() {
-      return new ListRulesRequest(folder, userGroup, name, additionalProperties);
+      return new ListRulesRequest(labels, folder, userGroup, name, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

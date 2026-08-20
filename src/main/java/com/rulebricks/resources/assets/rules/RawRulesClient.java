@@ -26,12 +26,12 @@ import com.rulebricks.resources.assets.rules.requests.ListRulesRequest;
 import com.rulebricks.resources.assets.rules.requests.PullRulesRequest;
 import com.rulebricks.types.Error;
 import com.rulebricks.types.RuleDetail;
+import com.rulebricks.types.RuleExport;
 import com.rulebricks.types.SuccessMessage;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
 import java.util.List;
-import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -111,14 +111,14 @@ public class RawRulesClient {
     /**
      * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request) {
+    public RulebricksApiHttpResponse<RuleExport> pull(PullRulesRequest request) {
       return pull(request,null);
     }
 
     /**
      * Export a specific rule by its ID. This response preserves the raw rule document casing (for example, <code>requestSchema</code>, <code>sampleRequest</code>, and <code>createdAt</code>) so it can round-trip through <code>/admin/rules/import</code> and <code>.rbm</code> workflows.
      */
-    public RulebricksApiHttpResponse<Map<String, Object>> pull(PullRulesRequest request,
+    public RulebricksApiHttpResponse<RuleExport> pull(PullRulesRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -142,7 +142,7 @@ public class RawRulesClient {
           ResponseBody responseBody = response.body();
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExport.class), response);
           }
           try {
             switch (response.code()) {
@@ -165,14 +165,14 @@ public class RawRulesClient {
       /**
        * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
        */
-      public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request) {
+      public RulebricksApiHttpResponse<RuleExport> push(ImportRuleRequest request) {
         return push(request,null);
       }
 
       /**
        * Create or update a rule. If <code>id</code> is provided, the matching rule is partially updated (all other fields optional). If <code>id</code> is omitted, a new rule is created (<code>id</code> and <code>slug</code> are auto-generated; all other fields required).
        */
-      public RulebricksApiHttpResponse<Map<String, Object>> push(ImportRuleRequest request,
+      public RulebricksApiHttpResponse<RuleExport> push(ImportRuleRequest request,
           RequestOptions requestOptions) {
         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -203,14 +203,14 @@ public class RawRulesClient {
             ResponseBody responseBody = response.body();
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             if (response.isSuccessful()) {
-              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+              return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExport.class), response);
             }
             try {
               switch (response.code()) {
                 case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-                case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 422:throw new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
               }
@@ -227,28 +227,28 @@ public class RawRulesClient {
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list() {
           return list(ListRulesRequest.builder().build());
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(RequestOptions requestOptions) {
           return list(ListRulesRequest.builder().build(),requestOptions);
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request) {
           return list(request,null);
         }
 
         /**
-         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+         * List all rules in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
          */
         public RulebricksApiHttpResponse<List<RuleDetail>> list(ListRulesRequest request,
             RequestOptions requestOptions) {
@@ -262,6 +262,9 @@ public class RawRulesClient {
             }
             if (request.getName().isPresent()) {
               QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+            }
+            if (request.getLabels().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "labels", request.getLabels().get(), true);
             }
             if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {

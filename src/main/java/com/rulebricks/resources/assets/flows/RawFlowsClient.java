@@ -46,28 +46,28 @@ public class RawFlowsClient {
   }
 
   /**
-   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public RulebricksApiHttpResponse<List<FlowDetail>> list() {
     return list(ListFlowsRequest.builder().build());
   }
 
   /**
-   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public RulebricksApiHttpResponse<List<FlowDetail>> list(RequestOptions requestOptions) {
     return list(ListFlowsRequest.builder().build(),requestOptions);
   }
 
   /**
-   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public RulebricksApiHttpResponse<List<FlowDetail>> list(ListFlowsRequest request) {
     return list(request,null);
   }
 
   /**
-   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List all flows in the organization. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, labels, user group name or ID when the API key has access to that group, or by name.
    */
   public RulebricksApiHttpResponse<List<FlowDetail>> list(ListFlowsRequest request,
       RequestOptions requestOptions) {
@@ -81,6 +81,9 @@ public class RawFlowsClient {
       }
       if (request.getName().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "name", request.getName().get(), false);
+      }
+      if (request.getLabels().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "labels", request.getLabels().get(), true);
       }
       if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {

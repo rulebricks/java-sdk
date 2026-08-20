@@ -44,6 +44,8 @@ public final class RuleDetail implements IRuleBase {
 
   private final Optional<OffsetDateTime> updatedAt;
 
+  private final Optional<List<String>> labels;
+
   private final Optional<Boolean> published;
 
   private final Optional<Integer> noConditions;
@@ -64,7 +66,7 @@ public final class RuleDetail implements IRuleBase {
 
   private RuleDetail(Optional<String> id, Optional<String> name, Optional<String> description,
       Optional<String> slug, Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
-      Optional<Boolean> published, Optional<Integer> noConditions,
+      Optional<List<String>> labels, Optional<Boolean> published, Optional<Integer> noConditions,
       Optional<Map<String, Object>> metadata, Optional<List<String>> userGroups,
       Optional<Folder> folder, Optional<RuleDetailContext> context,
       Optional<List<SchemaField>> requestSchema, Optional<List<SchemaField>> responseSchema,
@@ -75,6 +77,7 @@ public final class RuleDetail implements IRuleBase {
     this.slug = slug;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.labels = labels;
     this.published = published;
     this.noConditions = noConditions;
     this.metadata = metadata;
@@ -136,6 +139,11 @@ public final class RuleDetail implements IRuleBase {
   @JsonProperty("updated_at")
   public Optional<OffsetDateTime> getUpdatedAt() {
     return updatedAt;
+  }
+
+  @JsonProperty("labels")
+  public Optional<List<String>> getLabels() {
+    return labels;
   }
 
   /**
@@ -223,12 +231,12 @@ public final class RuleDetail implements IRuleBase {
   }
 
   private boolean equalTo(RuleDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && published.equals(other.published) && noConditions.equals(other.noConditions) && metadata.equals(other.metadata) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && context.equals(other.context) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && labels.equals(other.labels) && published.equals(other.published) && noConditions.equals(other.noConditions) && metadata.equals(other.metadata) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && context.equals(other.context) && requestSchema.equals(other.requestSchema) && responseSchema.equals(other.responseSchema);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.updatedAt, this.published, this.noConditions, this.metadata, this.userGroups, this.folder, this.context, this.requestSchema, this.responseSchema);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.createdAt, this.updatedAt, this.labels, this.published, this.noConditions, this.metadata, this.userGroups, this.folder, this.context, this.requestSchema, this.responseSchema);
   }
 
   @java.lang.Override
@@ -255,6 +263,8 @@ public final class RuleDetail implements IRuleBase {
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     private Optional<OffsetDateTime> updatedAt = Optional.empty();
+
+    private Optional<List<String>> labels = Optional.empty();
 
     private Optional<Boolean> published = Optional.empty();
 
@@ -285,6 +295,7 @@ public final class RuleDetail implements IRuleBase {
       slug(other.getSlug());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
+      labels(other.getLabels());
       published(other.getPublished());
       noConditions(other.getNoConditions());
       metadata(other.getMetadata());
@@ -395,6 +406,20 @@ public final class RuleDetail implements IRuleBase {
 
     public Builder updatedAt(OffsetDateTime updatedAt) {
       this.updatedAt = Optional.ofNullable(updatedAt);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "labels",
+        nulls = Nulls.SKIP
+    )
+    public Builder labels(Optional<List<String>> labels) {
+      this.labels = labels;
+      return this;
+    }
+
+    public Builder labels(List<String> labels) {
+      this.labels = Optional.ofNullable(labels);
       return this;
     }
 
@@ -545,7 +570,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     public RuleDetail build() {
-      return new RuleDetail(id, name, description, slug, createdAt, updatedAt, published, noConditions, metadata, userGroups, folder, context, requestSchema, responseSchema, additionalProperties);
+      return new RuleDetail(id, name, description, slug, createdAt, updatedAt, labels, published, noConditions, metadata, userGroups, folder, context, requestSchema, responseSchema, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

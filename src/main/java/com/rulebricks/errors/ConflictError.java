@@ -5,21 +5,21 @@
 package com.rulebricks.errors;
 
 import com.rulebricks.core.RulebricksApiApiException;
-import com.rulebricks.types.Error;
+import java.lang.Object;
 import okhttp3.Response;
 
 public final class ConflictError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Error body;
+  private final Object body;
 
-  public ConflictError(Error body) {
+  public ConflictError(Object body) {
     super("ConflictError", 409, body);
     this.body = body;
   }
 
-  public ConflictError(Error body, Response rawResponse) {
+  public ConflictError(Object body, Response rawResponse) {
     super("ConflictError", 409, body, rawResponse);
     this.body = body;
   }
@@ -28,7 +28,7 @@ public final class ConflictError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Error body() {
+  public Object body() {
     return this.body;
   }
 }

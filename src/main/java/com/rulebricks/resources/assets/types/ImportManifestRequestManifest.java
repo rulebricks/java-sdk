@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.types.ManifestLabeledAsset;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -28,9 +29,9 @@ import java.util.Optional;
 public final class ImportManifestRequestManifest {
   private final Optional<String> version;
 
-  private final Optional<List<Map<String, Object>>> rules;
+  private final Optional<List<ManifestLabeledAsset>> rules;
 
-  private final Optional<List<Map<String, Object>>> flows;
+  private final Optional<List<ManifestLabeledAsset>> flows;
 
   private final Optional<List<Map<String, Object>>> entities;
 
@@ -41,7 +42,7 @@ public final class ImportManifestRequestManifest {
   private final Map<String, Object> additionalProperties;
 
   private ImportManifestRequestManifest(Optional<String> version,
-      Optional<List<Map<String, Object>>> rules, Optional<List<Map<String, Object>>> flows,
+      Optional<List<ManifestLabeledAsset>> rules, Optional<List<ManifestLabeledAsset>> flows,
       Optional<List<Map<String, Object>>> entities, Optional<List<Map<String, Object>>> contexts,
       Optional<List<Map<String, Object>>> values, Map<String, Object> additionalProperties) {
     this.version = version;
@@ -65,7 +66,7 @@ public final class ImportManifestRequestManifest {
    * @return Rules to import.
    */
   @JsonProperty("rules")
-  public Optional<List<Map<String, Object>>> getRules() {
+  public Optional<List<ManifestLabeledAsset>> getRules() {
     return rules;
   }
 
@@ -73,7 +74,7 @@ public final class ImportManifestRequestManifest {
    * @return Flows to import.
    */
   @JsonProperty("flows")
-  public Optional<List<Map<String, Object>>> getFlows() {
+  public Optional<List<ManifestLabeledAsset>> getFlows() {
     return flows;
   }
 
@@ -94,7 +95,7 @@ public final class ImportManifestRequestManifest {
   }
 
   /**
-   * @return Vocabulary values to import.
+   * @return Vocabulary values to import. Entries in object-managed namespaces are skipped and reported instead of being overwritten.
    */
   @JsonProperty("values")
   public Optional<List<Map<String, Object>>> getValues() {
@@ -136,9 +137,9 @@ public final class ImportManifestRequestManifest {
   public static final class Builder {
     private Optional<String> version = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> rules = Optional.empty();
+    private Optional<List<ManifestLabeledAsset>> rules = Optional.empty();
 
-    private Optional<List<Map<String, Object>>> flows = Optional.empty();
+    private Optional<List<ManifestLabeledAsset>> flows = Optional.empty();
 
     private Optional<List<Map<String, Object>>> entities = Optional.empty();
 
@@ -186,12 +187,12 @@ public final class ImportManifestRequestManifest {
         value = "rules",
         nulls = Nulls.SKIP
     )
-    public Builder rules(Optional<List<Map<String, Object>>> rules) {
+    public Builder rules(Optional<List<ManifestLabeledAsset>> rules) {
       this.rules = rules;
       return this;
     }
 
-    public Builder rules(List<Map<String, Object>> rules) {
+    public Builder rules(List<ManifestLabeledAsset> rules) {
       this.rules = Optional.ofNullable(rules);
       return this;
     }
@@ -203,12 +204,12 @@ public final class ImportManifestRequestManifest {
         value = "flows",
         nulls = Nulls.SKIP
     )
-    public Builder flows(Optional<List<Map<String, Object>>> flows) {
+    public Builder flows(Optional<List<ManifestLabeledAsset>> flows) {
       this.flows = flows;
       return this;
     }
 
-    public Builder flows(List<Map<String, Object>> flows) {
+    public Builder flows(List<ManifestLabeledAsset> flows) {
       this.flows = Optional.ofNullable(flows);
       return this;
     }
@@ -248,7 +249,7 @@ public final class ImportManifestRequestManifest {
     }
 
     /**
-     * <p>Vocabulary values to import.</p>
+     * <p>Vocabulary values to import. Entries in object-managed namespaces are skipped and reported instead of being overwritten.</p>
      */
     @JsonSetter(
         value = "values",
