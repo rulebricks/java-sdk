@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
@@ -32,6 +35,8 @@ public final class ContextBatchResponseResultsItemExecutedItem {
 
   private final Optional<ContextBatchResponseResultsItemExecutedItemStatus> status;
 
+  private final Optional<String> executionId;
+
   private final Optional<String> error;
 
   private final Optional<List<String>> writtenToContext;
@@ -40,11 +45,13 @@ public final class ContextBatchResponseResultsItemExecutedItem {
 
   private ContextBatchResponseResultsItemExecutedItem(
       Optional<ContextBatchResponseResultsItemExecutedItemType> type, Optional<String> slug,
-      Optional<ContextBatchResponseResultsItemExecutedItemStatus> status, Optional<String> error,
-      Optional<List<String>> writtenToContext, Map<String, Object> additionalProperties) {
+      Optional<ContextBatchResponseResultsItemExecutedItemStatus> status,
+      Optional<String> executionId, Optional<String> error, Optional<List<String>> writtenToContext,
+      Map<String, Object> additionalProperties) {
     this.type = type;
     this.slug = slug;
     this.status = status;
+    this.executionId = executionId;
     this.error = error;
     this.writtenToContext = writtenToContext;
     this.additionalProperties = additionalProperties;
@@ -65,6 +72,17 @@ public final class ContextBatchResponseResultsItemExecutedItem {
     return status;
   }
 
+  /**
+   * @return Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.
+   */
+  @JsonIgnore
+  public Optional<String> getExecutionId() {
+    if (executionId == null) {
+      return Optional.empty();
+    }
+    return executionId;
+  }
+
   @JsonProperty("error")
   public Optional<String> getError() {
     return error;
@@ -73,6 +91,15 @@ public final class ContextBatchResponseResultsItemExecutedItem {
   @JsonProperty("written_to_context")
   public Optional<List<String>> getWrittenToContext() {
     return writtenToContext;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("execution_id")
+  private Optional<String> _getExecutionId() {
+    return executionId;
   }
 
   @java.lang.Override
@@ -87,12 +114,12 @@ public final class ContextBatchResponseResultsItemExecutedItem {
   }
 
   private boolean equalTo(ContextBatchResponseResultsItemExecutedItem other) {
-    return type.equals(other.type) && slug.equals(other.slug) && status.equals(other.status) && error.equals(other.error) && writtenToContext.equals(other.writtenToContext);
+    return type.equals(other.type) && slug.equals(other.slug) && status.equals(other.status) && executionId.equals(other.executionId) && error.equals(other.error) && writtenToContext.equals(other.writtenToContext);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.slug, this.status, this.error, this.writtenToContext);
+    return Objects.hash(this.type, this.slug, this.status, this.executionId, this.error, this.writtenToContext);
   }
 
   @java.lang.Override
@@ -114,6 +141,8 @@ public final class ContextBatchResponseResultsItemExecutedItem {
 
     private Optional<ContextBatchResponseResultsItemExecutedItemStatus> status = Optional.empty();
 
+    private Optional<String> executionId = Optional.empty();
+
     private Optional<String> error = Optional.empty();
 
     private Optional<List<String>> writtenToContext = Optional.empty();
@@ -128,6 +157,7 @@ public final class ContextBatchResponseResultsItemExecutedItem {
       type(other.getType());
       slug(other.getSlug());
       status(other.getStatus());
+      executionId(other.getExecutionId());
       error(other.getError());
       writtenToContext(other.getWrittenToContext());
       return this;
@@ -175,6 +205,36 @@ public final class ContextBatchResponseResultsItemExecutedItem {
       return this;
     }
 
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    @JsonSetter(
+        value = "execution_id",
+        nulls = Nulls.SKIP
+    )
+    public Builder executionId(Optional<String> executionId) {
+      this.executionId = executionId;
+      return this;
+    }
+
+    public Builder executionId(String executionId) {
+      this.executionId = Optional.ofNullable(executionId);
+      return this;
+    }
+
+    public Builder executionId(Nullable<String> executionId) {
+      if (executionId.isNull()) {
+        this.executionId = null;
+      }
+      else if (executionId.isEmpty()) {
+        this.executionId = Optional.empty();
+      }
+      else {
+        this.executionId = Optional.of(executionId.get());
+      }
+      return this;
+    }
+
     @JsonSetter(
         value = "error",
         nulls = Nulls.SKIP
@@ -204,7 +264,7 @@ public final class ContextBatchResponseResultsItemExecutedItem {
     }
 
     public ContextBatchResponseResultsItemExecutedItem build() {
-      return new ContextBatchResponseResultsItemExecutedItem(type, slug, status, error, writtenToContext, additionalProperties);
+      return new ContextBatchResponseResultsItemExecutedItem(type, slug, status, executionId, error, writtenToContext, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

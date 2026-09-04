@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
@@ -31,6 +34,8 @@ public final class SolveContextFlowResponse {
 
   private final Optional<String> flow;
 
+  private final Optional<String> executionId;
+
   private final Optional<Map<String, Object>> result;
 
   private final Optional<Map<String, Object>> usage;
@@ -38,11 +43,13 @@ public final class SolveContextFlowResponse {
   private final Map<String, Object> additionalProperties;
 
   private SolveContextFlowResponse(Optional<SolveContextFlowResponseStatus> status,
-      Optional<String> context, Optional<String> flow, Optional<Map<String, Object>> result,
-      Optional<Map<String, Object>> usage, Map<String, Object> additionalProperties) {
+      Optional<String> context, Optional<String> flow, Optional<String> executionId,
+      Optional<Map<String, Object>> result, Optional<Map<String, Object>> usage,
+      Map<String, Object> additionalProperties) {
     this.status = status;
     this.context = context;
     this.flow = flow;
+    this.executionId = executionId;
     this.result = result;
     this.usage = usage;
     this.additionalProperties = additionalProperties;
@@ -73,6 +80,17 @@ public final class SolveContextFlowResponse {
   }
 
   /**
+   * @return The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.
+   */
+  @JsonIgnore
+  public Optional<String> getExecutionId() {
+    if (executionId == null) {
+      return Optional.empty();
+    }
+    return executionId;
+  }
+
+  /**
    * @return The flow execution output.
    */
   @JsonProperty("result")
@@ -88,6 +106,15 @@ public final class SolveContextFlowResponse {
     return usage;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("execution_id")
+  private Optional<String> _getExecutionId() {
+    return executionId;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -100,12 +127,12 @@ public final class SolveContextFlowResponse {
   }
 
   private boolean equalTo(SolveContextFlowResponse other) {
-    return status.equals(other.status) && context.equals(other.context) && flow.equals(other.flow) && result.equals(other.result) && usage.equals(other.usage);
+    return status.equals(other.status) && context.equals(other.context) && flow.equals(other.flow) && executionId.equals(other.executionId) && result.equals(other.result) && usage.equals(other.usage);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.status, this.context, this.flow, this.result, this.usage);
+    return Objects.hash(this.status, this.context, this.flow, this.executionId, this.result, this.usage);
   }
 
   @java.lang.Override
@@ -127,6 +154,8 @@ public final class SolveContextFlowResponse {
 
     private Optional<String> flow = Optional.empty();
 
+    private Optional<String> executionId = Optional.empty();
+
     private Optional<Map<String, Object>> result = Optional.empty();
 
     private Optional<Map<String, Object>> usage = Optional.empty();
@@ -141,6 +170,7 @@ public final class SolveContextFlowResponse {
       status(other.getStatus());
       context(other.getContext());
       flow(other.getFlow());
+      executionId(other.getExecutionId());
       result(other.getResult());
       usage(other.getUsage());
       return this;
@@ -198,6 +228,36 @@ public final class SolveContextFlowResponse {
     }
 
     /**
+     * <p>The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    @JsonSetter(
+        value = "execution_id",
+        nulls = Nulls.SKIP
+    )
+    public Builder executionId(Optional<String> executionId) {
+      this.executionId = executionId;
+      return this;
+    }
+
+    public Builder executionId(String executionId) {
+      this.executionId = Optional.ofNullable(executionId);
+      return this;
+    }
+
+    public Builder executionId(Nullable<String> executionId) {
+      if (executionId.isNull()) {
+        this.executionId = null;
+      }
+      else if (executionId.isEmpty()) {
+        this.executionId = Optional.empty();
+      }
+      else {
+        this.executionId = Optional.of(executionId.get());
+      }
+      return this;
+    }
+
+    /**
      * <p>The flow execution output.</p>
      */
     @JsonSetter(
@@ -232,7 +292,7 @@ public final class SolveContextFlowResponse {
     }
 
     public SolveContextFlowResponse build() {
-      return new SolveContextFlowResponse(status, context, flow, result, usage, additionalProperties);
+      return new SolveContextFlowResponse(status, context, flow, executionId, result, usage, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

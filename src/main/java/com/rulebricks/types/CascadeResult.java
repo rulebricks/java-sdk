@@ -36,6 +36,8 @@ public final class CascadeResult {
 
   private final Optional<String> flow;
 
+  private final Optional<String> executionId;
+
   private final Optional<CascadeResultStatus> status;
 
   private final Optional<Map<String, Object>> result;
@@ -57,14 +59,15 @@ public final class CascadeResult {
   private final Map<String, Object> additionalProperties;
 
   private CascadeResult(Optional<String> context, Optional<String> rule, Optional<String> flow,
-      Optional<CascadeResultStatus> status, Optional<Map<String, Object>> result,
-      Optional<Boolean> autoExecuted, Optional<List<String>> writtenToContext,
-      Optional<String> error, Optional<Boolean> rateLimited, Optional<Boolean> usageLimited,
-      Optional<List<String>> need, Optional<List<CascadeResult>> cascaded,
-      Map<String, Object> additionalProperties) {
+      Optional<String> executionId, Optional<CascadeResultStatus> status,
+      Optional<Map<String, Object>> result, Optional<Boolean> autoExecuted,
+      Optional<List<String>> writtenToContext, Optional<String> error,
+      Optional<Boolean> rateLimited, Optional<Boolean> usageLimited, Optional<List<String>> need,
+      Optional<List<CascadeResult>> cascaded, Map<String, Object> additionalProperties) {
     this.context = context;
     this.rule = rule;
     this.flow = flow;
+    this.executionId = executionId;
     this.status = status;
     this.result = result;
     this.autoExecuted = autoExecuted;
@@ -105,6 +108,17 @@ public final class CascadeResult {
       return Optional.empty();
     }
     return flow;
+  }
+
+  /**
+   * @return Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.
+   */
+  @JsonIgnore
+  public Optional<String> getExecutionId() {
+    if (executionId == null) {
+      return Optional.empty();
+    }
+    return executionId;
   }
 
   /**
@@ -204,6 +218,15 @@ public final class CascadeResult {
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
   )
+  @JsonProperty("execution_id")
+  private Optional<String> _getExecutionId() {
+    return executionId;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
   @JsonProperty("error")
   private Optional<String> _getError() {
     return error;
@@ -221,12 +244,12 @@ public final class CascadeResult {
   }
 
   private boolean equalTo(CascadeResult other) {
-    return context.equals(other.context) && rule.equals(other.rule) && flow.equals(other.flow) && status.equals(other.status) && result.equals(other.result) && autoExecuted.equals(other.autoExecuted) && writtenToContext.equals(other.writtenToContext) && error.equals(other.error) && rateLimited.equals(other.rateLimited) && usageLimited.equals(other.usageLimited) && need.equals(other.need) && cascaded.equals(other.cascaded);
+    return context.equals(other.context) && rule.equals(other.rule) && flow.equals(other.flow) && executionId.equals(other.executionId) && status.equals(other.status) && result.equals(other.result) && autoExecuted.equals(other.autoExecuted) && writtenToContext.equals(other.writtenToContext) && error.equals(other.error) && rateLimited.equals(other.rateLimited) && usageLimited.equals(other.usageLimited) && need.equals(other.need) && cascaded.equals(other.cascaded);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.rule, this.flow, this.status, this.result, this.autoExecuted, this.writtenToContext, this.error, this.rateLimited, this.usageLimited, this.need, this.cascaded);
+    return Objects.hash(this.context, this.rule, this.flow, this.executionId, this.status, this.result, this.autoExecuted, this.writtenToContext, this.error, this.rateLimited, this.usageLimited, this.need, this.cascaded);
   }
 
   @java.lang.Override
@@ -247,6 +270,8 @@ public final class CascadeResult {
     private Optional<String> rule = Optional.empty();
 
     private Optional<String> flow = Optional.empty();
+
+    private Optional<String> executionId = Optional.empty();
 
     private Optional<CascadeResultStatus> status = Optional.empty();
 
@@ -276,6 +301,7 @@ public final class CascadeResult {
       context(other.getContext());
       rule(other.getRule());
       flow(other.getFlow());
+      executionId(other.getExecutionId());
       status(other.getStatus());
       result(other.getResult());
       autoExecuted(other.getAutoExecuted());
@@ -361,6 +387,36 @@ public final class CascadeResult {
       }
       else {
         this.flow = Optional.of(flow.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    @JsonSetter(
+        value = "execution_id",
+        nulls = Nulls.SKIP
+    )
+    public Builder executionId(Optional<String> executionId) {
+      this.executionId = executionId;
+      return this;
+    }
+
+    public Builder executionId(String executionId) {
+      this.executionId = Optional.ofNullable(executionId);
+      return this;
+    }
+
+    public Builder executionId(Nullable<String> executionId) {
+      if (executionId.isNull()) {
+        this.executionId = null;
+      }
+      else if (executionId.isEmpty()) {
+        this.executionId = Optional.empty();
+      }
+      else {
+        this.executionId = Optional.of(executionId.get());
       }
       return this;
     }
@@ -532,7 +588,7 @@ public final class CascadeResult {
     }
 
     public CascadeResult build() {
-      return new CascadeResult(context, rule, flow, status, result, autoExecuted, writtenToContext, error, rateLimited, usageLimited, need, cascaded, additionalProperties);
+      return new CascadeResult(context, rule, flow, executionId, status, result, autoExecuted, writtenToContext, error, rateLimited, usageLimited, need, cascaded, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -7,9 +7,8 @@ package com.rulebricks.resources.flows;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.flows.requests.ExecuteFlowsRequest;
-import java.lang.Object;
+import com.rulebricks.types.FlowExecutionResponsePayload;
 import java.lang.String;
-import java.util.Map;
 
 public class FlowsClient {
   protected final ClientOptions clientOptions;
@@ -31,15 +30,16 @@ public class FlowsClient {
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public Map<String, Object> execute(String slug, String version, ExecuteFlowsRequest request) {
+  public FlowExecutionResponsePayload execute(String slug, String version,
+      ExecuteFlowsRequest request) {
     return this.rawClient.execute(slug, version, request).body();
   }
 
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public Map<String, Object> execute(String slug, String version, ExecuteFlowsRequest request,
-      RequestOptions requestOptions) {
+  public FlowExecutionResponsePayload execute(String slug, String version,
+      ExecuteFlowsRequest request, RequestOptions requestOptions) {
     return this.rawClient.execute(slug, version, request, requestOptions).body();
   }
 }

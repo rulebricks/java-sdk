@@ -131,7 +131,7 @@ public final class ContextBatchResponseResultsItem {
   }
 
   /**
-   * @return Per-asset record of the last run: input hash, status, timestamp, trace IDs, error.
+   * @return Per-asset record of the last run: input hash, status, timestamp, trace IDs, <code>execution_id</code> for flows, error.
    */
   @JsonProperty("executions")
   public Optional<Map<String, Object>> getExecutions() {
@@ -382,7 +382,7 @@ public final class ContextBatchResponseResultsItem {
     }
 
     /**
-     * <p>Per-asset record of the last run: input hash, status, timestamp, trace IDs, error.</p>
+     * <p>Per-asset record of the last run: input hash, status, timestamp, trace IDs, <code>execution_id</code> for flows, error.</p>
      */
     @JsonSetter(
         value = "executions",

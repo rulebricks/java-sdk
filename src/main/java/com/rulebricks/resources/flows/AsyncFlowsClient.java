@@ -7,9 +7,8 @@ package com.rulebricks.resources.flows;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.resources.flows.requests.ExecuteFlowsRequest;
-import java.lang.Object;
+import com.rulebricks.types.FlowExecutionResponsePayload;
 import java.lang.String;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncFlowsClient {
@@ -32,7 +31,7 @@ public class AsyncFlowsClient {
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public CompletableFuture<Map<String, Object>> execute(String slug, String version,
+  public CompletableFuture<FlowExecutionResponsePayload> execute(String slug, String version,
       ExecuteFlowsRequest request) {
     return this.rawClient.execute(slug, version, request).thenApply(response -> response.body());
   }
@@ -40,7 +39,7 @@ public class AsyncFlowsClient {
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public CompletableFuture<Map<String, Object>> execute(String slug, String version,
+  public CompletableFuture<FlowExecutionResponsePayload> execute(String slug, String version,
       ExecuteFlowsRequest request, RequestOptions requestOptions) {
     return this.rawClient.execute(slug, version, request, requestOptions).thenApply(response -> response.body());
   }

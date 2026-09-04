@@ -5,7 +5,6 @@
 package com.rulebricks.resources.flows;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
@@ -19,11 +18,11 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.flows.requests.ExecuteFlowsRequest;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.FlowExecutionResponsePayload;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -46,16 +45,16 @@ public class AsyncRawFlowsClient {
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> execute(String slug,
-      String version, ExecuteFlowsRequest request) {
+  public CompletableFuture<RulebricksApiHttpResponse<FlowExecutionResponsePayload>> execute(
+      String slug, String version, ExecuteFlowsRequest request) {
     return execute(slug,version,request,null);
   }
 
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> execute(String slug,
-      String version, ExecuteFlowsRequest request, RequestOptions requestOptions) {
+  public CompletableFuture<RulebricksApiHttpResponse<FlowExecutionResponsePayload>> execute(
+      String slug, String version, ExecuteFlowsRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("flows")
@@ -83,14 +82,14 @@ public class AsyncRawFlowsClient {
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
       }
-      CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> future = new CompletableFuture<>();
+      CompletableFuture<RulebricksApiHttpResponse<FlowExecutionResponsePayload>> future = new CompletableFuture<>();
       client.newCall(okhttpRequest).enqueue(new Callback() {
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
           try (ResponseBody responseBody = response.body()) {
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             if (response.isSuccessful()) {
-              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response));
+              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FlowExecutionResponsePayload.class), response));
               return;
             }
             try {

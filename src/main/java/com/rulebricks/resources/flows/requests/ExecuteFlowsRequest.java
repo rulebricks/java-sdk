@@ -10,32 +10,33 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import com.rulebricks.types.FlowExecutionRequestPayload;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ExecuteFlowsRequest.Builder.class
 )
 public final class ExecuteFlowsRequest {
-  private final Map<String, Object> body;
+  private final FlowExecutionRequestPayload body;
 
   private final Map<String, Object> additionalProperties;
 
-  private ExecuteFlowsRequest(Map<String, Object> body, Map<String, Object> additionalProperties) {
+  private ExecuteFlowsRequest(FlowExecutionRequestPayload body,
+      Map<String, Object> additionalProperties) {
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
 
   @JsonProperty("body")
-  public Map<String, Object> getBody() {
+  public FlowExecutionRequestPayload getBody() {
     return body;
   }
 
@@ -64,15 +65,29 @@ public final class ExecuteFlowsRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static BodyStage builder() {
     return new Builder();
+  }
+
+  public interface BodyStage {
+    _FinalStage body(@NotNull FlowExecutionRequestPayload body);
+
+    Builder from(ExecuteFlowsRequest other);
+  }
+
+  public interface _FinalStage {
+    ExecuteFlowsRequest build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Map<String, Object> body = new LinkedHashMap<>();
+  public static final class Builder implements BodyStage, _FinalStage {
+    private FlowExecutionRequestPayload body;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -80,44 +95,31 @@ public final class ExecuteFlowsRequest {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(ExecuteFlowsRequest other) {
       body(other.getBody());
       return this;
     }
 
-    @JsonSetter(
-        value = "body",
-        nulls = Nulls.SKIP
-    )
-    public Builder body(Map<String, Object> body) {
-      this.body.clear();
-      if (body != null) {
-        this.body.putAll(body);
-      }
+    @java.lang.Override
+    @JsonSetter("body")
+    public _FinalStage body(@NotNull FlowExecutionRequestPayload body) {
+      this.body = Objects.requireNonNull(body, "body must not be null");
       return this;
     }
 
-    public Builder putAllBody(Map<String, Object> body) {
-      if (body != null) {
-        this.body.putAll(body);
-      }
-      return this;
-    }
-
-    public Builder body(String key, Object value) {
-      this.body.put(key, value);
-      return this;
-    }
-
+    @java.lang.Override
     public ExecuteFlowsRequest build() {
       return new ExecuteFlowsRequest(body, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

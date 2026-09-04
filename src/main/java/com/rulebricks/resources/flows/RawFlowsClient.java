@@ -5,7 +5,6 @@
 package com.rulebricks.resources.flows;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
@@ -19,10 +18,10 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.flows.requests.ExecuteFlowsRequest;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.FlowExecutionResponsePayload;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
-import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -41,16 +40,16 @@ public class RawFlowsClient {
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
-      ExecuteFlowsRequest request) {
+  public RulebricksApiHttpResponse<FlowExecutionResponsePayload> execute(String slug,
+      String version, ExecuteFlowsRequest request) {
     return execute(slug,version,request,null);
   }
 
   /**
    * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
-      ExecuteFlowsRequest request, RequestOptions requestOptions) {
+  public RulebricksApiHttpResponse<FlowExecutionResponsePayload> execute(String slug,
+      String version, ExecuteFlowsRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("flows")
@@ -82,7 +81,7 @@ public class RawFlowsClient {
         ResponseBody responseBody = response.body();
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FlowExecutionResponsePayload.class), response);
         }
         try {
           switch (response.code()) {
