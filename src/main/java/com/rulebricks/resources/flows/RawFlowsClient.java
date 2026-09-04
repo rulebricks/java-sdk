@@ -14,7 +14,9 @@ import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.GatewayTimeoutError;
 import com.rulebricks.errors.InternalServerError;
+import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.flows.requests.ExecuteFlowsRequest;
 import com.rulebricks.types.Error;
 import java.io.IOException;
@@ -37,7 +39,7 @@ public class RawFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
+   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
   public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request) {
@@ -45,7 +47,7 @@ public class RawFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
+   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
   public RulebricksApiHttpResponse<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request, RequestOptions requestOptions) {
@@ -86,6 +88,8 @@ public class RawFlowsClient {
           switch (response.code()) {
             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
             case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 504:throw new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }
         catch (JsonProcessingException ignored) {

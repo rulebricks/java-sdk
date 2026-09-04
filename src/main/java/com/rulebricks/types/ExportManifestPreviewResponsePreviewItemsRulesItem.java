@@ -6,15 +6,21 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,23 +33,49 @@ import java.util.Optional;
 public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
   private final Optional<String> id;
 
+  private final Optional<String> stableId;
+
   private final Optional<String> name;
 
   private final Optional<String> slug;
 
+  private final Optional<String> description;
+
+  private final Optional<Boolean> published;
+
+  private final Optional<Integer> rowCount;
+
+  private final Optional<Integer> versionCount;
+
+  private final Optional<OffsetDateTime> updatedAt;
+
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestPreviewResponsePreviewItemsRulesItem(Optional<String> id,
-      Optional<String> name, Optional<String> slug, Map<String, Object> additionalProperties) {
+      Optional<String> stableId, Optional<String> name, Optional<String> slug,
+      Optional<String> description, Optional<Boolean> published, Optional<Integer> rowCount,
+      Optional<Integer> versionCount, Optional<OffsetDateTime> updatedAt,
+      Map<String, Object> additionalProperties) {
     this.id = id;
+    this.stableId = stableId;
     this.name = name;
     this.slug = slug;
+    this.description = description;
+    this.published = published;
+    this.rowCount = rowCount;
+    this.versionCount = versionCount;
+    this.updatedAt = updatedAt;
     this.additionalProperties = additionalProperties;
   }
 
   @JsonProperty("id")
   public Optional<String> getId() {
     return id;
+  }
+
+  @JsonProperty("stableId")
+  public Optional<String> getStableId() {
+    return stableId;
   }
 
   @JsonProperty("name")
@@ -54,6 +86,43 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
   @JsonProperty("slug")
   public Optional<String> getSlug() {
     return slug;
+  }
+
+  @JsonIgnore
+  public Optional<String> getDescription() {
+    if (description == null) {
+      return Optional.empty();
+    }
+    return description;
+  }
+
+  @JsonProperty("published")
+  public Optional<Boolean> getPublished() {
+    return published;
+  }
+
+  @JsonProperty("rowCount")
+  public Optional<Integer> getRowCount() {
+    return rowCount;
+  }
+
+  @JsonProperty("versionCount")
+  public Optional<Integer> getVersionCount() {
+    return versionCount;
+  }
+
+  @JsonProperty("updatedAt")
+  public Optional<OffsetDateTime> getUpdatedAt() {
+    return updatedAt;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("description")
+  private Optional<String> _getDescription() {
+    return description;
   }
 
   @java.lang.Override
@@ -68,12 +137,12 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
   }
 
   private boolean equalTo(ExportManifestPreviewResponsePreviewItemsRulesItem other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug);
+    return id.equals(other.id) && stableId.equals(other.stableId) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && published.equals(other.published) && rowCount.equals(other.rowCount) && versionCount.equals(other.versionCount) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug);
+    return Objects.hash(this.id, this.stableId, this.name, this.slug, this.description, this.published, this.rowCount, this.versionCount, this.updatedAt);
   }
 
   @java.lang.Override
@@ -91,9 +160,21 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
   public static final class Builder {
     private Optional<String> id = Optional.empty();
 
+    private Optional<String> stableId = Optional.empty();
+
     private Optional<String> name = Optional.empty();
 
     private Optional<String> slug = Optional.empty();
+
+    private Optional<String> description = Optional.empty();
+
+    private Optional<Boolean> published = Optional.empty();
+
+    private Optional<Integer> rowCount = Optional.empty();
+
+    private Optional<Integer> versionCount = Optional.empty();
+
+    private Optional<OffsetDateTime> updatedAt = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -103,8 +184,14 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
 
     public Builder from(ExportManifestPreviewResponsePreviewItemsRulesItem other) {
       id(other.getId());
+      stableId(other.getStableId());
       name(other.getName());
       slug(other.getSlug());
+      description(other.getDescription());
+      published(other.getPublished());
+      rowCount(other.getRowCount());
+      versionCount(other.getVersionCount());
+      updatedAt(other.getUpdatedAt());
       return this;
     }
 
@@ -119,6 +206,20 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
 
     public Builder id(String id) {
       this.id = Optional.ofNullable(id);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "stableId",
+        nulls = Nulls.SKIP
+    )
+    public Builder stableId(Optional<String> stableId) {
+      this.stableId = stableId;
+      return this;
+    }
+
+    public Builder stableId(String stableId) {
+      this.stableId = Optional.ofNullable(stableId);
       return this;
     }
 
@@ -150,8 +251,91 @@ public final class ExportManifestPreviewResponsePreviewItemsRulesItem {
       return this;
     }
 
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
+      this.description = Optional.ofNullable(description);
+      return this;
+    }
+
+    public Builder description(Nullable<String> description) {
+      if (description.isNull()) {
+        this.description = null;
+      }
+      else if (description.isEmpty()) {
+        this.description = Optional.empty();
+      }
+      else {
+        this.description = Optional.of(description.get());
+      }
+      return this;
+    }
+
+    @JsonSetter(
+        value = "published",
+        nulls = Nulls.SKIP
+    )
+    public Builder published(Optional<Boolean> published) {
+      this.published = published;
+      return this;
+    }
+
+    public Builder published(Boolean published) {
+      this.published = Optional.ofNullable(published);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "rowCount",
+        nulls = Nulls.SKIP
+    )
+    public Builder rowCount(Optional<Integer> rowCount) {
+      this.rowCount = rowCount;
+      return this;
+    }
+
+    public Builder rowCount(Integer rowCount) {
+      this.rowCount = Optional.ofNullable(rowCount);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "versionCount",
+        nulls = Nulls.SKIP
+    )
+    public Builder versionCount(Optional<Integer> versionCount) {
+      this.versionCount = versionCount;
+      return this;
+    }
+
+    public Builder versionCount(Integer versionCount) {
+      this.versionCount = Optional.ofNullable(versionCount);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "updatedAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder updatedAt(Optional<OffsetDateTime> updatedAt) {
+      this.updatedAt = updatedAt;
+      return this;
+    }
+
+    public Builder updatedAt(OffsetDateTime updatedAt) {
+      this.updatedAt = Optional.ofNullable(updatedAt);
+      return this;
+    }
+
     public ExportManifestPreviewResponsePreviewItemsRulesItem build() {
-      return new ExportManifestPreviewResponsePreviewItemsRulesItem(id, name, slug, additionalProperties);
+      return new ExportManifestPreviewResponsePreviewItemsRulesItem(id, stableId, name, slug, description, published, rowCount, versionCount, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

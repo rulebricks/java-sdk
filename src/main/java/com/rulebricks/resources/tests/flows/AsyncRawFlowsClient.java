@@ -133,7 +133,7 @@ public class AsyncRawFlowsClient {
     }
 
     /**
-     * Adds a new test to the test suite of a flow identified by the slug.
+     * Adds a new test to the flow. <code>contains</code> (Contains Data, the default) finds the expected fragment anywhere in the output, <code>matches</code> (Matches Exactly) requires complete equality, and <code>excludes</code> (Excludes Data) requires the fragment to be absent.
      */
     public CompletableFuture<RulebricksApiHttpResponse<Test>> create(String slug,
         CreateFlowsRequest request) {
@@ -141,7 +141,7 @@ public class AsyncRawFlowsClient {
     }
 
     /**
-     * Adds a new test to the test suite of a flow identified by the slug.
+     * Adds a new test to the flow. <code>contains</code> (Contains Data, the default) finds the expected fragment anywhere in the output, <code>matches</code> (Matches Exactly) requires complete equality, and <code>excludes</code> (Excludes Data) requires the fragment to be absent.
      */
     public CompletableFuture<RulebricksApiHttpResponse<Test>> create(String slug,
         CreateFlowsRequest request, RequestOptions requestOptions) {

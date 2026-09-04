@@ -30,7 +30,7 @@ public class AsyncFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
+   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
   public CompletableFuture<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request) {
@@ -38,7 +38,7 @@ public class AsyncFlowsClient {
   }
 
   /**
-   * Execute a flow by its slug. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
+   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
    */
   public CompletableFuture<Map<String, Object>> execute(String slug, String version,
       ExecuteFlowsRequest request, RequestOptions requestOptions) {

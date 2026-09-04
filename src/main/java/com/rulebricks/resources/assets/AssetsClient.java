@@ -7,14 +7,15 @@ package com.rulebricks.resources.assets;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
+import com.rulebricks.resources.assets.contexts.ContextsClient;
 import com.rulebricks.resources.assets.flows.FlowsClient;
 import com.rulebricks.resources.assets.folders.FoldersClient;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
-import com.rulebricks.resources.assets.requests.ImportManifestRequest;
 import com.rulebricks.resources.assets.rules.RulesClient;
 import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
-import com.rulebricks.types.ImportManifestResponse;
+import com.rulebricks.resources.assets.types.ImportRbmAssetsResponse;
 import com.rulebricks.types.UsageStatistics;
+import java.io.InputStream;
 import java.util.function.Supplier;
 
 public class AssetsClient {
@@ -28,12 +29,15 @@ public class AssetsClient {
 
   protected final Supplier<FoldersClient> foldersClient;
 
+  protected final Supplier<ContextsClient> contextsClient;
+
   public AssetsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new RawAssetsClient(clientOptions);
     this.rulesClient = Suppliers.memoize(() -> new RulesClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new FlowsClient(clientOptions));
     this.foldersClient = Suppliers.memoize(() -> new FoldersClient(clientOptions));
+    this.contextsClient = Suppliers.memoize(() -> new ContextsClient(clientOptions));
   }
 
   /**
@@ -58,29 +62,42 @@ public class AssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
    */
-  public ImportManifestResponse importRbm(ImportManifestRequest request) {
+  public ImportRbmAssetsResponse importRbm(InputStream request) {
     return this.rawClient.importRbm(request).body();
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
    */
-  public ImportManifestResponse importRbm(ImportManifestRequest request,
-      RequestOptions requestOptions) {
+  public ImportRbmAssetsResponse importRbm(InputStream request, RequestOptions requestOptions) {
     return this.rawClient.importRbm(request, requestOptions).body();
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+   */
+  public ImportRbmAssetsResponse importRbm(byte[] request) {
+    return this.rawClient.importRbm(request).body();
+  }
+
+  /**
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+   */
+  public ImportRbmAssetsResponse importRbm(byte[] request, RequestOptions requestOptions) {
+    return this.rawClient.importRbm(request, requestOptions).body();
+  }
+
+  /**
+   * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
    */
   public ExportRbmAssetsResponse exportRbm(ExportManifestRequest request) {
     return this.rawClient.exportRbm(request).body();
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+   * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
    */
   public ExportRbmAssetsResponse exportRbm(ExportManifestRequest request,
       RequestOptions requestOptions) {
@@ -97,5 +114,9 @@ public class AssetsClient {
 
   public FoldersClient folders() {
     return this.foldersClient.get();
+  }
+
+  public ContextsClient contexts() {
+    return this.contextsClient.get();
   }
 }

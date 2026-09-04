@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -27,23 +28,39 @@ import java.util.Optional;
 public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
   private final Optional<String> id;
 
+  private final Optional<String> stableId;
+
   private final Optional<String> name;
 
   private final Optional<String> slug;
 
+  private final Optional<Integer> fieldCount;
+
+  private final Optional<String> identityField;
+
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestPreviewResponsePreviewItemsContextsItem(Optional<String> id,
-      Optional<String> name, Optional<String> slug, Map<String, Object> additionalProperties) {
+      Optional<String> stableId, Optional<String> name, Optional<String> slug,
+      Optional<Integer> fieldCount, Optional<String> identityField,
+      Map<String, Object> additionalProperties) {
     this.id = id;
+    this.stableId = stableId;
     this.name = name;
     this.slug = slug;
+    this.fieldCount = fieldCount;
+    this.identityField = identityField;
     this.additionalProperties = additionalProperties;
   }
 
   @JsonProperty("id")
   public Optional<String> getId() {
     return id;
+  }
+
+  @JsonProperty("stableId")
+  public Optional<String> getStableId() {
+    return stableId;
   }
 
   @JsonProperty("name")
@@ -54,6 +71,16 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
   @JsonProperty("slug")
   public Optional<String> getSlug() {
     return slug;
+  }
+
+  @JsonProperty("fieldCount")
+  public Optional<Integer> getFieldCount() {
+    return fieldCount;
+  }
+
+  @JsonProperty("identity_field")
+  public Optional<String> getIdentityField() {
+    return identityField;
   }
 
   @java.lang.Override
@@ -68,12 +95,12 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
   }
 
   private boolean equalTo(ExportManifestPreviewResponsePreviewItemsContextsItem other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug);
+    return id.equals(other.id) && stableId.equals(other.stableId) && name.equals(other.name) && slug.equals(other.slug) && fieldCount.equals(other.fieldCount) && identityField.equals(other.identityField);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug);
+    return Objects.hash(this.id, this.stableId, this.name, this.slug, this.fieldCount, this.identityField);
   }
 
   @java.lang.Override
@@ -91,9 +118,15 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
   public static final class Builder {
     private Optional<String> id = Optional.empty();
 
+    private Optional<String> stableId = Optional.empty();
+
     private Optional<String> name = Optional.empty();
 
     private Optional<String> slug = Optional.empty();
+
+    private Optional<Integer> fieldCount = Optional.empty();
+
+    private Optional<String> identityField = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -103,8 +136,11 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
 
     public Builder from(ExportManifestPreviewResponsePreviewItemsContextsItem other) {
       id(other.getId());
+      stableId(other.getStableId());
       name(other.getName());
       slug(other.getSlug());
+      fieldCount(other.getFieldCount());
+      identityField(other.getIdentityField());
       return this;
     }
 
@@ -119,6 +155,20 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
 
     public Builder id(String id) {
       this.id = Optional.ofNullable(id);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "stableId",
+        nulls = Nulls.SKIP
+    )
+    public Builder stableId(Optional<String> stableId) {
+      this.stableId = stableId;
+      return this;
+    }
+
+    public Builder stableId(String stableId) {
+      this.stableId = Optional.ofNullable(stableId);
       return this;
     }
 
@@ -150,8 +200,36 @@ public final class ExportManifestPreviewResponsePreviewItemsContextsItem {
       return this;
     }
 
+    @JsonSetter(
+        value = "fieldCount",
+        nulls = Nulls.SKIP
+    )
+    public Builder fieldCount(Optional<Integer> fieldCount) {
+      this.fieldCount = fieldCount;
+      return this;
+    }
+
+    public Builder fieldCount(Integer fieldCount) {
+      this.fieldCount = Optional.ofNullable(fieldCount);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "identity_field",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityField(Optional<String> identityField) {
+      this.identityField = identityField;
+      return this;
+    }
+
+    public Builder identityField(String identityField) {
+      this.identityField = Optional.ofNullable(identityField);
+      return this;
+    }
+
     public ExportManifestPreviewResponsePreviewItemsContextsItem build() {
-      return new ExportManifestPreviewResponsePreviewItemsContextsItem(id, name, slug, additionalProperties);
+      return new ExportManifestPreviewResponsePreviewItemsContextsItem(id, stableId, name, slug, fieldCount, identityField, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

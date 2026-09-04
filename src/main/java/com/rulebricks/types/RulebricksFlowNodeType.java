@@ -10,6 +10,8 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class RulebricksFlowNodeType {
+  public static final RulebricksFlowNodeType RUNFLOW = new RulebricksFlowNodeType(Value.RUNFLOW, "runflow");
+
   public static final RulebricksFlowNodeType VAULT = new RulebricksFlowNodeType(Value.VAULT, "vault");
 
   public static final RulebricksFlowNodeType ORIGIN = new RulebricksFlowNodeType(Value.ORIGIN, "origin");
@@ -68,6 +70,8 @@ public final class RulebricksFlowNodeType {
 
   public static final RulebricksFlowNodeType RULE = new RulebricksFlowNodeType(Value.RULE, "rule");
 
+  public static final RulebricksFlowNodeType ENTITYOPERATION = new RulebricksFlowNodeType(Value.ENTITYOPERATION, "entityoperation");
+
   public static final RulebricksFlowNodeType AGGREGATE = new RulebricksFlowNodeType(Value.AGGREGATE, "aggregate");
 
   public static final RulebricksFlowNodeType SOAP = new RulebricksFlowNodeType(Value.SOAP, "soap");
@@ -112,6 +116,8 @@ public final class RulebricksFlowNodeType {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case RUNFLOW:
+        return visitor.visitRunflow();
       case VAULT:
         return visitor.visitVault();
       case ORIGIN:
@@ -170,6 +176,8 @@ public final class RulebricksFlowNodeType {
         return visitor.visitRunCode();
       case RULE:
         return visitor.visitRule();
+      case ENTITYOPERATION:
+        return visitor.visitEntityoperation();
       case AGGREGATE:
         return visitor.visitAggregate();
       case SOAP:
@@ -193,6 +201,8 @@ public final class RulebricksFlowNodeType {
   )
   public static RulebricksFlowNodeType valueOf(String value) {
     switch (value) {
+      case "runflow":
+        return RUNFLOW;
       case "vault":
         return VAULT;
       case "origin":
@@ -251,6 +261,8 @@ public final class RulebricksFlowNodeType {
         return RUN_CODE;
       case "rule":
         return RULE;
+      case "entityoperation":
+        return ENTITYOPERATION;
       case "aggregate":
         return AGGREGATE;
       case "soap":
@@ -282,6 +294,8 @@ public final class RulebricksFlowNodeType {
     SUBFLOW,
 
     RUN_FLOW,
+
+    RUNFLOW,
 
     IFELSE,
 
@@ -335,6 +349,8 @@ public final class RulebricksFlowNodeType {
 
     CONTEXT_OPERATION,
 
+    ENTITYOPERATION,
+
     NOTIFICATION,
 
     SEND_NOTIFICATION,
@@ -356,6 +372,8 @@ public final class RulebricksFlowNodeType {
     T visitSubflow();
 
     T visitRunFlow();
+
+    T visitRunflow();
 
     T visitIfelse();
 
@@ -408,6 +426,8 @@ public final class RulebricksFlowNodeType {
     T visitEntity();
 
     T visitContextOperation();
+
+    T visitEntityoperation();
 
     T visitNotification();
 

@@ -33,14 +33,21 @@ public final class ImportManifestResponseErrorsItem {
 
   private final Optional<String> reason;
 
+  private final Optional<String> code;
+
+  private final Optional<String> issueId;
+
   private final Map<String, Object> additionalProperties;
 
   private ImportManifestResponseErrorsItem(Optional<String> type, Optional<String> stableId,
-      Optional<String> status, Optional<String> reason, Map<String, Object> additionalProperties) {
+      Optional<String> status, Optional<String> reason, Optional<String> code,
+      Optional<String> issueId, Map<String, Object> additionalProperties) {
     this.type = type;
     this.stableId = stableId;
     this.status = status;
     this.reason = reason;
+    this.code = code;
+    this.issueId = issueId;
     this.additionalProperties = additionalProperties;
   }
 
@@ -64,6 +71,22 @@ public final class ImportManifestResponseErrorsItem {
     return reason;
   }
 
+  /**
+   * @return Machine-readable reason for a planning error, e.g. 'stable_id_conflict' when the asset already exists and conflict_strategy is 'block', 'context_name_conflict', or 'access_denied'.
+   */
+  @JsonProperty("code")
+  public Optional<String> getCode() {
+    return code;
+  }
+
+  /**
+   * @return Identifier of the underlying plan issue.
+   */
+  @JsonProperty("issue_id")
+  public Optional<String> getIssueId() {
+    return issueId;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -76,12 +99,12 @@ public final class ImportManifestResponseErrorsItem {
   }
 
   private boolean equalTo(ImportManifestResponseErrorsItem other) {
-    return type.equals(other.type) && stableId.equals(other.stableId) && status.equals(other.status) && reason.equals(other.reason);
+    return type.equals(other.type) && stableId.equals(other.stableId) && status.equals(other.status) && reason.equals(other.reason) && code.equals(other.code) && issueId.equals(other.issueId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.stableId, this.status, this.reason);
+    return Objects.hash(this.type, this.stableId, this.status, this.reason, this.code, this.issueId);
   }
 
   @java.lang.Override
@@ -105,6 +128,10 @@ public final class ImportManifestResponseErrorsItem {
 
     private Optional<String> reason = Optional.empty();
 
+    private Optional<String> code = Optional.empty();
+
+    private Optional<String> issueId = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -116,6 +143,8 @@ public final class ImportManifestResponseErrorsItem {
       stableId(other.getStableId());
       status(other.getStatus());
       reason(other.getReason());
+      code(other.getCode());
+      issueId(other.getIssueId());
       return this;
     }
 
@@ -175,8 +204,42 @@ public final class ImportManifestResponseErrorsItem {
       return this;
     }
 
+    /**
+     * <p>Machine-readable reason for a planning error, e.g. 'stable_id_conflict' when the asset already exists and conflict_strategy is 'block', 'context_name_conflict', or 'access_denied'.</p>
+     */
+    @JsonSetter(
+        value = "code",
+        nulls = Nulls.SKIP
+    )
+    public Builder code(Optional<String> code) {
+      this.code = code;
+      return this;
+    }
+
+    public Builder code(String code) {
+      this.code = Optional.ofNullable(code);
+      return this;
+    }
+
+    /**
+     * <p>Identifier of the underlying plan issue.</p>
+     */
+    @JsonSetter(
+        value = "issue_id",
+        nulls = Nulls.SKIP
+    )
+    public Builder issueId(Optional<String> issueId) {
+      this.issueId = issueId;
+      return this;
+    }
+
+    public Builder issueId(String issueId) {
+      this.issueId = Optional.ofNullable(issueId);
+      return this;
+    }
+
     public ImportManifestResponseErrorsItem build() {
-      return new ImportManifestResponseErrorsItem(type, stableId, status, reason, additionalProperties);
+      return new ImportManifestResponseErrorsItem(type, stableId, status, reason, code, issueId, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

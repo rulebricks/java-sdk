@@ -40,6 +40,8 @@ public final class Test {
 
   private final Map<String, Object> response;
 
+  private final TestPolicy policy;
+
   private final boolean critical;
 
   private final Optional<Boolean> error;
@@ -53,13 +55,14 @@ public final class Test {
   private final Map<String, Object> additionalProperties;
 
   private Test(String id, String name, Map<String, Object> request, Map<String, Object> response,
-      boolean critical, Optional<Boolean> error, Optional<Boolean> success,
+      TestPolicy policy, boolean critical, Optional<Boolean> error, Optional<Boolean> success,
       Optional<TestTestState> testState, Optional<OffsetDateTime> lastExecuted,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.request = request;
     this.response = response;
+    this.policy = policy;
     this.critical = critical;
     this.error = error;
     this.success = success;
@@ -98,6 +101,14 @@ public final class Test {
   @JsonProperty("response")
   public Map<String, Object> getResponse() {
     return response;
+  }
+
+  /**
+   * @return How the expected response is compared with the actual response. Contains Data searches at any nesting depth, Matches Exactly compares the complete response, and Excludes Data requires the expected fragment to be absent.
+   */
+  @JsonProperty("policy")
+  public TestPolicy getPolicy() {
+    return policy;
   }
 
   /**
@@ -200,12 +211,12 @@ public final class Test {
   }
 
   private boolean equalTo(Test other) {
-    return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical && error.equals(other.error) && success.equals(other.success) && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
+    return id.equals(other.id) && name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && policy.equals(other.policy) && critical == other.critical && error.equals(other.error) && success.equals(other.success) && testState.equals(other.testState) && lastExecuted.equals(other.lastExecuted);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.request, this.response, this.critical, this.error, this.success, this.testState, this.lastExecuted);
+    return Objects.hash(this.id, this.name, this.request, this.response, this.policy, this.critical, this.error, this.success, this.testState, this.lastExecuted);
   }
 
   @java.lang.Override
@@ -230,7 +241,14 @@ public final class Test {
     /**
      * <p>The name of the test.</p>
      */
-    CriticalStage name(@NotNull String name);
+    PolicyStage name(@NotNull String name);
+  }
+
+  public interface PolicyStage {
+    /**
+     * <p>How the expected response is compared with the actual response. Contains Data searches at any nesting depth, Matches Exactly compares the complete response, and Excludes Data requires the expected fragment to be absent.</p>
+     */
+    CriticalStage policy(@NotNull TestPolicy policy);
   }
 
   public interface CriticalStage {
@@ -305,10 +323,12 @@ public final class Test {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements IdStage, NameStage, CriticalStage, _FinalStage {
+  public static final class Builder implements IdStage, NameStage, PolicyStage, CriticalStage, _FinalStage {
     private String id;
 
     private String name;
+
+    private TestPolicy policy;
 
     private boolean critical;
 
@@ -336,6 +356,7 @@ public final class Test {
       name(other.getName());
       request(other.getRequest());
       response(other.getResponse());
+      policy(other.getPolicy());
       critical(other.getCritical());
       error(other.getError());
       success(other.getSuccess());
@@ -363,8 +384,20 @@ public final class Test {
      */
     @java.lang.Override
     @JsonSetter("name")
-    public CriticalStage name(@NotNull String name) {
+    public PolicyStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    /**
+     * <p>How the expected response is compared with the actual response. Contains Data searches at any nesting depth, Matches Exactly compares the complete response, and Excludes Data requires the expected fragment to be absent.</p>
+     * <p>How the expected response is compared with the actual response. Contains Data searches at any nesting depth, Matches Exactly compares the complete response, and Excludes Data requires the expected fragment to be absent.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("policy")
+    public CriticalStage policy(@NotNull TestPolicy policy) {
+      this.policy = Objects.requireNonNull(policy, "policy must not be null");
       return this;
     }
 
@@ -622,7 +655,7 @@ public final class Test {
 
     @java.lang.Override
     public Test build() {
-      return new Test(id, name, request, response, critical, error, success, testState, lastExecuted, additionalProperties);
+      return new Test(id, name, request, response, policy, critical, error, success, testState, lastExecuted, additionalProperties);
     }
 
     @java.lang.Override

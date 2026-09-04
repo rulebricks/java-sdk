@@ -45,7 +45,7 @@ public final class UpdateValuesRequest {
   }
 
   /**
-   * @return A dictionary of keys and values to update or add. This developer-facing sync contract preserves source names and nesting: nested objects are flattened using dot notation while every key segment stays exactly as sent (e.g. 'user.contact_info.email' stays 'user.contact_info.email'). Individual payloads may be value-to-value references (see ValueReference): a scalar payload may be a single { &quot;$ref&quot;: &quot;&lt;value name&gt;&quot; } marker, and list payloads may mix literal items with reference markers.
+   * @return Values to create or update. Nested objects use dot-separated names and payloads may reference other values.
    */
   @JsonProperty("values")
   public Map<String, Object> getValues() {
@@ -121,7 +121,7 @@ public final class UpdateValuesRequest {
     }
 
     /**
-     * <p>A dictionary of keys and values to update or add. This developer-facing sync contract preserves source names and nesting: nested objects are flattened using dot notation while every key segment stays exactly as sent (e.g. 'user.contact_info.email' stays 'user.contact_info.email'). Individual payloads may be value-to-value references (see ValueReference): a scalar payload may be a single { &quot;$ref&quot;: &quot;&lt;value name&gt;&quot; } marker, and list payloads may mix literal items with reference markers.</p>
+     * <p>Values to create or update. Nested objects use dot-separated names and payloads may reference other values.</p>
      */
     @JsonSetter(
         value = "values",

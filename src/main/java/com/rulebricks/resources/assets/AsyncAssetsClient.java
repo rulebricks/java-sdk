@@ -7,14 +7,15 @@ package com.rulebricks.resources.assets;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
 import com.rulebricks.core.Suppliers;
+import com.rulebricks.resources.assets.contexts.AsyncContextsClient;
 import com.rulebricks.resources.assets.flows.AsyncFlowsClient;
 import com.rulebricks.resources.assets.folders.AsyncFoldersClient;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
-import com.rulebricks.resources.assets.requests.ImportManifestRequest;
 import com.rulebricks.resources.assets.rules.AsyncRulesClient;
 import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
-import com.rulebricks.types.ImportManifestResponse;
+import com.rulebricks.resources.assets.types.ImportRbmAssetsResponse;
 import com.rulebricks.types.UsageStatistics;
+import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -29,12 +30,15 @@ public class AsyncAssetsClient {
 
   protected final Supplier<AsyncFoldersClient> foldersClient;
 
+  protected final Supplier<AsyncContextsClient> contextsClient;
+
   public AsyncAssetsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new AsyncRawAssetsClient(clientOptions);
     this.rulesClient = Suppliers.memoize(() -> new AsyncRulesClient(clientOptions));
     this.flowsClient = Suppliers.memoize(() -> new AsyncFlowsClient(clientOptions));
     this.foldersClient = Suppliers.memoize(() -> new AsyncFoldersClient(clientOptions));
+    this.contextsClient = Suppliers.memoize(() -> new AsyncContextsClient(clientOptions));
   }
 
   /**
@@ -59,29 +63,44 @@ public class AsyncAssetsClient {
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
    */
-  public CompletableFuture<ImportManifestResponse> importRbm(ImportManifestRequest request) {
+  public CompletableFuture<ImportRbmAssetsResponse> importRbm(InputStream request) {
     return this.rawClient.importRbm(request).thenApply(response -> response.body());
   }
 
   /**
-   * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
    */
-  public CompletableFuture<ImportManifestResponse> importRbm(ImportManifestRequest request,
+  public CompletableFuture<ImportRbmAssetsResponse> importRbm(InputStream request,
       RequestOptions requestOptions) {
     return this.rawClient.importRbm(request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+   */
+  public CompletableFuture<ImportRbmAssetsResponse> importRbm(byte[] request) {
+    return this.rawClient.importRbm(request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+   */
+  public CompletableFuture<ImportRbmAssetsResponse> importRbm(byte[] request,
+      RequestOptions requestOptions) {
+    return this.rawClient.importRbm(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
    */
   public CompletableFuture<ExportRbmAssetsResponse> exportRbm(ExportManifestRequest request) {
     return this.rawClient.exportRbm(request).thenApply(response -> response.body());
   }
 
   /**
-   * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+   * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
    */
   public CompletableFuture<ExportRbmAssetsResponse> exportRbm(ExportManifestRequest request,
       RequestOptions requestOptions) {
@@ -98,5 +117,9 @@ public class AsyncAssetsClient {
 
   public AsyncFoldersClient folders() {
     return this.foldersClient.get();
+  }
+
+  public AsyncContextsClient contexts() {
+    return this.contextsClient.get();
   }
 }

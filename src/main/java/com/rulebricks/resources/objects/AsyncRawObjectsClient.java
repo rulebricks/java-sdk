@@ -118,7 +118,7 @@ public class AsyncRawObjectsClient {
     }
 
     /**
-     * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
+     * Creates or updates an object and syncs its generated enum values.
      */
     public CompletableFuture<RulebricksApiHttpResponse<UpsertObjectResponse>> upsert(
         UpsertObjectRequest request) {
@@ -126,7 +126,7 @@ public class AsyncRawObjectsClient {
     }
 
     /**
-     * Creates or updates an object by ID or name and syncs enum values it generates. <code>content</code> and at least one of <code>id</code> or <code>name</code> are required. Objects help workspace admins programmatically determine multiple collections of values based on Rulebricks' contracts with external systems from a single JSON Schema source. Renaming the object's display name does not move its managed collection paths: those paths derive from schema field keys. When a schema field key itself is renamed, <code>field_rename</code> can preserve the generated values' identities.
+     * Creates or updates an object and syncs its generated enum values.
      */
     public CompletableFuture<RulebricksApiHttpResponse<UpsertObjectResponse>> upsert(
         UpsertObjectRequest request, RequestOptions requestOptions) {

@@ -35,6 +35,8 @@ public final class RunTestsResponseFailuresItem {
 
   private final String name;
 
+  private final RunTestsResponseFailuresItemPolicy policy;
+
   private final boolean critical;
 
   private final Optional<Object> expected;
@@ -47,11 +49,13 @@ public final class RunTestsResponseFailuresItem {
 
   private final Map<String, Object> additionalProperties;
 
-  private RunTestsResponseFailuresItem(String id, String name, boolean critical,
-      Optional<Object> expected, Optional<Object> actual, Optional<List<Integer>> matchedRows,
-      Optional<String> errorMessage, Map<String, Object> additionalProperties) {
+  private RunTestsResponseFailuresItem(String id, String name,
+      RunTestsResponseFailuresItemPolicy policy, boolean critical, Optional<Object> expected,
+      Optional<Object> actual, Optional<List<Integer>> matchedRows, Optional<String> errorMessage,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
+    this.policy = policy;
     this.critical = critical;
     this.expected = expected;
     this.actual = actual;
@@ -68,6 +72,11 @@ public final class RunTestsResponseFailuresItem {
   @JsonProperty("name")
   public String getName() {
     return name;
+  }
+
+  @JsonProperty("policy")
+  public RunTestsResponseFailuresItemPolicy getPolicy() {
+    return policy;
   }
 
   @JsonProperty("critical")
@@ -167,12 +176,12 @@ public final class RunTestsResponseFailuresItem {
   }
 
   private boolean equalTo(RunTestsResponseFailuresItem other) {
-    return id.equals(other.id) && name.equals(other.name) && critical == other.critical && expected.equals(other.expected) && actual.equals(other.actual) && matchedRows.equals(other.matchedRows) && errorMessage.equals(other.errorMessage);
+    return id.equals(other.id) && name.equals(other.name) && policy.equals(other.policy) && critical == other.critical && expected.equals(other.expected) && actual.equals(other.actual) && matchedRows.equals(other.matchedRows) && errorMessage.equals(other.errorMessage);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.critical, this.expected, this.actual, this.matchedRows, this.errorMessage);
+    return Objects.hash(this.id, this.name, this.policy, this.critical, this.expected, this.actual, this.matchedRows, this.errorMessage);
   }
 
   @java.lang.Override
@@ -191,7 +200,11 @@ public final class RunTestsResponseFailuresItem {
   }
 
   public interface NameStage {
-    CriticalStage name(@NotNull String name);
+    PolicyStage name(@NotNull String name);
+  }
+
+  public interface PolicyStage {
+    CriticalStage policy(@NotNull RunTestsResponseFailuresItemPolicy policy);
   }
 
   public interface CriticalStage {
@@ -245,10 +258,12 @@ public final class RunTestsResponseFailuresItem {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements IdStage, NameStage, CriticalStage, _FinalStage {
+  public static final class Builder implements IdStage, NameStage, PolicyStage, CriticalStage, _FinalStage {
     private String id;
 
     private String name;
+
+    private RunTestsResponseFailuresItemPolicy policy;
 
     private boolean critical;
 
@@ -270,6 +285,7 @@ public final class RunTestsResponseFailuresItem {
     public Builder from(RunTestsResponseFailuresItem other) {
       id(other.getId());
       name(other.getName());
+      policy(other.getPolicy());
       critical(other.getCritical());
       expected(other.getExpected());
       actual(other.getActual());
@@ -287,8 +303,15 @@ public final class RunTestsResponseFailuresItem {
 
     @java.lang.Override
     @JsonSetter("name")
-    public CriticalStage name(@NotNull String name) {
+    public PolicyStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter("policy")
+    public CriticalStage policy(@NotNull RunTestsResponseFailuresItemPolicy policy) {
+      this.policy = Objects.requireNonNull(policy, "policy must not be null");
       return this;
     }
 
@@ -465,7 +488,7 @@ public final class RunTestsResponseFailuresItem {
 
     @java.lang.Override
     public RunTestsResponseFailuresItem build() {
-      return new RunTestsResponseFailuresItem(id, name, critical, expected, actual, matchedRows, errorMessage, additionalProperties);
+      return new RunTestsResponseFailuresItem(id, name, policy, critical, expected, actual, matchedRows, errorMessage, additionalProperties);
     }
 
     @java.lang.Override

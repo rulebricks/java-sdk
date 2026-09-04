@@ -6,9 +6,6 @@ package com.rulebricks.resources.contexts;
 
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
-import com.rulebricks.core.Suppliers;
-import com.rulebricks.resources.contexts.objects.AsyncObjectsClient;
-import com.rulebricks.resources.contexts.relationships.AsyncRelationshipsClient;
 import com.rulebricks.resources.contexts.requests.BulkIngestContextsRequest;
 import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
 import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
@@ -28,22 +25,15 @@ import java.lang.String;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 public class AsyncContextsClient {
   protected final ClientOptions clientOptions;
 
   private final AsyncRawContextsClient rawClient;
 
-  protected final Supplier<AsyncObjectsClient> objectsClient;
-
-  protected final Supplier<AsyncRelationshipsClient> relationshipsClient;
-
   public AsyncContextsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new AsyncRawContextsClient(clientOptions);
-    this.objectsClient = Suppliers.memoize(() -> new AsyncObjectsClient(clientOptions));
-    this.relationshipsClient = Suppliers.memoize(() -> new AsyncRelationshipsClient(clientOptions));
   }
 
   /**
@@ -240,13 +230,5 @@ public class AsyncContextsClient {
   public CompletableFuture<ContextBatchResponse> bulkIngest(String slug,
       BulkIngestContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.bulkIngest(slug, request, requestOptions).thenApply(response -> response.body());
-  }
-
-  public AsyncObjectsClient objects() {
-    return this.objectsClient.get();
-  }
-
-  public AsyncRelationshipsClient relationships() {
-    return this.relationshipsClient.get();
   }
 }

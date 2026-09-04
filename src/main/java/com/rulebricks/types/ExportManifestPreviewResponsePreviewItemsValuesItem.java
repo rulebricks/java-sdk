@@ -27,14 +27,28 @@ import java.util.Optional;
 public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
   private final Optional<String> id;
 
+  private final Optional<String> stableId;
+
   private final Optional<String> name;
+
+  private final Optional<String> type;
+
+  private final Optional<String> valueType;
+
+  private final Optional<Object> value;
 
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestPreviewResponsePreviewItemsValuesItem(Optional<String> id,
-      Optional<String> name, Map<String, Object> additionalProperties) {
+      Optional<String> stableId, Optional<String> name, Optional<String> type,
+      Optional<String> valueType, Optional<Object> value,
+      Map<String, Object> additionalProperties) {
     this.id = id;
+    this.stableId = stableId;
     this.name = name;
+    this.type = type;
+    this.valueType = valueType;
+    this.value = value;
     this.additionalProperties = additionalProperties;
   }
 
@@ -43,9 +57,29 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
     return id;
   }
 
+  @JsonProperty("stableId")
+  public Optional<String> getStableId() {
+    return stableId;
+  }
+
   @JsonProperty("name")
   public Optional<String> getName() {
     return name;
+  }
+
+  @JsonProperty("type")
+  public Optional<String> getType() {
+    return type;
+  }
+
+  @JsonProperty("valueType")
+  public Optional<String> getValueType() {
+    return valueType;
+  }
+
+  @JsonProperty("value")
+  public Optional<Object> getValue() {
+    return value;
   }
 
   @java.lang.Override
@@ -60,12 +94,12 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
   }
 
   private boolean equalTo(ExportManifestPreviewResponsePreviewItemsValuesItem other) {
-    return id.equals(other.id) && name.equals(other.name);
+    return id.equals(other.id) && stableId.equals(other.stableId) && name.equals(other.name) && type.equals(other.type) && valueType.equals(other.valueType) && value.equals(other.value);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name);
+    return Objects.hash(this.id, this.stableId, this.name, this.type, this.valueType, this.value);
   }
 
   @java.lang.Override
@@ -83,7 +117,15 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
   public static final class Builder {
     private Optional<String> id = Optional.empty();
 
+    private Optional<String> stableId = Optional.empty();
+
     private Optional<String> name = Optional.empty();
+
+    private Optional<String> type = Optional.empty();
+
+    private Optional<String> valueType = Optional.empty();
+
+    private Optional<Object> value = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -93,7 +135,11 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
 
     public Builder from(ExportManifestPreviewResponsePreviewItemsValuesItem other) {
       id(other.getId());
+      stableId(other.getStableId());
       name(other.getName());
+      type(other.getType());
+      valueType(other.getValueType());
+      value(other.getValue());
       return this;
     }
 
@@ -112,6 +158,20 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
     }
 
     @JsonSetter(
+        value = "stableId",
+        nulls = Nulls.SKIP
+    )
+    public Builder stableId(Optional<String> stableId) {
+      this.stableId = stableId;
+      return this;
+    }
+
+    public Builder stableId(String stableId) {
+      this.stableId = Optional.ofNullable(stableId);
+      return this;
+    }
+
+    @JsonSetter(
         value = "name",
         nulls = Nulls.SKIP
     )
@@ -125,8 +185,50 @@ public final class ExportManifestPreviewResponsePreviewItemsValuesItem {
       return this;
     }
 
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public Builder type(Optional<String> type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder type(String type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "valueType",
+        nulls = Nulls.SKIP
+    )
+    public Builder valueType(Optional<String> valueType) {
+      this.valueType = valueType;
+      return this;
+    }
+
+    public Builder valueType(String valueType) {
+      this.valueType = Optional.ofNullable(valueType);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "value",
+        nulls = Nulls.SKIP
+    )
+    public Builder value(Optional<Object> value) {
+      this.value = value;
+      return this;
+    }
+
+    public Builder value(Object value) {
+      this.value = Optional.ofNullable(value);
+      return this;
+    }
+
     public ExportManifestPreviewResponsePreviewItemsValuesItem build() {
-      return new ExportManifestPreviewResponsePreviewItemsValuesItem(id, name, additionalProperties);
+      return new ExportManifestPreviewResponsePreviewItemsValuesItem(id, stableId, name, type, valueType, value, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

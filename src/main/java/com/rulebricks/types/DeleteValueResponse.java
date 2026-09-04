@@ -28,24 +28,20 @@ import java.util.Optional;
 public final class DeleteValueResponse {
   private final Optional<String> message;
 
-  private final Optional<List<DeleteValueResponseCascadeDeletedItem>> cascadeDeleted;
-
   private final Optional<List<DeleteValueResponseUpdatedListValuesItem>> updatedListValues;
 
   private final Map<String, Object> additionalProperties;
 
   private DeleteValueResponse(Optional<String> message,
-      Optional<List<DeleteValueResponseCascadeDeletedItem>> cascadeDeleted,
       Optional<List<DeleteValueResponseUpdatedListValuesItem>> updatedListValues,
       Map<String, Object> additionalProperties) {
     this.message = message;
-    this.cascadeDeleted = cascadeDeleted;
     this.updatedListValues = updatedListValues;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Human-readable confirmation.
+   * @return Confirmation message.
    */
   @JsonProperty("message")
   public Optional<String> getMessage() {
@@ -53,15 +49,7 @@ public final class DeleteValueResponse {
   }
 
   /**
-   * @return Values that were deleted with the target because their entire payload referenced it.
-   */
-  @JsonProperty("cascade_deleted")
-  public Optional<List<DeleteValueResponseCascadeDeletedItem>> getCascadeDeleted() {
-    return cascadeDeleted;
-  }
-
-  /**
-   * @return List values that lost item(s) referencing the deleted value but were otherwise kept.
+   * @return Values updated to replace references to the deleted value.
    */
   @JsonProperty("updated_list_values")
   public Optional<List<DeleteValueResponseUpdatedListValuesItem>> getUpdatedListValues() {
@@ -80,12 +68,12 @@ public final class DeleteValueResponse {
   }
 
   private boolean equalTo(DeleteValueResponse other) {
-    return message.equals(other.message) && cascadeDeleted.equals(other.cascadeDeleted) && updatedListValues.equals(other.updatedListValues);
+    return message.equals(other.message) && updatedListValues.equals(other.updatedListValues);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.message, this.cascadeDeleted, this.updatedListValues);
+    return Objects.hash(this.message, this.updatedListValues);
   }
 
   @java.lang.Override
@@ -103,8 +91,6 @@ public final class DeleteValueResponse {
   public static final class Builder {
     private Optional<String> message = Optional.empty();
 
-    private Optional<List<DeleteValueResponseCascadeDeletedItem>> cascadeDeleted = Optional.empty();
-
     private Optional<List<DeleteValueResponseUpdatedListValuesItem>> updatedListValues = Optional.empty();
 
     @JsonAnySetter
@@ -115,13 +101,12 @@ public final class DeleteValueResponse {
 
     public Builder from(DeleteValueResponse other) {
       message(other.getMessage());
-      cascadeDeleted(other.getCascadeDeleted());
       updatedListValues(other.getUpdatedListValues());
       return this;
     }
 
     /**
-     * <p>Human-readable confirmation.</p>
+     * <p>Confirmation message.</p>
      */
     @JsonSetter(
         value = "message",
@@ -138,25 +123,7 @@ public final class DeleteValueResponse {
     }
 
     /**
-     * <p>Values that were deleted with the target because their entire payload referenced it.</p>
-     */
-    @JsonSetter(
-        value = "cascade_deleted",
-        nulls = Nulls.SKIP
-    )
-    public Builder cascadeDeleted(
-        Optional<List<DeleteValueResponseCascadeDeletedItem>> cascadeDeleted) {
-      this.cascadeDeleted = cascadeDeleted;
-      return this;
-    }
-
-    public Builder cascadeDeleted(List<DeleteValueResponseCascadeDeletedItem> cascadeDeleted) {
-      this.cascadeDeleted = Optional.ofNullable(cascadeDeleted);
-      return this;
-    }
-
-    /**
-     * <p>List values that lost item(s) referencing the deleted value but were otherwise kept.</p>
+     * <p>Values updated to replace references to the deleted value.</p>
      */
     @JsonSetter(
         value = "updated_list_values",
@@ -175,7 +142,7 @@ public final class DeleteValueResponse {
     }
 
     public DeleteValueResponse build() {
-      return new DeleteValueResponse(message, cascadeDeleted, updatedListValues, additionalProperties);
+      return new DeleteValueResponse(message, updatedListValues, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

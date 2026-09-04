@@ -32,13 +32,17 @@ public final class ValueLimits {
 
   private final Optional<Integer> maxKeyLength;
 
+  private final Optional<Integer> maxKeyBytes;
+
   private final Map<String, Object> additionalProperties;
 
   private ValueLimits(Optional<Integer> maxKeys, Optional<Integer> maxValueLength,
-      Optional<Integer> maxKeyLength, Map<String, Object> additionalProperties) {
+      Optional<Integer> maxKeyLength, Optional<Integer> maxKeyBytes,
+      Map<String, Object> additionalProperties) {
     this.maxKeys = maxKeys;
     this.maxValueLength = maxValueLength;
     this.maxKeyLength = maxKeyLength;
+    this.maxKeyBytes = maxKeyBytes;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +70,14 @@ public final class ValueLimits {
     return maxKeyLength;
   }
 
+  /**
+   * @return Maximum UTF-8 encoded byte length of a value name, including collection prefixes
+   */
+  @JsonProperty("MAX_KEY_BYTES")
+  public Optional<Integer> getMaxKeyBytes() {
+    return maxKeyBytes;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +90,12 @@ public final class ValueLimits {
   }
 
   private boolean equalTo(ValueLimits other) {
-    return maxKeys.equals(other.maxKeys) && maxValueLength.equals(other.maxValueLength) && maxKeyLength.equals(other.maxKeyLength);
+    return maxKeys.equals(other.maxKeys) && maxValueLength.equals(other.maxValueLength) && maxKeyLength.equals(other.maxKeyLength) && maxKeyBytes.equals(other.maxKeyBytes);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.maxKeys, this.maxValueLength, this.maxKeyLength);
+    return Objects.hash(this.maxKeys, this.maxValueLength, this.maxKeyLength, this.maxKeyBytes);
   }
 
   @java.lang.Override
@@ -105,6 +117,8 @@ public final class ValueLimits {
 
     private Optional<Integer> maxKeyLength = Optional.empty();
 
+    private Optional<Integer> maxKeyBytes = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -115,6 +129,7 @@ public final class ValueLimits {
       maxKeys(other.getMaxKeys());
       maxValueLength(other.getMaxValueLength());
       maxKeyLength(other.getMaxKeyLength());
+      maxKeyBytes(other.getMaxKeyBytes());
       return this;
     }
 
@@ -169,8 +184,25 @@ public final class ValueLimits {
       return this;
     }
 
+    /**
+     * <p>Maximum UTF-8 encoded byte length of a value name, including collection prefixes</p>
+     */
+    @JsonSetter(
+        value = "MAX_KEY_BYTES",
+        nulls = Nulls.SKIP
+    )
+    public Builder maxKeyBytes(Optional<Integer> maxKeyBytes) {
+      this.maxKeyBytes = maxKeyBytes;
+      return this;
+    }
+
+    public Builder maxKeyBytes(Integer maxKeyBytes) {
+      this.maxKeyBytes = Optional.ofNullable(maxKeyBytes);
+      return this;
+    }
+
     public ValueLimits build() {
-      return new ValueLimits(maxKeys, maxValueLength, maxKeyLength, additionalProperties);
+      return new ValueLimits(maxKeys, maxValueLength, maxKeyLength, maxKeyBytes, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

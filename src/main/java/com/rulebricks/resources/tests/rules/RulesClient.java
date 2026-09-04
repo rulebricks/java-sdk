@@ -61,14 +61,14 @@ public class RulesClient {
   }
 
   /**
-   * Adds a new test to the test suite of a rule identified by the slug.
+   * Adds a new test to the rule. <code>contains</code> (Contains Data, the default) finds the expected fragment anywhere in the output, <code>matches</code> (Matches Exactly) requires complete equality, and <code>excludes</code> (Excludes Data) requires the fragment to be absent.
    */
   public Test create(String slug, CreateRulesRequest request) {
     return this.rawClient.create(slug, request).body();
   }
 
   /**
-   * Adds a new test to the test suite of a rule identified by the slug.
+   * Adds a new test to the rule. <code>contains</code> (Contains Data, the default) finds the expected fragment anywhere in the output, <code>matches</code> (Matches Exactly) requires complete equality, and <code>excludes</code> (Excludes Data) requires the fragment to be absent.
    */
   public Test create(String slug, CreateRulesRequest request, RequestOptions requestOptions) {
     return this.rawClient.create(slug, request, requestOptions).body();

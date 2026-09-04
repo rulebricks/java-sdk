@@ -6,9 +6,6 @@ package com.rulebricks.resources.contexts;
 
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.RequestOptions;
-import com.rulebricks.core.Suppliers;
-import com.rulebricks.resources.contexts.objects.ObjectsClient;
-import com.rulebricks.resources.contexts.relationships.RelationshipsClient;
 import com.rulebricks.resources.contexts.requests.BulkIngestContextsRequest;
 import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
 import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
@@ -27,22 +24,15 @@ import java.lang.Object;
 import java.lang.String;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ContextsClient {
   protected final ClientOptions clientOptions;
 
   private final RawContextsClient rawClient;
 
-  protected final Supplier<ObjectsClient> objectsClient;
-
-  protected final Supplier<RelationshipsClient> relationshipsClient;
-
   public ContextsClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.rawClient = new RawContextsClient(clientOptions);
-    this.objectsClient = Suppliers.memoize(() -> new ObjectsClient(clientOptions));
-    this.relationshipsClient = Suppliers.memoize(() -> new RelationshipsClient(clientOptions));
   }
 
   /**
@@ -234,13 +224,5 @@ public class ContextsClient {
   public ContextBatchResponse bulkIngest(String slug, BulkIngestContextsRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.bulkIngest(slug, request, requestOptions).body();
-  }
-
-  public ObjectsClient objects() {
-    return this.objectsClient.get();
-  }
-
-  public RelationshipsClient relationships() {
-    return this.relationshipsClient.get();
   }
 }

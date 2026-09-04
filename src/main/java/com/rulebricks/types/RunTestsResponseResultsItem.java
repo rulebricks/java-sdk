@@ -28,6 +28,8 @@ public final class RunTestsResponseResultsItem {
 
   private final String name;
 
+  private final RunTestsResponseResultsItemPolicy policy;
+
   private final boolean critical;
 
   private final boolean success;
@@ -36,10 +38,12 @@ public final class RunTestsResponseResultsItem {
 
   private final Map<String, Object> additionalProperties;
 
-  private RunTestsResponseResultsItem(String id, String name, boolean critical, boolean success,
-      boolean error, Map<String, Object> additionalProperties) {
+  private RunTestsResponseResultsItem(String id, String name,
+      RunTestsResponseResultsItemPolicy policy, boolean critical, boolean success, boolean error,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
+    this.policy = policy;
     this.critical = critical;
     this.success = success;
     this.error = error;
@@ -54,6 +58,11 @@ public final class RunTestsResponseResultsItem {
   @JsonProperty("name")
   public String getName() {
     return name;
+  }
+
+  @JsonProperty("policy")
+  public RunTestsResponseResultsItemPolicy getPolicy() {
+    return policy;
   }
 
   @JsonProperty("critical")
@@ -83,12 +92,12 @@ public final class RunTestsResponseResultsItem {
   }
 
   private boolean equalTo(RunTestsResponseResultsItem other) {
-    return id.equals(other.id) && name.equals(other.name) && critical == other.critical && success == other.success && error == other.error;
+    return id.equals(other.id) && name.equals(other.name) && policy.equals(other.policy) && critical == other.critical && success == other.success && error == other.error;
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.critical, this.success, this.error);
+    return Objects.hash(this.id, this.name, this.policy, this.critical, this.success, this.error);
   }
 
   @java.lang.Override
@@ -107,7 +116,11 @@ public final class RunTestsResponseResultsItem {
   }
 
   public interface NameStage {
-    CriticalStage name(@NotNull String name);
+    PolicyStage name(@NotNull String name);
+  }
+
+  public interface PolicyStage {
+    CriticalStage policy(@NotNull RunTestsResponseResultsItemPolicy policy);
   }
 
   public interface CriticalStage {
@@ -133,10 +146,12 @@ public final class RunTestsResponseResultsItem {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements IdStage, NameStage, CriticalStage, SuccessStage, ErrorStage, _FinalStage {
+  public static final class Builder implements IdStage, NameStage, PolicyStage, CriticalStage, SuccessStage, ErrorStage, _FinalStage {
     private String id;
 
     private String name;
+
+    private RunTestsResponseResultsItemPolicy policy;
 
     private boolean critical;
 
@@ -154,6 +169,7 @@ public final class RunTestsResponseResultsItem {
     public Builder from(RunTestsResponseResultsItem other) {
       id(other.getId());
       name(other.getName());
+      policy(other.getPolicy());
       critical(other.getCritical());
       success(other.getSuccess());
       error(other.getError());
@@ -169,8 +185,15 @@ public final class RunTestsResponseResultsItem {
 
     @java.lang.Override
     @JsonSetter("name")
-    public CriticalStage name(@NotNull String name) {
+    public PolicyStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter("policy")
+    public CriticalStage policy(@NotNull RunTestsResponseResultsItemPolicy policy) {
+      this.policy = Objects.requireNonNull(policy, "policy must not be null");
       return this;
     }
 
@@ -197,7 +220,7 @@ public final class RunTestsResponseResultsItem {
 
     @java.lang.Override
     public RunTestsResponseResultsItem build() {
-      return new RunTestsResponseResultsItem(id, name, critical, success, error, additionalProperties);
+      return new RunTestsResponseResultsItem(id, name, policy, critical, success, error, additionalProperties);
     }
 
     @java.lang.Override

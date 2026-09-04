@@ -49,7 +49,7 @@ public final class WorkspaceObjectParsedFieldsItem {
   }
 
   /**
-   * @return Rule-facing field key. Array-item fields use a key relative to their scope and never include [] notation.
+   * @return Rule-facing field key.
    */
   @JsonProperty("key")
   public Optional<String> getKey() {
@@ -68,7 +68,7 @@ public final class WorkspaceObjectParsedFieldsItem {
   }
 
   /**
-   * @return Source-schema path used for editing and enum collection derivation; may include [] markers.
+   * @return Path in the source schema.
    */
   @JsonIgnore
   public Optional<String> getSchemaPath() {
@@ -79,7 +79,7 @@ public final class WorkspaceObjectParsedFieldsItem {
   }
 
   /**
-   * @return Display-only, fully qualified label for an array-item scope, including the stored object name and every nesting level (for example, 'Inventory Warehouses Cars'). It does not identify a stored object or control managed collection paths; those derive from schema field keys/schemaPath.
+   * @return Display label for an array-item field.
    */
   @JsonIgnore
   public Optional<String> getDerivedObjectName() {
@@ -172,7 +172,7 @@ public final class WorkspaceObjectParsedFieldsItem {
     }
 
     /**
-     * <p>Rule-facing field key. Array-item fields use a key relative to their scope and never include [] notation.</p>
+     * <p>Rule-facing field key.</p>
      */
     @JsonSetter(
         value = "key",
@@ -219,7 +219,7 @@ public final class WorkspaceObjectParsedFieldsItem {
     }
 
     /**
-     * <p>Source-schema path used for editing and enum collection derivation; may include [] markers.</p>
+     * <p>Path in the source schema.</p>
      */
     @JsonSetter(
         value = "schemaPath",
@@ -249,7 +249,7 @@ public final class WorkspaceObjectParsedFieldsItem {
     }
 
     /**
-     * <p>Display-only, fully qualified label for an array-item scope, including the stored object name and every nesting level (for example, 'Inventory Warehouses Cars'). It does not identify a stored object or control managed collection paths; those derive from schema field keys/schemaPath.</p>
+     * <p>Display label for an array-item field.</p>
      */
     @JsonSetter(
         value = "derivedObjectName",

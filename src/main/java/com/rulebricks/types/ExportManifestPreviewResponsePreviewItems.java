@@ -34,6 +34,8 @@ public final class ExportManifestPreviewResponsePreviewItems {
 
   private final Optional<List<ExportManifestPreviewResponsePreviewItemsValuesItem>> values;
 
+  private final Optional<List<Map<String, Object>>> entityRelationships;
+
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestPreviewResponsePreviewItems(
@@ -41,11 +43,13 @@ public final class ExportManifestPreviewResponsePreviewItems {
       Optional<List<ExportManifestPreviewResponsePreviewItemsFlowsItem>> flows,
       Optional<List<ExportManifestPreviewResponsePreviewItemsContextsItem>> contexts,
       Optional<List<ExportManifestPreviewResponsePreviewItemsValuesItem>> values,
+      Optional<List<Map<String, Object>>> entityRelationships,
       Map<String, Object> additionalProperties) {
     this.rules = rules;
     this.flows = flows;
     this.contexts = contexts;
     this.values = values;
+    this.entityRelationships = entityRelationships;
     this.additionalProperties = additionalProperties;
   }
 
@@ -69,6 +73,11 @@ public final class ExportManifestPreviewResponsePreviewItems {
     return values;
   }
 
+  @JsonProperty("entityRelationships")
+  public Optional<List<Map<String, Object>>> getEntityRelationships() {
+    return entityRelationships;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -81,12 +90,12 @@ public final class ExportManifestPreviewResponsePreviewItems {
   }
 
   private boolean equalTo(ExportManifestPreviewResponsePreviewItems other) {
-    return rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && values.equals(other.values);
+    return rules.equals(other.rules) && flows.equals(other.flows) && contexts.equals(other.contexts) && values.equals(other.values) && entityRelationships.equals(other.entityRelationships);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.rules, this.flows, this.contexts, this.values);
+    return Objects.hash(this.rules, this.flows, this.contexts, this.values, this.entityRelationships);
   }
 
   @java.lang.Override
@@ -110,6 +119,8 @@ public final class ExportManifestPreviewResponsePreviewItems {
 
     private Optional<List<ExportManifestPreviewResponsePreviewItemsValuesItem>> values = Optional.empty();
 
+    private Optional<List<Map<String, Object>>> entityRelationships = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -121,6 +132,7 @@ public final class ExportManifestPreviewResponsePreviewItems {
       flows(other.getFlows());
       contexts(other.getContexts());
       values(other.getValues());
+      entityRelationships(other.getEntityRelationships());
       return this;
     }
 
@@ -182,8 +194,22 @@ public final class ExportManifestPreviewResponsePreviewItems {
       return this;
     }
 
+    @JsonSetter(
+        value = "entityRelationships",
+        nulls = Nulls.SKIP
+    )
+    public Builder entityRelationships(Optional<List<Map<String, Object>>> entityRelationships) {
+      this.entityRelationships = entityRelationships;
+      return this;
+    }
+
+    public Builder entityRelationships(List<Map<String, Object>> entityRelationships) {
+      this.entityRelationships = Optional.ofNullable(entityRelationships);
+      return this;
+    }
+
     public ExportManifestPreviewResponsePreviewItems build() {
-      return new ExportManifestPreviewResponsePreviewItems(rules, flows, contexts, values, additionalProperties);
+      return new ExportManifestPreviewResponsePreviewItems(rules, flows, contexts, values, entityRelationships, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

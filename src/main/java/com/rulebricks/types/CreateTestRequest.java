@@ -6,12 +6,15 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
@@ -19,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -32,15 +36,19 @@ public final class CreateTestRequest {
 
   private final Map<String, Object> response;
 
+  private final Optional<CreateTestRequestPolicy> policy;
+
   private final boolean critical;
 
   private final Map<String, Object> additionalProperties;
 
   private CreateTestRequest(String name, Map<String, Object> request, Map<String, Object> response,
-      boolean critical, Map<String, Object> additionalProperties) {
+      Optional<CreateTestRequestPolicy> policy, boolean critical,
+      Map<String, Object> additionalProperties) {
     this.name = name;
     this.request = request;
     this.response = response;
+    this.policy = policy;
     this.critical = critical;
     this.additionalProperties = additionalProperties;
   }
@@ -70,11 +78,31 @@ public final class CreateTestRequest {
   }
 
   /**
+   * @return Optional comparison policy. Missing or null values default to contains for rules and flows.
+   */
+  @JsonIgnore
+  public Optional<CreateTestRequestPolicy> getPolicy() {
+    if (policy == null) {
+      return Optional.empty();
+    }
+    return policy;
+  }
+
+  /**
    * @return Indicates whether the test is critical.
    */
   @JsonProperty("critical")
   public boolean getCritical() {
     return critical;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("policy")
+  private Optional<CreateTestRequestPolicy> _getPolicy() {
+    return policy;
   }
 
   @java.lang.Override
@@ -89,12 +117,12 @@ public final class CreateTestRequest {
   }
 
   private boolean equalTo(CreateTestRequest other) {
-    return name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && critical == other.critical;
+    return name.equals(other.name) && request.equals(other.request) && response.equals(other.response) && policy.equals(other.policy) && critical == other.critical;
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.request, this.response, this.critical);
+    return Objects.hash(this.name, this.request, this.response, this.policy, this.critical);
   }
 
   @java.lang.Override
@@ -146,6 +174,15 @@ public final class CreateTestRequest {
     _FinalStage putAllResponse(Map<String, Object> response);
 
     _FinalStage response(String key, Object value);
+
+    /**
+     * <p>Optional comparison policy. Missing or null values default to contains for rules and flows.</p>
+     */
+    _FinalStage policy(Optional<CreateTestRequestPolicy> policy);
+
+    _FinalStage policy(CreateTestRequestPolicy policy);
+
+    _FinalStage policy(Nullable<CreateTestRequestPolicy> policy);
   }
 
   @JsonIgnoreProperties(
@@ -155,6 +192,8 @@ public final class CreateTestRequest {
     private String name;
 
     private boolean critical;
+
+    private Optional<CreateTestRequestPolicy> policy = Optional.empty();
 
     private Map<String, Object> response = new LinkedHashMap<>();
 
@@ -171,6 +210,7 @@ public final class CreateTestRequest {
       name(other.getName());
       request(other.getRequest());
       response(other.getResponse());
+      policy(other.getPolicy());
       critical(other.getCritical());
       return this;
     }
@@ -196,6 +236,47 @@ public final class CreateTestRequest {
     @JsonSetter("critical")
     public _FinalStage critical(boolean critical) {
       this.critical = critical;
+      return this;
+    }
+
+    /**
+     * <p>Optional comparison policy. Missing or null values default to contains for rules and flows.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage policy(Nullable<CreateTestRequestPolicy> policy) {
+      if (policy.isNull()) {
+        this.policy = null;
+      }
+      else if (policy.isEmpty()) {
+        this.policy = Optional.empty();
+      }
+      else {
+        this.policy = Optional.of(policy.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Optional comparison policy. Missing or null values default to contains for rules and flows.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage policy(CreateTestRequestPolicy policy) {
+      this.policy = Optional.ofNullable(policy);
+      return this;
+    }
+
+    /**
+     * <p>Optional comparison policy. Missing or null values default to contains for rules and flows.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "policy",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage policy(Optional<CreateTestRequestPolicy> policy) {
+      this.policy = policy;
       return this;
     }
 
@@ -277,7 +358,7 @@ public final class CreateTestRequest {
 
     @java.lang.Override
     public CreateTestRequest build() {
-      return new CreateTestRequest(name, request, response, critical, additionalProperties);
+      return new CreateTestRequest(name, request, response, policy, critical, additionalProperties);
     }
 
     @java.lang.Override

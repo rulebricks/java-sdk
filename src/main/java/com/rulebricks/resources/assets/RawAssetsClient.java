@@ -6,6 +6,7 @@ package com.rulebricks.resources.assets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rulebricks.core.ClientOptions;
+import com.rulebricks.core.InputStreamRequestBody;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.core.RequestOptions;
@@ -14,17 +15,20 @@ import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
+import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.assets.requests.ExportManifestRequest;
-import com.rulebricks.resources.assets.requests.ImportManifestRequest;
 import com.rulebricks.resources.assets.types.ExportRbmAssetsResponse;
+import com.rulebricks.resources.assets.types.ImportRbmAssetsResponse;
 import com.rulebricks.types.Error;
-import com.rulebricks.types.ImportManifestResponse;
 import com.rulebricks.types.UsageStatistics;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Object;
 import java.lang.String;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -81,18 +85,17 @@ public class RawAssetsClient {
     }
 
     /**
-     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+     * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
      */
-    public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(
-        ImportManifestRequest request) {
+    public RulebricksApiHttpResponse<ImportRbmAssetsResponse> importRbm(InputStream request) {
       return importRbm(request,null);
     }
 
     /**
-     * Import rules, flows, contexts, and values from an Rulebricks manifest file (*.rbm).
+     * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
      */
-    public RulebricksApiHttpResponse<ImportManifestResponse> importRbm(
-        ImportManifestRequest request, RequestOptions requestOptions) {
+    public RulebricksApiHttpResponse<ImportRbmAssetsResponse> importRbm(InputStream request,
+        RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
         .addPathSegments("admin/import");if (requestOptions != null) {
@@ -100,19 +103,11 @@ public class RawAssetsClient {
             httpUrl.addQueryParameter(_key, _value);
           } );
         }
-        RequestBody body;
-        try {
-          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-        }
-        catch(JsonProcessingException e) {
-          throw new RulebricksApiException("Failed to serialize request", e);
-        }
+        RequestBody body = new InputStreamRequestBody(MediaType.parse("application/octet-stream"), request);
         Request okhttpRequest = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
-          .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
           .build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
@@ -122,7 +117,7 @@ public class RawAssetsClient {
           ResponseBody responseBody = response.body();
           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
           if (response.isSuccessful()) {
-            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ImportManifestResponse.class), response);
+            return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ImportRbmAssetsResponse.class), response);
           }
           try {
             switch (response.code()) {
@@ -142,7 +137,22 @@ public class RawAssetsClient {
       }
 
       /**
-       * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+       * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+       */
+      public RulebricksApiHttpResponse<ImportRbmAssetsResponse> importRbm(byte[] request) {
+        return importRbm(new ByteArrayInputStream(request));
+      }
+
+      /**
+       * Import rules, flows, contexts, and values from a Rulebricks manifest file (*.rbm). Plain JSON remains supported, and clients may send the same JSON envelope gzip-compressed with <code>Content-Type: application/octet-stream</code> and <code>X-Rulebricks-Content-Encoding: gzip</code>.
+       */
+      public RulebricksApiHttpResponse<ImportRbmAssetsResponse> importRbm(byte[] request,
+          RequestOptions requestOptions) {
+        return importRbm(new ByteArrayInputStream(request), requestOptions);
+      }
+
+      /**
+       * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
        */
       public RulebricksApiHttpResponse<ExportRbmAssetsResponse> exportRbm(
           ExportManifestRequest request) {
@@ -150,7 +160,7 @@ public class RawAssetsClient {
       }
 
       /**
-       * Export selected rules, flows, contexts, and values to an Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array), which is much smaller and can be saved directly as a .rbm file; the import endpoint accepts both forms.
+       * Export selected rules, flows, contexts, and values to a Rulebricks manifest file (*.rbm). Dependencies are resolved automatically: exporting a flow includes its rules, contexts, vocabulary values, and any flows referenced by Run Flow nodes (recursively). Set <code>compress: true</code> to receive the manifest in compressed form (a compress-json array). Set <code>download: true</code> to receive that manifest directly as a streamed attachment instead of inside the <code>{ success, manifest }</code> envelope.
        */
       public RulebricksApiHttpResponse<ExportRbmAssetsResponse> exportRbm(
           ExportManifestRequest request, RequestOptions requestOptions) {
@@ -189,6 +199,7 @@ public class RawAssetsClient {
               switch (response.code()) {
                 case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
                 case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               }
             }
             catch (JsonProcessingException ignored) {

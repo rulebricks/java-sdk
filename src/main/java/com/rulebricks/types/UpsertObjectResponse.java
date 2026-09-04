@@ -47,7 +47,7 @@ public final class UpsertObjectResponse {
   }
 
   /**
-   * @return Present and true for a dry-run response; no object or managed values were written.
+   * @return True when no changes were written.
    */
   @JsonProperty("dry_run")
   public Optional<Boolean> getDryRun() {
@@ -68,7 +68,7 @@ public final class UpsertObjectResponse {
   }
 
   /**
-   * @return Managed-value sync results (or would_sync / would_archive for dry runs).
+   * @return Managed-value sync results.
    */
   @JsonProperty("values")
   public Optional<UpsertObjectResponseValues> getValues() {
@@ -131,7 +131,7 @@ public final class UpsertObjectResponse {
     }
 
     /**
-     * <p>Present and true for a dry-run response; no object or managed values were written.</p>
+     * <p>True when no changes were written.</p>
      */
     @JsonSetter(
         value = "dry_run",
@@ -179,7 +179,7 @@ public final class UpsertObjectResponse {
     }
 
     /**
-     * <p>Managed-value sync results (or would_sync / would_archive for dry runs).</p>
+     * <p>Managed-value sync results.</p>
      */
     @JsonSetter(
         value = "values",

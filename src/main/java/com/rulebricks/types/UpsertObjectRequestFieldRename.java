@@ -38,7 +38,7 @@ public final class UpsertObjectRequestFieldRename {
   }
 
   /**
-   * @return Previous schema field key or schemaPath present on the stored object.
+   * @return Existing field key or schema path.
    */
   @JsonProperty("from_key")
   public String getFromKey() {
@@ -46,7 +46,7 @@ public final class UpsertObjectRequestFieldRename {
   }
 
   /**
-   * @return Replacement schema field key or schemaPath present in the submitted content.
+   * @return New field key or schema path.
    */
   @JsonProperty("to_key")
   public String getToKey() {
@@ -84,7 +84,7 @@ public final class UpsertObjectRequestFieldRename {
 
   public interface FromKeyStage {
     /**
-     * <p>Previous schema field key or schemaPath present on the stored object.</p>
+     * <p>Existing field key or schema path.</p>
      */
     ToKeyStage fromKey(@NotNull String fromKey);
 
@@ -93,7 +93,7 @@ public final class UpsertObjectRequestFieldRename {
 
   public interface ToKeyStage {
     /**
-     * <p>Replacement schema field key or schemaPath present in the submitted content.</p>
+     * <p>New field key or schema path.</p>
      */
     _FinalStage toKey(@NotNull String toKey);
   }
@@ -128,8 +128,8 @@ public final class UpsertObjectRequestFieldRename {
     }
 
     /**
-     * <p>Previous schema field key or schemaPath present on the stored object.</p>
-     * <p>Previous schema field key or schemaPath present on the stored object.</p>
+     * <p>Existing field key or schema path.</p>
+     * <p>Existing field key or schema path.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -140,8 +140,8 @@ public final class UpsertObjectRequestFieldRename {
     }
 
     /**
-     * <p>Replacement schema field key or schemaPath present in the submitted content.</p>
-     * <p>Replacement schema field key or schemaPath present in the submitted content.</p>
+     * <p>New field key or schema path.</p>
+     * <p>New field key or schema path.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

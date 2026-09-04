@@ -32,6 +32,8 @@ import java.util.Optional;
 public final class ImportManifestResponse {
   private final Optional<Boolean> success;
 
+  private final Optional<ImportManifestResponseOutcome> outcome;
+
   private final Optional<List<ImportManifestResponseCreatedItem>> created;
 
   private final Optional<List<ImportManifestResponseUpdatedItem>> updated;
@@ -47,6 +49,7 @@ public final class ImportManifestResponse {
   private final Map<String, Object> additionalProperties;
 
   private ImportManifestResponse(Optional<Boolean> success,
+      Optional<ImportManifestResponseOutcome> outcome,
       Optional<List<ImportManifestResponseCreatedItem>> created,
       Optional<List<ImportManifestResponseUpdatedItem>> updated,
       Optional<List<ImportManifestResponseSkippedItem>> skipped,
@@ -54,6 +57,7 @@ public final class ImportManifestResponse {
       Optional<ImportManifestResponseOrganizationCreated> organizationCreated,
       Map<String, Object> additionalProperties) {
     this.success = success;
+    this.outcome = outcome;
     this.created = created;
     this.updated = updated;
     this.skipped = skipped;
@@ -72,6 +76,14 @@ public final class ImportManifestResponse {
   }
 
   /**
+   * @return 'rejected' means the plan was refused before any write (for example a 'block' conflict); 'partial' means some assets were written and others failed.
+   */
+  @JsonProperty("outcome")
+  public Optional<ImportManifestResponseOutcome> getOutcome() {
+    return outcome;
+  }
+
+  /**
    * @return Assets that were created during import.
    */
   @JsonProperty("created")
@@ -80,7 +92,7 @@ public final class ImportManifestResponse {
   }
 
   /**
-   * @return Assets that were updated during import.
+   * @return Assets that already existed and were replaced by the manifest's version (conflict_strategy 'override').
    */
   @JsonProperty("updated")
   public Optional<List<ImportManifestResponseUpdatedItem>> getUpdated() {
@@ -88,7 +100,7 @@ public final class ImportManifestResponse {
   }
 
   /**
-   * @return Assets that were skipped during import. Object-managed values are listed here with a reason such as 'Collection is managed by a workspace object' or 'Value is managed by a workspace object'; they do not cause a whole-import 409.
+   * @return Assets skipped during import, including object-managed values.
    */
   @JsonProperty("skipped")
   public Optional<List<ImportManifestResponseSkippedItem>> getSkipped() {
@@ -143,12 +155,12 @@ public final class ImportManifestResponse {
   }
 
   private boolean equalTo(ImportManifestResponse other) {
-    return success.equals(other.success) && created.equals(other.created) && updated.equals(other.updated) && skipped.equals(other.skipped) && errors.equals(other.errors) && warnings.equals(other.warnings) && organizationCreated.equals(other.organizationCreated);
+    return success.equals(other.success) && outcome.equals(other.outcome) && created.equals(other.created) && updated.equals(other.updated) && skipped.equals(other.skipped) && errors.equals(other.errors) && warnings.equals(other.warnings) && organizationCreated.equals(other.organizationCreated);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.success, this.created, this.updated, this.skipped, this.errors, this.warnings, this.organizationCreated);
+    return Objects.hash(this.success, this.outcome, this.created, this.updated, this.skipped, this.errors, this.warnings, this.organizationCreated);
   }
 
   @java.lang.Override
@@ -165,6 +177,8 @@ public final class ImportManifestResponse {
   )
   public static final class Builder {
     private Optional<Boolean> success = Optional.empty();
+
+    private Optional<ImportManifestResponseOutcome> outcome = Optional.empty();
 
     private Optional<List<ImportManifestResponseCreatedItem>> created = Optional.empty();
 
@@ -186,6 +200,7 @@ public final class ImportManifestResponse {
 
     public Builder from(ImportManifestResponse other) {
       success(other.getSuccess());
+      outcome(other.getOutcome());
       created(other.getCreated());
       updated(other.getUpdated());
       skipped(other.getSkipped());
@@ -213,6 +228,23 @@ public final class ImportManifestResponse {
     }
 
     /**
+     * <p>'rejected' means the plan was refused before any write (for example a 'block' conflict); 'partial' means some assets were written and others failed.</p>
+     */
+    @JsonSetter(
+        value = "outcome",
+        nulls = Nulls.SKIP
+    )
+    public Builder outcome(Optional<ImportManifestResponseOutcome> outcome) {
+      this.outcome = outcome;
+      return this;
+    }
+
+    public Builder outcome(ImportManifestResponseOutcome outcome) {
+      this.outcome = Optional.ofNullable(outcome);
+      return this;
+    }
+
+    /**
      * <p>Assets that were created during import.</p>
      */
     @JsonSetter(
@@ -230,7 +262,7 @@ public final class ImportManifestResponse {
     }
 
     /**
-     * <p>Assets that were updated during import.</p>
+     * <p>Assets that already existed and were replaced by the manifest's version (conflict_strategy 'override').</p>
      */
     @JsonSetter(
         value = "updated",
@@ -247,7 +279,7 @@ public final class ImportManifestResponse {
     }
 
     /**
-     * <p>Assets that were skipped during import. Object-managed values are listed here with a reason such as 'Collection is managed by a workspace object' or 'Value is managed by a workspace object'; they do not cause a whole-import 409.</p>
+     * <p>Assets skipped during import, including object-managed values.</p>
      */
     @JsonSetter(
         value = "skipped",
@@ -331,7 +363,7 @@ public final class ImportManifestResponse {
     }
 
     public ImportManifestResponse build() {
-      return new ImportManifestResponse(success, created, updated, skipped, errors, warnings, organizationCreated, additionalProperties);
+      return new ImportManifestResponse(success, outcome, created, updated, skipped, errors, warnings, organizationCreated, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -44,12 +44,15 @@ public final class ExportManifestRequest {
 
   private final Optional<Boolean> compress;
 
+  private final Optional<Boolean> download;
+
   private final Map<String, Object> additionalProperties;
 
   private ExportManifestRequest(ExportManifestRequestRootType rootType, List<String> rootIds,
       Optional<Boolean> includeDownstream, Optional<String> manifestName,
       Optional<String> manifestDescription, Optional<Boolean> previewOnly,
-      Optional<Boolean> compress, Map<String, Object> additionalProperties) {
+      Optional<Boolean> compress, Optional<Boolean> download,
+      Map<String, Object> additionalProperties) {
     this.rootType = rootType;
     this.rootIds = rootIds;
     this.includeDownstream = includeDownstream;
@@ -57,6 +60,7 @@ public final class ExportManifestRequest {
     this.manifestDescription = manifestDescription;
     this.previewOnly = previewOnly;
     this.compress = compress;
+    this.download = download;
     this.additionalProperties = additionalProperties;
   }
 
@@ -116,6 +120,14 @@ public final class ExportManifestRequest {
     return compress;
   }
 
+  /**
+   * @return If true, returns the manifest itself as a streamed application/json attachment with Content-Disposition, rather than the normal <code>{ success, manifest }</code> response envelope. Combine with <code>compress: true</code> for large .rbm downloads.
+   */
+  @JsonProperty("download")
+  public Optional<Boolean> getDownload() {
+    return download;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -128,12 +140,12 @@ public final class ExportManifestRequest {
   }
 
   private boolean equalTo(ExportManifestRequest other) {
-    return rootType.equals(other.rootType) && rootIds.equals(other.rootIds) && includeDownstream.equals(other.includeDownstream) && manifestName.equals(other.manifestName) && manifestDescription.equals(other.manifestDescription) && previewOnly.equals(other.previewOnly) && compress.equals(other.compress);
+    return rootType.equals(other.rootType) && rootIds.equals(other.rootIds) && includeDownstream.equals(other.includeDownstream) && manifestName.equals(other.manifestName) && manifestDescription.equals(other.manifestDescription) && previewOnly.equals(other.previewOnly) && compress.equals(other.compress) && download.equals(other.download);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.rootType, this.rootIds, this.includeDownstream, this.manifestName, this.manifestDescription, this.previewOnly, this.compress);
+    return Objects.hash(this.rootType, this.rootIds, this.includeDownstream, this.manifestName, this.manifestDescription, this.previewOnly, this.compress, this.download);
   }
 
   @java.lang.Override
@@ -204,6 +216,13 @@ public final class ExportManifestRequest {
     _FinalStage compress(Optional<Boolean> compress);
 
     _FinalStage compress(Boolean compress);
+
+    /**
+     * <p>If true, returns the manifest itself as a streamed application/json attachment with Content-Disposition, rather than the normal <code>{ success, manifest }</code> response envelope. Combine with <code>compress: true</code> for large .rbm downloads.</p>
+     */
+    _FinalStage download(Optional<Boolean> download);
+
+    _FinalStage download(Boolean download);
   }
 
   @JsonIgnoreProperties(
@@ -211,6 +230,8 @@ public final class ExportManifestRequest {
   )
   public static final class Builder implements RootTypeStage, _FinalStage {
     private ExportManifestRequestRootType rootType;
+
+    private Optional<Boolean> download = Optional.empty();
 
     private Optional<Boolean> compress = Optional.empty();
 
@@ -239,6 +260,7 @@ public final class ExportManifestRequest {
       manifestDescription(other.getManifestDescription());
       previewOnly(other.getPreviewOnly());
       compress(other.getCompress());
+      download(other.getDownload());
       return this;
     }
 
@@ -251,6 +273,29 @@ public final class ExportManifestRequest {
     @JsonSetter("root_type")
     public _FinalStage rootType(@NotNull ExportManifestRequestRootType rootType) {
       this.rootType = Objects.requireNonNull(rootType, "rootType must not be null");
+      return this;
+    }
+
+    /**
+     * <p>If true, returns the manifest itself as a streamed application/json attachment with Content-Disposition, rather than the normal <code>{ success, manifest }</code> response envelope. Combine with <code>compress: true</code> for large .rbm downloads.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage download(Boolean download) {
+      this.download = Optional.ofNullable(download);
+      return this;
+    }
+
+    /**
+     * <p>If true, returns the manifest itself as a streamed application/json attachment with Content-Disposition, rather than the normal <code>{ success, manifest }</code> response envelope. Combine with <code>compress: true</code> for large .rbm downloads.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "download",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage download(Optional<Boolean> download) {
+      this.download = download;
       return this;
     }
 
@@ -409,7 +454,7 @@ public final class ExportManifestRequest {
 
     @java.lang.Override
     public ExportManifestRequest build() {
-      return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, compress, additionalProperties);
+      return new ExportManifestRequest(rootType, rootIds, includeDownstream, manifestName, manifestDescription, previewOnly, compress, download, additionalProperties);
     }
 
     @java.lang.Override

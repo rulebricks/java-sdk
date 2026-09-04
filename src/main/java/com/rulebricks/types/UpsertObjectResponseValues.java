@@ -57,7 +57,7 @@ public final class UpsertObjectResponseValues {
   }
 
   /**
-   * @return Previously generated values archived because the schema no longer declares them.
+   * @return Generated values removed from the schema.
    */
   @JsonProperty("archived")
   public Optional<Integer> getArchived() {
@@ -153,7 +153,7 @@ public final class UpsertObjectResponseValues {
     }
 
     /**
-     * <p>Previously generated values archived because the schema no longer declares them.</p>
+     * <p>Generated values removed from the schema.</p>
      */
     @JsonSetter(
         value = "archived",

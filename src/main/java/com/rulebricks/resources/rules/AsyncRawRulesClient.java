@@ -14,7 +14,9 @@ import com.rulebricks.core.RulebricksApiApiException;
 import com.rulebricks.core.RulebricksApiException;
 import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
+import com.rulebricks.errors.GatewayTimeoutError;
 import com.rulebricks.errors.InternalServerError;
+import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.rules.requests.BulkSolveRulesRequest;
 import com.rulebricks.resources.rules.requests.SolveRulesRequest;
 import com.rulebricks.types.BulkRuleResponseItem;
@@ -101,6 +103,10 @@ public class AsyncRawRulesClient {
                 return;
                 case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                 return;
+                case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
+                case 504:future.completeExceptionally(new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
               }
             }
             catch (JsonProcessingException ignored) {
@@ -179,6 +185,10 @@ public class AsyncRawRulesClient {
                   return;
                   case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
+                  case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 504:future.completeExceptionally(new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -254,6 +264,10 @@ public class AsyncRawRulesClient {
                     case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                     return;
                     case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    return;
+                    case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                    return;
+                    case 504:future.completeExceptionally(new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
                   }
                 }

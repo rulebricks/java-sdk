@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
@@ -27,13 +28,15 @@ import java.util.Optional;
     builder = ExportManifestResponseManifest.Builder.class
 )
 public final class ExportManifestResponseManifest {
-  private final Optional<String> version;
+  private final Optional<Integer> schemaVersion;
 
   private final Optional<String> name;
 
   private final Optional<String> description;
 
   private final Optional<OffsetDateTime> exportedAt;
+
+  private final Optional<String> exportedFrom;
 
   private final Optional<List<Map<String, Object>>> contexts;
 
@@ -45,15 +48,16 @@ public final class ExportManifestResponseManifest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ExportManifestResponseManifest(Optional<String> version, Optional<String> name,
+  private ExportManifestResponseManifest(Optional<Integer> schemaVersion, Optional<String> name,
       Optional<String> description, Optional<OffsetDateTime> exportedAt,
-      Optional<List<Map<String, Object>>> contexts, Optional<List<Map<String, Object>>> values,
-      Optional<List<ManifestLabeledAsset>> rules, Optional<List<ManifestLabeledAsset>> flows,
-      Map<String, Object> additionalProperties) {
-    this.version = version;
+      Optional<String> exportedFrom, Optional<List<Map<String, Object>>> contexts,
+      Optional<List<Map<String, Object>>> values, Optional<List<ManifestLabeledAsset>> rules,
+      Optional<List<ManifestLabeledAsset>> flows, Map<String, Object> additionalProperties) {
+    this.schemaVersion = schemaVersion;
     this.name = name;
     this.description = description;
     this.exportedAt = exportedAt;
+    this.exportedFrom = exportedFrom;
     this.contexts = contexts;
     this.values = values;
     this.rules = rules;
@@ -62,11 +66,11 @@ public final class ExportManifestResponseManifest {
   }
 
   /**
-   * @return Manifest format version.
+   * @return RBM schema version.
    */
-  @JsonProperty("version")
-  public Optional<String> getVersion() {
-    return version;
+  @JsonProperty("schema_version")
+  public Optional<Integer> getSchemaVersion() {
+    return schemaVersion;
   }
 
   /**
@@ -88,6 +92,14 @@ public final class ExportManifestResponseManifest {
   @JsonProperty("exported_at")
   public Optional<OffsetDateTime> getExportedAt() {
     return exportedAt;
+  }
+
+  /**
+   * @return Source workspace identifier.
+   */
+  @JsonProperty("exported_from")
+  public Optional<String> getExportedFrom() {
+    return exportedFrom;
   }
 
   /**
@@ -134,12 +146,12 @@ public final class ExportManifestResponseManifest {
   }
 
   private boolean equalTo(ExportManifestResponseManifest other) {
-    return version.equals(other.version) && name.equals(other.name) && description.equals(other.description) && exportedAt.equals(other.exportedAt) && contexts.equals(other.contexts) && values.equals(other.values) && rules.equals(other.rules) && flows.equals(other.flows);
+    return schemaVersion.equals(other.schemaVersion) && name.equals(other.name) && description.equals(other.description) && exportedAt.equals(other.exportedAt) && exportedFrom.equals(other.exportedFrom) && contexts.equals(other.contexts) && values.equals(other.values) && rules.equals(other.rules) && flows.equals(other.flows);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.version, this.name, this.description, this.exportedAt, this.contexts, this.values, this.rules, this.flows);
+    return Objects.hash(this.schemaVersion, this.name, this.description, this.exportedAt, this.exportedFrom, this.contexts, this.values, this.rules, this.flows);
   }
 
   @java.lang.Override
@@ -155,13 +167,15 @@ public final class ExportManifestResponseManifest {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<String> version = Optional.empty();
+    private Optional<Integer> schemaVersion = Optional.empty();
 
     private Optional<String> name = Optional.empty();
 
     private Optional<String> description = Optional.empty();
 
     private Optional<OffsetDateTime> exportedAt = Optional.empty();
+
+    private Optional<String> exportedFrom = Optional.empty();
 
     private Optional<List<Map<String, Object>>> contexts = Optional.empty();
 
@@ -178,10 +192,11 @@ public final class ExportManifestResponseManifest {
     }
 
     public Builder from(ExportManifestResponseManifest other) {
-      version(other.getVersion());
+      schemaVersion(other.getSchemaVersion());
       name(other.getName());
       description(other.getDescription());
       exportedAt(other.getExportedAt());
+      exportedFrom(other.getExportedFrom());
       contexts(other.getContexts());
       values(other.getValues());
       rules(other.getRules());
@@ -190,19 +205,19 @@ public final class ExportManifestResponseManifest {
     }
 
     /**
-     * <p>Manifest format version.</p>
+     * <p>RBM schema version.</p>
      */
     @JsonSetter(
-        value = "version",
+        value = "schema_version",
         nulls = Nulls.SKIP
     )
-    public Builder version(Optional<String> version) {
-      this.version = version;
+    public Builder schemaVersion(Optional<Integer> schemaVersion) {
+      this.schemaVersion = schemaVersion;
       return this;
     }
 
-    public Builder version(String version) {
-      this.version = Optional.ofNullable(version);
+    public Builder schemaVersion(Integer schemaVersion) {
+      this.schemaVersion = Optional.ofNullable(schemaVersion);
       return this;
     }
 
@@ -251,6 +266,23 @@ public final class ExportManifestResponseManifest {
 
     public Builder exportedAt(OffsetDateTime exportedAt) {
       this.exportedAt = Optional.ofNullable(exportedAt);
+      return this;
+    }
+
+    /**
+     * <p>Source workspace identifier.</p>
+     */
+    @JsonSetter(
+        value = "exported_from",
+        nulls = Nulls.SKIP
+    )
+    public Builder exportedFrom(Optional<String> exportedFrom) {
+      this.exportedFrom = exportedFrom;
+      return this;
+    }
+
+    public Builder exportedFrom(String exportedFrom) {
+      this.exportedFrom = Optional.ofNullable(exportedFrom);
       return this;
     }
 
@@ -323,7 +355,7 @@ public final class ExportManifestResponseManifest {
     }
 
     public ExportManifestResponseManifest build() {
-      return new ExportManifestResponseManifest(version, name, description, exportedAt, contexts, values, rules, flows, additionalProperties);
+      return new ExportManifestResponseManifest(schemaVersion, name, description, exportedAt, exportedFrom, contexts, values, rules, flows, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {
