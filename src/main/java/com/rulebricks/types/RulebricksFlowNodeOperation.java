@@ -16,8 +16,6 @@ public final class RulebricksFlowNodeOperation {
 
   public static final RulebricksFlowNodeOperation READ = new RulebricksFlowNodeOperation(Value.READ, "read");
 
-  public static final RulebricksFlowNodeOperation BATCH_UPDATE = new RulebricksFlowNodeOperation(Value.BATCH_UPDATE, "batch_update");
-
   private final Value value;
 
   private final String string;
@@ -56,8 +54,6 @@ public final class RulebricksFlowNodeOperation {
         return visitor.visitDelete();
       case READ:
         return visitor.visitRead();
-      case BATCH_UPDATE:
-        return visitor.visitBatchUpdate();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -75,8 +71,6 @@ public final class RulebricksFlowNodeOperation {
         return DELETE;
       case "read":
         return READ;
-      case "batch_update":
-        return BATCH_UPDATE;
       default:
         return new RulebricksFlowNodeOperation(Value.UNKNOWN, value);
     }
@@ -89,8 +83,6 @@ public final class RulebricksFlowNodeOperation {
 
     DELETE,
 
-    BATCH_UPDATE,
-
     UNKNOWN
   }
 
@@ -100,8 +92,6 @@ public final class RulebricksFlowNodeOperation {
     T visitUpdate();
 
     T visitDelete();
-
-    T visitBatchUpdate();
 
     T visitUnknown(String unknownType);
   }

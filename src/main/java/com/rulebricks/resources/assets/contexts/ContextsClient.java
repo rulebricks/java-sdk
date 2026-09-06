@@ -13,13 +13,12 @@ import com.rulebricks.resources.assets.contexts.requests.DeleteContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.ListContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.UpdateContextRequest;
+import com.rulebricks.resources.assets.contexts.types.ListContextsResponse;
 import com.rulebricks.types.ContextDetail;
-import com.rulebricks.types.ContextListItem;
 import com.rulebricks.types.CreateContextResponse;
 import com.rulebricks.types.DeleteContextResponse;
 import com.rulebricks.types.UpdateContextResponse;
 import java.lang.String;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class ContextsClient {
@@ -43,30 +42,30 @@ public class ContextsClient {
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public List<ContextListItem> list() {
+  public ListContextsResponse list() {
     return this.rawClient.list().body();
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public List<ContextListItem> list(RequestOptions requestOptions) {
+  public ListContextsResponse list(RequestOptions requestOptions) {
     return this.rawClient.list(requestOptions).body();
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public List<ContextListItem> list(ListContextsRequest request) {
+  public ListContextsResponse list(ListContextsRequest request) {
     return this.rawClient.list(request).body();
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public List<ContextListItem> list(ListContextsRequest request, RequestOptions requestOptions) {
+  public ListContextsResponse list(ListContextsRequest request, RequestOptions requestOptions) {
     return this.rawClient.list(request, requestOptions).body();
   }
 

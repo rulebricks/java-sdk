@@ -155,7 +155,7 @@ public final class RuleDetail implements IRuleBase {
   }
 
   /**
-   * @return The number of condition rows configured for the rule. Uses the published condition count when the rule is published, otherwise the draft condition count.
+   * @return The number of condition rows in the selected version. Without version, uses the published condition count when published, otherwise the draft condition count.
    */
   @JsonProperty("no_conditions")
   public Optional<Integer> getNoConditions() {
@@ -195,7 +195,7 @@ public final class RuleDetail implements IRuleBase {
   }
 
   /**
-   * @return The request schema for the rule. Uses published schema when published, otherwise draft schema.
+   * @return The request schema for the selected version. Without version, uses published schema when published, otherwise draft schema.
    */
   @JsonProperty("request_schema")
   public Optional<List<SchemaField>> getRequestSchema() {
@@ -203,7 +203,7 @@ public final class RuleDetail implements IRuleBase {
   }
 
   /**
-   * @return The response schema for the rule. Uses published schema when published, otherwise draft schema.
+   * @return The response schema for the selected version. Without version, uses published schema when published, otherwise draft schema.
    */
   @JsonProperty("response_schema")
   public Optional<List<SchemaField>> getResponseSchema() {
@@ -441,7 +441,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     /**
-     * <p>The number of condition rows configured for the rule. Uses the published condition count when the rule is published, otherwise the draft condition count.</p>
+     * <p>The number of condition rows in the selected version. Without version, uses the published condition count when published, otherwise the draft condition count.</p>
      */
     @JsonSetter(
         value = "no_conditions",
@@ -536,7 +536,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     /**
-     * <p>The request schema for the rule. Uses published schema when published, otherwise draft schema.</p>
+     * <p>The request schema for the selected version. Without version, uses published schema when published, otherwise draft schema.</p>
      */
     @JsonSetter(
         value = "request_schema",
@@ -553,7 +553,7 @@ public final class RuleDetail implements IRuleBase {
     }
 
     /**
-     * <p>The response schema for the rule. Uses published schema when published, otherwise draft schema.</p>
+     * <p>The response schema for the selected version. Without version, uses published schema when published, otherwise draft schema.</p>
      */
     @JsonSetter(
         value = "response_schema",

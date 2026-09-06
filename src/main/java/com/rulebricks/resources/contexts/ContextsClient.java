@@ -12,6 +12,8 @@ import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
+import com.rulebricks.resources.contexts.requests.SolveFlowContextsRequest;
+import com.rulebricks.resources.contexts.requests.SolveRuleContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
 import com.rulebricks.types.ContextBatchResponse;
@@ -19,6 +21,8 @@ import com.rulebricks.types.ContextInstanceHistory;
 import com.rulebricks.types.ContextInstancePendingResponse;
 import com.rulebricks.types.ContextInstanceState;
 import com.rulebricks.types.DeleteContextInstanceResponse;
+import com.rulebricks.types.SolveContextFlowResponse;
+import com.rulebricks.types.SolveContextRuleResponse;
 import com.rulebricks.types.SubmitContextDataResponse;
 import java.lang.Object;
 import java.lang.String;
@@ -72,7 +76,22 @@ public class ContextsClient {
   }
 
   /**
-   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations.
+   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
+   */
+  public SubmitContextDataResponse submit(String slug, String instance, Map<String, Object> body) {
+    return this.rawClient.submit(slug, instance, body).body();
+  }
+
+  /**
+   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
+   */
+  public SubmitContextDataResponse submit(String slug, String instance, Map<String, Object> body,
+      RequestOptions requestOptions) {
+    return this.rawClient.submit(slug, instance, body, requestOptions).body();
+  }
+
+  /**
+   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
    */
   public SubmitContextDataResponse submit(String slug, String instance,
       SubmitContextsRequest request) {
@@ -80,7 +99,7 @@ public class ContextsClient {
   }
 
   /**
-   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations.
+   * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
    */
   public SubmitContextDataResponse submit(String slug, String instance,
       SubmitContextsRequest request, RequestOptions requestOptions) {
@@ -197,14 +216,46 @@ public class ContextsClient {
   }
 
   /**
-   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+   * Execute one rule bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that rule's own inputs are not yet available.
+   */
+  public SolveContextRuleResponse solveRule(String slug, String instance, String ruleSlug,
+      SolveRuleContextsRequest request) {
+    return this.rawClient.solveRule(slug, instance, ruleSlug, request).body();
+  }
+
+  /**
+   * Execute one rule bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that rule's own inputs are not yet available.
+   */
+  public SolveContextRuleResponse solveRule(String slug, String instance, String ruleSlug,
+      SolveRuleContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.solveRule(slug, instance, ruleSlug, request, requestOptions).body();
+  }
+
+  /**
+   * Execute one flow bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that flow's own inputs are not yet available.
+   */
+  public SolveContextFlowResponse solveFlow(String slug, String instance, String flowSlug,
+      SolveFlowContextsRequest request) {
+    return this.rawClient.solveFlow(slug, instance, flowSlug, request).body();
+  }
+
+  /**
+   * Execute one flow bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that flow's own inputs are not yet available.
+   */
+  public SolveContextFlowResponse solveFlow(String slug, String instance, String flowSlug,
+      SolveFlowContextsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.solveFlow(slug, instance, flowSlug, request, requestOptions).body();
+  }
+
+  /**
+   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
    */
   public ContextBatchResponse bulkIngest(String slug, List<Map<String, Object>> body) {
     return this.rawClient.bulkIngest(slug, body).body();
   }
 
   /**
-   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
    */
   public ContextBatchResponse bulkIngest(String slug, List<Map<String, Object>> body,
       RequestOptions requestOptions) {
@@ -212,14 +263,14 @@ public class ContextsClient {
   }
 
   /**
-   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
    */
   public ContextBatchResponse bulkIngest(String slug, BulkIngestContextsRequest request) {
     return this.rawClient.bulkIngest(slug, request).body();
   }
 
   /**
-   * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
    */
   public ContextBatchResponse bulkIngest(String slug, BulkIngestContextsRequest request,
       RequestOptions requestOptions) {

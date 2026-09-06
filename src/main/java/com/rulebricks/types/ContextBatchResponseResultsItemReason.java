@@ -10,6 +10,8 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class ContextBatchResponseResultsItemReason {
+  public static final ContextBatchResponseResultsItemReason EXECUTION_IN_PROGRESS = new ContextBatchResponseResultsItemReason(Value.EXECUTION_IN_PROGRESS, "execution_in_progress");
+
   public static final ContextBatchResponseResultsItemReason INPUTS_UNCHANGED = new ContextBatchResponseResultsItemReason(Value.INPUTS_UNCHANGED, "inputs_unchanged");
 
   public static final ContextBatchResponseResultsItemReason NO_BOUND_ASSETS = new ContextBatchResponseResultsItemReason(Value.NO_BOUND_ASSETS, "no_bound_assets");
@@ -52,6 +54,8 @@ public final class ContextBatchResponseResultsItemReason {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case EXECUTION_IN_PROGRESS:
+        return visitor.visitExecutionInProgress();
       case INPUTS_UNCHANGED:
         return visitor.visitInputsUnchanged();
       case NO_BOUND_ASSETS:
@@ -73,6 +77,8 @@ public final class ContextBatchResponseResultsItemReason {
   )
   public static ContextBatchResponseResultsItemReason valueOf(String value) {
     switch (value) {
+      case "execution_in_progress":
+        return EXECUTION_IN_PROGRESS;
       case "inputs_unchanged":
         return INPUTS_UNCHANGED;
       case "no_bound_assets":
@@ -99,6 +105,8 @@ public final class ContextBatchResponseResultsItemReason {
 
     EXECUTION_UNAVAILABLE,
 
+    EXECUTION_IN_PROGRESS,
+
     UNKNOWN
   }
 
@@ -112,6 +120,8 @@ public final class ContextBatchResponseResultsItemReason {
     T visitAutoExecuteDisabled();
 
     T visitExecutionUnavailable();
+
+    T visitExecutionInProgress();
 
     T visitUnknown(String unknownType);
   }

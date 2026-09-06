@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
@@ -38,7 +39,7 @@ public final class CascadeResult {
 
   private final Optional<String> executionId;
 
-  private final Optional<CascadeResultStatus> status;
+  private final CascadeResultStatus status;
 
   private final Optional<Map<String, Object>> result;
 
@@ -59,7 +60,7 @@ public final class CascadeResult {
   private final Map<String, Object> additionalProperties;
 
   private CascadeResult(Optional<String> context, Optional<String> rule, Optional<String> flow,
-      Optional<String> executionId, Optional<CascadeResultStatus> status,
+      Optional<String> executionId, CascadeResultStatus status,
       Optional<Map<String, Object>> result, Optional<Boolean> autoExecuted,
       Optional<List<String>> writtenToContext, Optional<String> error,
       Optional<Boolean> rateLimited, Optional<Boolean> usageLimited, Optional<List<String>> need,
@@ -125,12 +126,12 @@ public final class CascadeResult {
    * @return Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.
    */
   @JsonProperty("status")
-  public Optional<CascadeResultStatus> getStatus() {
+  public CascadeResultStatus getStatus() {
     return status;
   }
 
   /**
-   * @return The evaluation output.
+   * @return The evaluation output. In ordinary Context submit responses, present only when include contains execution_results.
    */
   @JsonProperty("result")
   public Optional<Map<String, Object>> getResult() {
@@ -257,39 +258,148 @@ public final class CascadeResult {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static StatusStage builder() {
     return new Builder();
+  }
+
+  public interface StatusStage {
+    /**
+     * <p>Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.</p>
+     */
+    _FinalStage status(@NotNull CascadeResultStatus status);
+
+    Builder from(CascadeResult other);
+  }
+
+  public interface _FinalStage {
+    CascadeResult build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     */
+    _FinalStage context(Optional<String> context);
+
+    _FinalStage context(String context);
+
+    /**
+     * <p>The rule slug (if this was a rule evaluation).</p>
+     */
+    _FinalStage rule(Optional<String> rule);
+
+    _FinalStage rule(String rule);
+
+    _FinalStage rule(Nullable<String> rule);
+
+    /**
+     * <p>The flow slug (if this was a flow evaluation).</p>
+     */
+    _FinalStage flow(Optional<String> flow);
+
+    _FinalStage flow(String flow);
+
+    _FinalStage flow(Nullable<String> flow);
+
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    _FinalStage executionId(Optional<String> executionId);
+
+    _FinalStage executionId(String executionId);
+
+    _FinalStage executionId(Nullable<String> executionId);
+
+    /**
+     * <p>The evaluation output. In ordinary Context submit responses, present only when include contains execution_results.</p>
+     */
+    _FinalStage result(Optional<Map<String, Object>> result);
+
+    _FinalStage result(Map<String, Object> result);
+
+    /**
+     * <p>True for context auto-execution. Omitted for registered pending evaluations.</p>
+     */
+    _FinalStage autoExecuted(Optional<Boolean> autoExecuted);
+
+    _FinalStage autoExecuted(Boolean autoExecuted);
+
+    /**
+     * <p>List of field keys written back to the context (for rule evaluations).</p>
+     */
+    _FinalStage writtenToContext(Optional<List<String>> writtenToContext);
+
+    _FinalStage writtenToContext(List<String> writtenToContext);
+
+    /**
+     * <p>Error message if the evaluation failed.</p>
+     */
+    _FinalStage error(Optional<String> error);
+
+    _FinalStage error(String error);
+
+    _FinalStage error(Nullable<String> error);
+
+    /**
+     * <p>True when execution stopped at a rate limit.</p>
+     */
+    _FinalStage rateLimited(Optional<Boolean> rateLimited);
+
+    _FinalStage rateLimited(Boolean rateLimited);
+
+    /**
+     * <p>True when execution stopped at a plan usage limit.</p>
+     */
+    _FinalStage usageLimited(Optional<Boolean> usageLimited);
+
+    _FinalStage usageLimited(Boolean usageLimited);
+
+    /**
+     * <p>Dependencies still missing when the evaluation remains pending.</p>
+     */
+    _FinalStage need(Optional<List<String>> need);
+
+    _FinalStage need(List<String> need);
+
+    /**
+     * <p>Nested pending evaluations triggered by this rule's writeback.</p>
+     */
+    _FinalStage cascaded(Optional<List<CascadeResult>> cascaded);
+
+    _FinalStage cascaded(List<CascadeResult> cascaded);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> context = Optional.empty();
+  public static final class Builder implements StatusStage, _FinalStage {
+    private CascadeResultStatus status;
 
-    private Optional<String> rule = Optional.empty();
-
-    private Optional<String> flow = Optional.empty();
-
-    private Optional<String> executionId = Optional.empty();
-
-    private Optional<CascadeResultStatus> status = Optional.empty();
-
-    private Optional<Map<String, Object>> result = Optional.empty();
-
-    private Optional<Boolean> autoExecuted = Optional.empty();
-
-    private Optional<List<String>> writtenToContext = Optional.empty();
-
-    private Optional<String> error = Optional.empty();
-
-    private Optional<Boolean> rateLimited = Optional.empty();
-
-    private Optional<Boolean> usageLimited = Optional.empty();
+    private Optional<List<CascadeResult>> cascaded = Optional.empty();
 
     private Optional<List<String>> need = Optional.empty();
 
-    private Optional<List<CascadeResult>> cascaded = Optional.empty();
+    private Optional<Boolean> usageLimited = Optional.empty();
+
+    private Optional<Boolean> rateLimited = Optional.empty();
+
+    private Optional<String> error = Optional.empty();
+
+    private Optional<List<String>> writtenToContext = Optional.empty();
+
+    private Optional<Boolean> autoExecuted = Optional.empty();
+
+    private Optional<Map<String, Object>> result = Optional.empty();
+
+    private Optional<String> executionId = Optional.empty();
+
+    private Optional<String> flow = Optional.empty();
+
+    private Optional<String> rule = Optional.empty();
+
+    private Optional<String> context = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -297,6 +407,7 @@ public final class CascadeResult {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(CascadeResult other) {
       context(other.getContext());
       rule(other.getRule());
@@ -315,198 +426,115 @@ public final class CascadeResult {
     }
 
     /**
-     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
-     */
-    @JsonSetter(
-        value = "context",
-        nulls = Nulls.SKIP
-    )
-    public Builder context(Optional<String> context) {
-      this.context = context;
-      return this;
-    }
-
-    public Builder context(String context) {
-      this.context = Optional.ofNullable(context);
-      return this;
-    }
-
-    /**
-     * <p>The rule slug (if this was a rule evaluation).</p>
-     */
-    @JsonSetter(
-        value = "rule",
-        nulls = Nulls.SKIP
-    )
-    public Builder rule(Optional<String> rule) {
-      this.rule = rule;
-      return this;
-    }
-
-    public Builder rule(String rule) {
-      this.rule = Optional.ofNullable(rule);
-      return this;
-    }
-
-    public Builder rule(Nullable<String> rule) {
-      if (rule.isNull()) {
-        this.rule = null;
-      }
-      else if (rule.isEmpty()) {
-        this.rule = Optional.empty();
-      }
-      else {
-        this.rule = Optional.of(rule.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>The flow slug (if this was a flow evaluation).</p>
-     */
-    @JsonSetter(
-        value = "flow",
-        nulls = Nulls.SKIP
-    )
-    public Builder flow(Optional<String> flow) {
-      this.flow = flow;
-      return this;
-    }
-
-    public Builder flow(String flow) {
-      this.flow = Optional.ofNullable(flow);
-      return this;
-    }
-
-    public Builder flow(Nullable<String> flow) {
-      if (flow.isNull()) {
-        this.flow = null;
-      }
-      else if (flow.isEmpty()) {
-        this.flow = Optional.empty();
-      }
-      else {
-        this.flow = Optional.of(flow.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
-     */
-    @JsonSetter(
-        value = "execution_id",
-        nulls = Nulls.SKIP
-    )
-    public Builder executionId(Optional<String> executionId) {
-      this.executionId = executionId;
-      return this;
-    }
-
-    public Builder executionId(String executionId) {
-      this.executionId = Optional.ofNullable(executionId);
-      return this;
-    }
-
-    public Builder executionId(Nullable<String> executionId) {
-      if (executionId.isNull()) {
-        this.executionId = null;
-      }
-      else if (executionId.isEmpty()) {
-        this.executionId = Optional.empty();
-      }
-      else {
-        this.executionId = Optional.of(executionId.get());
-      }
-      return this;
-    }
-
-    /**
      * <p>Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.</p>
+     * <p>Whether the evaluation succeeded, failed, remains pending, or was skipped because the same inputs already completed successfully.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public Builder status(Optional<CascadeResultStatus> status) {
-      this.status = status;
-      return this;
-    }
-
-    public Builder status(CascadeResultStatus status) {
-      this.status = Optional.ofNullable(status);
+    @java.lang.Override
+    @JsonSetter("status")
+    public _FinalStage status(@NotNull CascadeResultStatus status) {
+      this.status = Objects.requireNonNull(status, "status must not be null");
       return this;
     }
 
     /**
-     * <p>The evaluation output.</p>
+     * <p>Nested pending evaluations triggered by this rule's writeback.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "result",
-        nulls = Nulls.SKIP
-    )
-    public Builder result(Optional<Map<String, Object>> result) {
-      this.result = result;
-      return this;
-    }
-
-    public Builder result(Map<String, Object> result) {
-      this.result = Optional.ofNullable(result);
+    @java.lang.Override
+    public _FinalStage cascaded(List<CascadeResult> cascaded) {
+      this.cascaded = Optional.ofNullable(cascaded);
       return this;
     }
 
     /**
-     * <p>True for context auto-execution. Omitted for registered pending evaluations.</p>
+     * <p>Nested pending evaluations triggered by this rule's writeback.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "auto_executed",
+        value = "cascaded",
         nulls = Nulls.SKIP
     )
-    public Builder autoExecuted(Optional<Boolean> autoExecuted) {
-      this.autoExecuted = autoExecuted;
-      return this;
-    }
-
-    public Builder autoExecuted(Boolean autoExecuted) {
-      this.autoExecuted = Optional.ofNullable(autoExecuted);
+    public _FinalStage cascaded(Optional<List<CascadeResult>> cascaded) {
+      this.cascaded = cascaded;
       return this;
     }
 
     /**
-     * <p>List of field keys written back to the context (for rule evaluations).</p>
+     * <p>Dependencies still missing when the evaluation remains pending.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "written_to_context",
-        nulls = Nulls.SKIP
-    )
-    public Builder writtenToContext(Optional<List<String>> writtenToContext) {
-      this.writtenToContext = writtenToContext;
+    @java.lang.Override
+    public _FinalStage need(List<String> need) {
+      this.need = Optional.ofNullable(need);
       return this;
     }
 
-    public Builder writtenToContext(List<String> writtenToContext) {
-      this.writtenToContext = Optional.ofNullable(writtenToContext);
+    /**
+     * <p>Dependencies still missing when the evaluation remains pending.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "need",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage need(Optional<List<String>> need) {
+      this.need = need;
+      return this;
+    }
+
+    /**
+     * <p>True when execution stopped at a plan usage limit.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage usageLimited(Boolean usageLimited) {
+      this.usageLimited = Optional.ofNullable(usageLimited);
+      return this;
+    }
+
+    /**
+     * <p>True when execution stopped at a plan usage limit.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "usage_limited",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage usageLimited(Optional<Boolean> usageLimited) {
+      this.usageLimited = usageLimited;
+      return this;
+    }
+
+    /**
+     * <p>True when execution stopped at a rate limit.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage rateLimited(Boolean rateLimited) {
+      this.rateLimited = Optional.ofNullable(rateLimited);
+      return this;
+    }
+
+    /**
+     * <p>True when execution stopped at a rate limit.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "rate_limited",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rateLimited(Optional<Boolean> rateLimited) {
+      this.rateLimited = rateLimited;
       return this;
     }
 
     /**
      * <p>Error message if the evaluation failed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "error",
-        nulls = Nulls.SKIP
-    )
-    public Builder error(Optional<String> error) {
-      this.error = error;
-      return this;
-    }
-
-    public Builder error(String error) {
-      this.error = Optional.ofNullable(error);
-      return this;
-    }
-
-    public Builder error(Nullable<String> error) {
+    @java.lang.Override
+    public _FinalStage error(Nullable<String> error) {
       if (error.isNull()) {
         this.error = null;
       }
@@ -520,82 +548,255 @@ public final class CascadeResult {
     }
 
     /**
-     * <p>True when execution stopped at a rate limit.</p>
+     * <p>Error message if the evaluation failed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "rate_limited",
-        nulls = Nulls.SKIP
-    )
-    public Builder rateLimited(Optional<Boolean> rateLimited) {
-      this.rateLimited = rateLimited;
-      return this;
-    }
-
-    public Builder rateLimited(Boolean rateLimited) {
-      this.rateLimited = Optional.ofNullable(rateLimited);
+    @java.lang.Override
+    public _FinalStage error(String error) {
+      this.error = Optional.ofNullable(error);
       return this;
     }
 
     /**
-     * <p>True when execution stopped at a plan usage limit.</p>
+     * <p>Error message if the evaluation failed.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "usage_limited",
+        value = "error",
         nulls = Nulls.SKIP
     )
-    public Builder usageLimited(Optional<Boolean> usageLimited) {
-      this.usageLimited = usageLimited;
-      return this;
-    }
-
-    public Builder usageLimited(Boolean usageLimited) {
-      this.usageLimited = Optional.ofNullable(usageLimited);
+    public _FinalStage error(Optional<String> error) {
+      this.error = error;
       return this;
     }
 
     /**
-     * <p>Dependencies still missing when the evaluation remains pending.</p>
+     * <p>List of field keys written back to the context (for rule evaluations).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "need",
-        nulls = Nulls.SKIP
-    )
-    public Builder need(Optional<List<String>> need) {
-      this.need = need;
-      return this;
-    }
-
-    public Builder need(List<String> need) {
-      this.need = Optional.ofNullable(need);
+    @java.lang.Override
+    public _FinalStage writtenToContext(List<String> writtenToContext) {
+      this.writtenToContext = Optional.ofNullable(writtenToContext);
       return this;
     }
 
     /**
-     * <p>Nested pending evaluations triggered by this rule's writeback.</p>
+     * <p>List of field keys written back to the context (for rule evaluations).</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "cascaded",
+        value = "written_to_context",
         nulls = Nulls.SKIP
     )
-    public Builder cascaded(Optional<List<CascadeResult>> cascaded) {
-      this.cascaded = cascaded;
+    public _FinalStage writtenToContext(Optional<List<String>> writtenToContext) {
+      this.writtenToContext = writtenToContext;
       return this;
     }
 
-    public Builder cascaded(List<CascadeResult> cascaded) {
-      this.cascaded = Optional.ofNullable(cascaded);
+    /**
+     * <p>True for context auto-execution. Omitted for registered pending evaluations.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage autoExecuted(Boolean autoExecuted) {
+      this.autoExecuted = Optional.ofNullable(autoExecuted);
       return this;
     }
 
+    /**
+     * <p>True for context auto-execution. Omitted for registered pending evaluations.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "auto_executed",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage autoExecuted(Optional<Boolean> autoExecuted) {
+      this.autoExecuted = autoExecuted;
+      return this;
+    }
+
+    /**
+     * <p>The evaluation output. In ordinary Context submit responses, present only when include contains execution_results.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage result(Map<String, Object> result) {
+      this.result = Optional.ofNullable(result);
+      return this;
+    }
+
+    /**
+     * <p>The evaluation output. In ordinary Context submit responses, present only when include contains execution_results.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "result",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage result(Optional<Map<String, Object>> result) {
+      this.result = result;
+      return this;
+    }
+
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage executionId(Nullable<String> executionId) {
+      if (executionId.isNull()) {
+        this.executionId = null;
+      }
+      else if (executionId.isEmpty()) {
+        this.executionId = Optional.empty();
+      }
+      else {
+        this.executionId = Optional.of(executionId.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage executionId(String executionId) {
+      this.executionId = Optional.ofNullable(executionId);
+      return this;
+    }
+
+    /**
+     * <p>Flow entries only: the run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "execution_id",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage executionId(Optional<String> executionId) {
+      this.executionId = executionId;
+      return this;
+    }
+
+    /**
+     * <p>The flow slug (if this was a flow evaluation).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage flow(Nullable<String> flow) {
+      if (flow.isNull()) {
+        this.flow = null;
+      }
+      else if (flow.isEmpty()) {
+        this.flow = Optional.empty();
+      }
+      else {
+        this.flow = Optional.of(flow.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>The flow slug (if this was a flow evaluation).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage flow(String flow) {
+      this.flow = Optional.ofNullable(flow);
+      return this;
+    }
+
+    /**
+     * <p>The flow slug (if this was a flow evaluation).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "flow",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage flow(Optional<String> flow) {
+      this.flow = flow;
+      return this;
+    }
+
+    /**
+     * <p>The rule slug (if this was a rule evaluation).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage rule(Nullable<String> rule) {
+      if (rule.isNull()) {
+        this.rule = null;
+      }
+      else if (rule.isEmpty()) {
+        this.rule = Optional.empty();
+      }
+      else {
+        this.rule = Optional.of(rule.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>The rule slug (if this was a rule evaluation).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage rule(String rule) {
+      this.rule = Optional.ofNullable(rule);
+      return this;
+    }
+
+    /**
+     * <p>The rule slug (if this was a rule evaluation).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "rule",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rule(Optional<String> rule) {
+      this.rule = rule;
+      return this;
+    }
+
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage context(String context) {
+      this.context = Optional.ofNullable(context);
+      return this;
+    }
+
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "context",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage context(Optional<String> context) {
+      this.context = context;
+      return this;
+    }
+
+    @java.lang.Override
     public CascadeResult build() {
       return new CascadeResult(context, rule, flow, executionId, status, result, autoExecuted, writtenToContext, error, rateLimited, usageLimited, need, cascaded, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

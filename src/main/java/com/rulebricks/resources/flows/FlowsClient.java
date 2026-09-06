@@ -28,7 +28,7 @@ public class FlowsClient {
   }
 
   /**
-   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
+   * Execute a flow by slug and optional version. The flow setting <code>failedResponseMode</code> controls execution-failure responses: a missing or invalid value is treated as <code>return</code> (the default), which returns an <code>{ &quot;error&quot;: &quot;...&quot; }</code> payload with HTTP 200; <code>fail</code> returns HTTP 400 for input/schema failures and HTTP 500 for escalated policy/runtime failures. Request- and entity-level errors, capacity errors, and infrastructure failures remain non-2xx responses as documented.
    */
   public FlowExecutionResponsePayload execute(String slug, String version,
       ExecuteFlowsRequest request) {
@@ -36,7 +36,7 @@ public class FlowsClient {
   }
 
   /**
-   * Execute a flow by slug and optional version. Policy failures return <code>{ error }</code> with status 200, including per-item errors for bulk requests. Errors: 400 invalid input, 500 unhandled execution failure, 503 unavailable, 504 timeout.
+   * Execute a flow by slug and optional version. The flow setting <code>failedResponseMode</code> controls execution-failure responses: a missing or invalid value is treated as <code>return</code> (the default), which returns an <code>{ &quot;error&quot;: &quot;...&quot; }</code> payload with HTTP 200; <code>fail</code> returns HTTP 400 for input/schema failures and HTTP 500 for escalated policy/runtime failures. Request- and entity-level errors, capacity errors, and infrastructure failures remain non-2xx responses as documented.
    */
   public FlowExecutionResponsePayload execute(String slug, String version,
       ExecuteFlowsRequest request, RequestOptions requestOptions) {

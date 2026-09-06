@@ -17,21 +17,27 @@ import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.ContentTooLargeError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.NotFoundError;
-import com.rulebricks.errors.PaymentRequiredError;
+import com.rulebricks.errors.ServiceUnavailableError;
+import com.rulebricks.errors.TooManyRequestsError;
 import com.rulebricks.resources.contexts.requests.BulkIngestContextsRequest;
 import com.rulebricks.resources.contexts.requests.CascadeContextsRequest;
 import com.rulebricks.resources.contexts.requests.DeleteContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetHistoryContextsRequest;
 import com.rulebricks.resources.contexts.requests.GetPendingContextsRequest;
+import com.rulebricks.resources.contexts.requests.SolveFlowContextsRequest;
+import com.rulebricks.resources.contexts.requests.SolveRuleContextsRequest;
 import com.rulebricks.resources.contexts.requests.SubmitContextsRequest;
 import com.rulebricks.types.CascadeContextResponse;
 import com.rulebricks.types.ContextBatchResponse;
 import com.rulebricks.types.ContextInstanceHistory;
 import com.rulebricks.types.ContextInstancePendingResponse;
 import com.rulebricks.types.ContextInstanceState;
+import com.rulebricks.types.ContextOperationError;
 import com.rulebricks.types.DeleteContextInstanceResponse;
 import com.rulebricks.types.Error;
+import com.rulebricks.types.SolveContextFlowResponse;
+import com.rulebricks.types.SolveContextRuleResponse;
 import com.rulebricks.types.SubmitContextDataResponse;
 import java.io.IOException;
 import java.lang.Exception;
@@ -93,7 +99,10 @@ public class AsyncRawContextsClient {
 
       .addPathSegments("contexts")
       .addPathSegment(slug)
-      .addPathSegment(instance);if (request.getIncludeRelations().isPresent()) {
+      .addPathSegment(instance);if (request.getInclude().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+      }
+      if (request.getIncludeRelations().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "include_relations", request.getIncludeRelations().get(), false);
       }
       if (requestOptions != null) {
@@ -125,7 +134,7 @@ public class AsyncRawContextsClient {
               switch (response.code()) {
                 case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                 return;
-                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
               }
             }
@@ -150,7 +159,23 @@ public class AsyncRawContextsClient {
     }
 
     /**
-     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations.
+     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
+     */
+    public CompletableFuture<RulebricksApiHttpResponse<SubmitContextDataResponse>> submit(
+        String slug, String instance, Map<String, Object> body) {
+      return submit(slug, instance, SubmitContextsRequest.builder().body(body).build());
+    }
+
+    /**
+     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
+     */
+    public CompletableFuture<RulebricksApiHttpResponse<SubmitContextDataResponse>> submit(
+        String slug, String instance, Map<String, Object> body, RequestOptions requestOptions) {
+      return submit(slug, instance, SubmitContextsRequest.builder().body(body).build(), requestOptions);
+    }
+
+    /**
+     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
      */
     public CompletableFuture<RulebricksApiHttpResponse<SubmitContextDataResponse>> submit(
         String slug, String instance, SubmitContextsRequest request) {
@@ -158,7 +183,7 @@ public class AsyncRawContextsClient {
     }
 
     /**
-     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations.
+     * Submit data to a context instance, creating it if it doesn't exist. May trigger bound rule/flow evaluations. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Deployment transport limits and execution deadlines also apply.
      */
     public CompletableFuture<RulebricksApiHttpResponse<SubmitContextDataResponse>> submit(
         String slug, String instance, SubmitContextsRequest request,
@@ -167,7 +192,10 @@ public class AsyncRawContextsClient {
 
         .addPathSegments("contexts")
         .addPathSegment(slug)
-        .addPathSegment(instance);if (requestOptions != null) {
+        .addPathSegment(instance);if (request.getInclude().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+        }
+        if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );
@@ -176,16 +204,16 @@ public class AsyncRawContextsClient {
         try {
           body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
         }
-        catch(JsonProcessingException e) {
-          throw new RulebricksApiException("Failed to serialize request", e);
+        catch(Exception e) {
+          throw new RuntimeException(e);
         }
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
-          .build();
+          .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -202,11 +230,17 @@ public class AsyncRawContextsClient {
               }
               try {
                 switch (response.code()) {
-                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                   return;
-                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                  return;
+                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                  return;
+                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
               }
@@ -291,9 +325,17 @@ public class AsyncRawContextsClient {
                 }
                 try {
                   switch (response.code()) {
+                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                    return;
                     case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                     return;
-                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                    return;
+                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                    return;
+                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                    return;
+                    case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
                   }
                 }
@@ -387,7 +429,7 @@ public class AsyncRawContextsClient {
                     switch (response.code()) {
                       case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                       return;
-                      case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                      case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
                     }
                   }
@@ -475,7 +517,7 @@ public class AsyncRawContextsClient {
                       switch (response.code()) {
                         case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                         return;
-                        case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                        case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
                       }
                     }
@@ -553,9 +595,17 @@ public class AsyncRawContextsClient {
                       }
                       try {
                         switch (response.code()) {
+                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
                           case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                           return;
-                          case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                          case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                          return;
+                          case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                          return;
+                          case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                         }
                       }
@@ -580,41 +630,26 @@ public class AsyncRawContextsClient {
               }
 
               /**
-               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+               * Execute one rule bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that rule's own inputs are not yet available.
                */
-              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
-                  String slug, List<Map<String, Object>> body) {
-                return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build());
+              public CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> solveRule(
+                  String slug, String instance, String ruleSlug, SolveRuleContextsRequest request) {
+                return solveRule(slug,instance,ruleSlug,request,null);
               }
 
               /**
-               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
+               * Execute one rule bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that rule's own inputs are not yet available.
                */
-              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
-                  String slug, List<Map<String, Object>> body, RequestOptions requestOptions) {
-                return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build(), requestOptions);
-              }
-
-              /**
-               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
-               */
-              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
-                  String slug, BulkIngestContextsRequest request) {
-                return bulkIngest(slug,request,null);
-              }
-
-              /**
-               * Submit an array of records to any context in one synchronous call. Records merge into their context instances (matched by the context's identity fact), bound rules and flows whose inputs became satisfied execute, and the response returns the resolved state of every touched instance. Retries are always safe: merges are idempotent and executions are deduplicated by input hash. Fact history is recorded for tracked facts exactly as on individual writes. Clients chunk large datasets across requests.
-               */
-              public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
-                  String slug, BulkIngestContextsRequest request, RequestOptions requestOptions) {
+              public CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> solveRule(
+                  String slug, String instance, String ruleSlug, SolveRuleContextsRequest request,
+                  RequestOptions requestOptions) {
                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                  .addPathSegments("contexts/batch")
-                  .addPathSegment(slug);if (request.getInclude().isPresent()) {
-                    QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
-                  }
-                  if (requestOptions != null) {
+                  .addPathSegments("contexts")
+                  .addPathSegment(slug)
+                  .addPathSegment(instance)
+                  .addPathSegments("solve")
+                  .addPathSegment(ruleSlug);if (requestOptions != null) {
                     requestOptions.getQueryParameters().forEach((_key, _value) -> {
                       httpUrl.addQueryParameter(_key, _value);
                     } );
@@ -623,41 +658,43 @@ public class AsyncRawContextsClient {
                   try {
                     body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                   }
-                  catch(Exception e) {
-                    throw new RuntimeException(e);
+                  catch(JsonProcessingException e) {
+                    throw new RulebricksApiException("Failed to serialize request", e);
                   }
-                  Request.Builder _requestBuilder = new Request.Builder()
+                  Request okhttpRequest = new Request.Builder()
                     .url(httpUrl.build())
                     .method("POST", body)
                     .headers(Headers.of(clientOptions.headers(requestOptions)))
                     .addHeader("Content-Type", "application/json")
-                    .addHeader("Accept", "application/json");
-                  Request okhttpRequest = _requestBuilder.build();
+                    .addHeader("Accept", "application/json")
+                    .build();
                   OkHttpClient client = clientOptions.httpClient();
                   if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                     client = clientOptions.httpClientWithTimeout(requestOptions);
                   }
-                  CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> future = new CompletableFuture<>();
+                  CompletableFuture<RulebricksApiHttpResponse<SolveContextRuleResponse>> future = new CompletableFuture<>();
                   client.newCall(okhttpRequest).enqueue(new Callback() {
                     @Override
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                       try (ResponseBody responseBody = response.body()) {
                         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                         if (response.isSuccessful()) {
-                          future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextBatchResponse.class), response));
+                          future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SolveContextRuleResponse.class), response));
                           return;
                         }
                         try {
                           switch (response.code()) {
-                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
-                            return;
-                            case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                             return;
                             case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
                             return;
-                            case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
                             return;
-                            case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                            case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                            return;
+                            case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                             return;
                           }
                         }
@@ -680,4 +717,199 @@ public class AsyncRawContextsClient {
                   });
                   return future;
                 }
-              }
+
+                /**
+                 * Execute one flow bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that flow's own inputs are not yet available.
+                 */
+                public CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> solveFlow(
+                    String slug, String instance, String flowSlug,
+                    SolveFlowContextsRequest request) {
+                  return solveFlow(slug,instance,flowSlug,request,null);
+                }
+
+                /**
+                 * Execute one flow bound to this context. An optional object body is validated and persisted before evaluation. Returns HTTP 202 and registers pending work when that flow's own inputs are not yet available.
+                 */
+                public CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> solveFlow(
+                    String slug, String instance, String flowSlug, SolveFlowContextsRequest request,
+                    RequestOptions requestOptions) {
+                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                    .addPathSegments("contexts")
+                    .addPathSegment(slug)
+                    .addPathSegment(instance)
+                    .addPathSegments("flows")
+                    .addPathSegment(flowSlug);if (requestOptions != null) {
+                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                        httpUrl.addQueryParameter(_key, _value);
+                      } );
+                    }
+                    RequestBody body;
+                    try {
+                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+                    }
+                    catch(JsonProcessingException e) {
+                      throw new RulebricksApiException("Failed to serialize request", e);
+                    }
+                    Request okhttpRequest = new Request.Builder()
+                      .url(httpUrl.build())
+                      .method("POST", body)
+                      .headers(Headers.of(clientOptions.headers(requestOptions)))
+                      .addHeader("Content-Type", "application/json")
+                      .addHeader("Accept", "application/json")
+                      .build();
+                    OkHttpClient client = clientOptions.httpClient();
+                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                      client = clientOptions.httpClientWithTimeout(requestOptions);
+                    }
+                    CompletableFuture<RulebricksApiHttpResponse<SolveContextFlowResponse>> future = new CompletableFuture<>();
+                    client.newCall(okhttpRequest).enqueue(new Callback() {
+                      @Override
+                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        try (ResponseBody responseBody = response.body()) {
+                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                          if (response.isSuccessful()) {
+                            future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SolveContextFlowResponse.class), response));
+                            return;
+                          }
+                          try {
+                            switch (response.code()) {
+                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                              return;
+                              case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                              return;
+                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                              return;
+                              case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                              case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                            }
+                          }
+                          catch (JsonProcessingException ignored) {
+                            // unable to map error response, throwing generic error
+                          }
+                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                          future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                          return;
+                        }
+                        catch (IOException e) {
+                          future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                        }
+                      }
+
+                      @Override
+                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                      }
+                    });
+                    return future;
+                  }
+
+                  /**
+                   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
+                   */
+                  public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                      String slug, List<Map<String, Object>> body) {
+                    return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build());
+                  }
+
+                  /**
+                   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
+                   */
+                  public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                      String slug, List<Map<String, Object>> body, RequestOptions requestOptions) {
+                    return bulkIngest(slug, BulkIngestContextsRequest.builder().body(body).build(), requestOptions);
+                  }
+
+                  /**
+                   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
+                   */
+                  public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                      String slug, BulkIngestContextsRequest request) {
+                    return bulkIngest(slug,request,null);
+                  }
+
+                  /**
+                   * Synchronously merge records by identity, record tracked history, and execute ready bound rules/flows. Returns each touched instance's resolved state and execution summary. Successful runs are deduplicated by input hash; lost responses can cause repeated external effects. Each instance supports up to 64 MiB of combined stored state and execution metadata, measured as serialized database JSON. Contexts impose no separate request-wide size or record-count budget. Deployment transport limits, available resources, and execution deadlines still apply. Error responses identify committed and failed instances when known; a failed request does not imply rollback of earlier writes.
+                   */
+                  public CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> bulkIngest(
+                      String slug, BulkIngestContextsRequest request,
+                      RequestOptions requestOptions) {
+                    HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                      .addPathSegments("contexts/batch")
+                      .addPathSegment(slug);if (request.getInclude().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "include", request.getInclude().get(), false);
+                      }
+                      if (requestOptions != null) {
+                        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                          httpUrl.addQueryParameter(_key, _value);
+                        } );
+                      }
+                      RequestBody body;
+                      try {
+                        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+                      }
+                      catch(Exception e) {
+                        throw new RuntimeException(e);
+                      }
+                      Request.Builder _requestBuilder = new Request.Builder()
+                        .url(httpUrl.build())
+                        .method("POST", body)
+                        .headers(Headers.of(clientOptions.headers(requestOptions)))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Accept", "application/json");
+                      Request okhttpRequest = _requestBuilder.build();
+                      OkHttpClient client = clientOptions.httpClient();
+                      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                        client = clientOptions.httpClientWithTimeout(requestOptions);
+                      }
+                      CompletableFuture<RulebricksApiHttpResponse<ContextBatchResponse>> future = new CompletableFuture<>();
+                      client.newCall(okhttpRequest).enqueue(new Callback() {
+                        @Override
+                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                          try (ResponseBody responseBody = response.body()) {
+                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                            if (response.isSuccessful()) {
+                              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextBatchResponse.class), response));
+                              return;
+                            }
+                            try {
+                              switch (response.code()) {
+                                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                return;
+                                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                                return;
+                                case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                                return;
+                                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ContextOperationError.class), response));
+                                return;
+                                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                return;
+                                case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                return;
+                              }
+                            }
+                            catch (JsonProcessingException ignored) {
+                              // unable to map error response, throwing generic error
+                            }
+                            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                            future.completeExceptionally(new RulebricksApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                            return;
+                          }
+                          catch (IOException e) {
+                            future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                          }
+                        }
+
+                        @Override
+                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                          future.completeExceptionally(new RulebricksApiException("Network error executing HTTP request", e));
+                        }
+                      });
+                      return future;
+                    }
+                  }

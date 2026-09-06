@@ -16,7 +16,6 @@ import com.rulebricks.core.RulebricksApiHttpResponse;
 import com.rulebricks.errors.BadRequestError;
 import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.resources.users.groups.requests.CreateUserGroupRequest;
-import com.rulebricks.types.Error;
 import com.rulebricks.types.UserGroup;
 import java.io.IOException;
 import java.lang.Object;
@@ -73,7 +72,7 @@ public class RawGroupsClient {
         }
         try {
           if (response.code() == 500) {
-            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }
         catch (JsonProcessingException ignored) {
@@ -132,8 +131,8 @@ public class RawGroupsClient {
           }
           try {
             switch (response.code()) {
-              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {

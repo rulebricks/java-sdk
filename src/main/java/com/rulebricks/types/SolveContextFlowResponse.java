@@ -22,15 +22,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = SolveContextFlowResponse.Builder.class
 )
 public final class SolveContextFlowResponse {
-  private final Optional<SolveContextFlowResponseStatus> status;
+  private final SolveContextFlowResponseStatus status;
 
-  private final Optional<String> context;
+  private final String context;
 
   private final Optional<String> flow;
 
@@ -42,10 +43,9 @@ public final class SolveContextFlowResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private SolveContextFlowResponse(Optional<SolveContextFlowResponseStatus> status,
-      Optional<String> context, Optional<String> flow, Optional<String> executionId,
-      Optional<Map<String, Object>> result, Optional<Map<String, Object>> usage,
-      Map<String, Object> additionalProperties) {
+  private SolveContextFlowResponse(SolveContextFlowResponseStatus status, String context,
+      Optional<String> flow, Optional<String> executionId, Optional<Map<String, Object>> result,
+      Optional<Map<String, Object>> usage, Map<String, Object> additionalProperties) {
     this.status = status;
     this.context = context;
     this.flow = flow;
@@ -59,7 +59,7 @@ public final class SolveContextFlowResponse {
    * @return Whether the flow executed successfully.
    */
   @JsonProperty("status")
-  public Optional<SolveContextFlowResponseStatus> getStatus() {
+  public SolveContextFlowResponseStatus getStatus() {
     return status;
   }
 
@@ -67,7 +67,7 @@ public final class SolveContextFlowResponse {
    * @return Combined identifier in format 'contextSlug:instanceId'.
    */
   @JsonProperty("context")
-  public Optional<String> getContext() {
+  public String getContext() {
     return context;
   }
 
@@ -140,25 +140,79 @@ public final class SolveContextFlowResponse {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static StatusStage builder() {
     return new Builder();
+  }
+
+  public interface StatusStage {
+    /**
+     * <p>Whether the flow executed successfully.</p>
+     */
+    ContextStage status(@NotNull SolveContextFlowResponseStatus status);
+
+    Builder from(SolveContextFlowResponse other);
+  }
+
+  public interface ContextStage {
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     */
+    _FinalStage context(@NotNull String context);
+  }
+
+  public interface _FinalStage {
+    SolveContextFlowResponse build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>The slug of the flow that was executed.</p>
+     */
+    _FinalStage flow(Optional<String> flow);
+
+    _FinalStage flow(String flow);
+
+    /**
+     * <p>The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     */
+    _FinalStage executionId(Optional<String> executionId);
+
+    _FinalStage executionId(String executionId);
+
+    _FinalStage executionId(Nullable<String> executionId);
+
+    /**
+     * <p>The flow execution output.</p>
+     */
+    _FinalStage result(Optional<Map<String, Object>> result);
+
+    _FinalStage result(Map<String, Object> result);
+
+    /**
+     * <p>Resource usage information for the flow execution.</p>
+     */
+    _FinalStage usage(Optional<Map<String, Object>> usage);
+
+    _FinalStage usage(Map<String, Object> usage);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<SolveContextFlowResponseStatus> status = Optional.empty();
+  public static final class Builder implements StatusStage, ContextStage, _FinalStage {
+    private SolveContextFlowResponseStatus status;
 
-    private Optional<String> context = Optional.empty();
+    private String context;
 
-    private Optional<String> flow = Optional.empty();
-
-    private Optional<String> executionId = Optional.empty();
+    private Optional<Map<String, Object>> usage = Optional.empty();
 
     private Optional<Map<String, Object>> result = Optional.empty();
 
-    private Optional<Map<String, Object>> usage = Optional.empty();
+    private Optional<String> executionId = Optional.empty();
+
+    private Optional<String> flow = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -166,6 +220,7 @@ public final class SolveContextFlowResponse {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(SolveContextFlowResponse other) {
       status(other.getStatus());
       context(other.getContext());
@@ -178,73 +233,80 @@ public final class SolveContextFlowResponse {
 
     /**
      * <p>Whether the flow executed successfully.</p>
+     * <p>Whether the flow executed successfully.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public Builder status(Optional<SolveContextFlowResponseStatus> status) {
-      this.status = status;
-      return this;
-    }
-
-    public Builder status(SolveContextFlowResponseStatus status) {
-      this.status = Optional.ofNullable(status);
+    @java.lang.Override
+    @JsonSetter("status")
+    public ContextStage status(@NotNull SolveContextFlowResponseStatus status) {
+      this.status = Objects.requireNonNull(status, "status must not be null");
       return this;
     }
 
     /**
      * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "context",
-        nulls = Nulls.SKIP
-    )
-    public Builder context(Optional<String> context) {
-      this.context = context;
-      return this;
-    }
-
-    public Builder context(String context) {
-      this.context = Optional.ofNullable(context);
+    @java.lang.Override
+    @JsonSetter("context")
+    public _FinalStage context(@NotNull String context) {
+      this.context = Objects.requireNonNull(context, "context must not be null");
       return this;
     }
 
     /**
-     * <p>The slug of the flow that was executed.</p>
+     * <p>Resource usage information for the flow execution.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "flow",
-        nulls = Nulls.SKIP
-    )
-    public Builder flow(Optional<String> flow) {
-      this.flow = flow;
+    @java.lang.Override
+    public _FinalStage usage(Map<String, Object> usage) {
+      this.usage = Optional.ofNullable(usage);
       return this;
     }
 
-    public Builder flow(String flow) {
-      this.flow = Optional.ofNullable(flow);
+    /**
+     * <p>Resource usage information for the flow execution.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "usage",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage usage(Optional<Map<String, Object>> usage) {
+      this.usage = usage;
+      return this;
+    }
+
+    /**
+     * <p>The flow execution output.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage result(Map<String, Object> result) {
+      this.result = Optional.ofNullable(result);
+      return this;
+    }
+
+    /**
+     * <p>The flow execution output.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "result",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage result(Optional<Map<String, Object>> result) {
+      this.result = result;
       return this;
     }
 
     /**
      * <p>The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "execution_id",
-        nulls = Nulls.SKIP
-    )
-    public Builder executionId(Optional<String> executionId) {
-      this.executionId = executionId;
-      return this;
-    }
-
-    public Builder executionId(String executionId) {
-      this.executionId = Optional.ofNullable(executionId);
-      return this;
-    }
-
-    public Builder executionId(Nullable<String> executionId) {
+    @java.lang.Override
+    public _FinalStage executionId(Nullable<String> executionId) {
       if (executionId.isNull()) {
         this.executionId = null;
       }
@@ -258,48 +320,63 @@ public final class SolveContextFlowResponse {
     }
 
     /**
-     * <p>The flow execution output.</p>
+     * <p>The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "result",
-        nulls = Nulls.SKIP
-    )
-    public Builder result(Optional<Map<String, Object>> result) {
-      this.result = result;
-      return this;
-    }
-
-    public Builder result(Map<String, Object> result) {
-      this.result = Optional.ofNullable(result);
+    @java.lang.Override
+    public _FinalStage executionId(String executionId) {
+      this.executionId = Optional.ofNullable(executionId);
       return this;
     }
 
     /**
-     * <p>Resource usage information for the flow execution.</p>
+     * <p>The flow run's execution ID, accepted by <code>/decisions/query</code> <code>trace</code>.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "usage",
+        value = "execution_id",
         nulls = Nulls.SKIP
     )
-    public Builder usage(Optional<Map<String, Object>> usage) {
-      this.usage = usage;
+    public _FinalStage executionId(Optional<String> executionId) {
+      this.executionId = executionId;
       return this;
     }
 
-    public Builder usage(Map<String, Object> usage) {
-      this.usage = Optional.ofNullable(usage);
+    /**
+     * <p>The slug of the flow that was executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage flow(String flow) {
+      this.flow = Optional.ofNullable(flow);
       return this;
     }
 
+    /**
+     * <p>The slug of the flow that was executed.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "flow",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage flow(Optional<String> flow) {
+      this.flow = flow;
+      return this;
+    }
+
+    @java.lang.Override
     public SolveContextFlowResponse build() {
       return new SolveContextFlowResponse(status, context, flow, executionId, result, usage, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

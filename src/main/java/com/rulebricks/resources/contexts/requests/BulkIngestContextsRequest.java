@@ -41,7 +41,7 @@ public final class BulkIngestContextsRequest {
   }
 
   /**
-   * @return Comma-separated list of per-instance fields to include in results (instance_id is always present). Omit to include everything. Valid fields: positions, is_new, status, have, need, state, expires_at, executions, executed, triggered, reason. Useful for keeping response size proportional to outcomes rather than data volume, e.g. include=status,executed.
+   * @return Select comma-separated fields; <code>instance_id</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (stored metadata), <code>execution_results</code> (<code>executed[].result</code>). Compact outcomes with flow IDs: <code>status,triggered,executed</code>. Unavailable fields are omitted. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.
    */
   @JsonProperty("include")
   public Optional<String> getInclude() {
@@ -103,7 +103,7 @@ public final class BulkIngestContextsRequest {
     }
 
     /**
-     * <p>Comma-separated list of per-instance fields to include in results (instance_id is always present). Omit to include everything. Valid fields: positions, is_new, status, have, need, state, expires_at, executions, executed, triggered, reason. Useful for keeping response size proportional to outcomes rather than data volume, e.g. include=status,executed.</p>
+     * <p>Select comma-separated fields; <code>instance_id</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (stored metadata), <code>execution_results</code> (<code>executed[].result</code>). Compact outcomes with flow IDs: <code>status,triggered,executed</code>. Unavailable fields are omitted. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.</p>
      */
     @JsonSetter(
         value = "include",

@@ -13,23 +13,32 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
-import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ContextCascadeSummary.Builder.class
 )
 public final class ContextCascadeSummary {
-  private final Optional<String> context;
+  private final Optional<String> relationType;
 
-  private final Optional<String> relation;
+  private final Optional<String> foreignKeyField;
+
+  private final Optional<List<String>> failedInstanceIds;
+
+  private final Optional<Integer> rejected;
+
+  private final String context;
+
+  private final String relation;
 
   private final Optional<Integer> instances;
 
@@ -41,19 +50,22 @@ public final class ContextCascadeSummary {
 
   private final Optional<Integer> skipped;
 
-  private final Optional<Boolean> truncated;
-
   private final Optional<String> executionDegraded;
 
   private final Optional<String> error;
 
   private final Map<String, Object> additionalProperties;
 
-  private ContextCascadeSummary(Optional<String> context, Optional<String> relation,
-      Optional<Integer> instances, Optional<Integer> executed, Optional<Integer> evaluationErrors,
-      Optional<Integer> infrastructureErrors, Optional<Integer> skipped,
-      Optional<Boolean> truncated, Optional<String> executionDegraded, Optional<String> error,
+  private ContextCascadeSummary(Optional<String> relationType, Optional<String> foreignKeyField,
+      Optional<List<String>> failedInstanceIds, Optional<Integer> rejected, String context,
+      String relation, Optional<Integer> instances, Optional<Integer> executed,
+      Optional<Integer> evaluationErrors, Optional<Integer> infrastructureErrors,
+      Optional<Integer> skipped, Optional<String> executionDegraded, Optional<String> error,
       Map<String, Object> additionalProperties) {
+    this.relationType = relationType;
+    this.foreignKeyField = foreignKeyField;
+    this.failedInstanceIds = failedInstanceIds;
+    this.rejected = rejected;
     this.context = context;
     this.relation = relation;
     this.instances = instances;
@@ -61,17 +73,45 @@ public final class ContextCascadeSummary {
     this.evaluationErrors = evaluationErrors;
     this.infrastructureErrors = infrastructureErrors;
     this.skipped = skipped;
-    this.truncated = truncated;
     this.executionDegraded = executionDegraded;
     this.error = error;
     this.additionalProperties = additionalProperties;
   }
 
   /**
+   * @return Relationship type used to find dependent work.
+   */
+  @JsonProperty("relation_type")
+  public Optional<String> getRelationType() {
+    return relationType;
+  }
+
+  /**
+   * @return Foreign key used to find dependent identities.
+   */
+  @JsonProperty("foreign_key_field")
+  public Optional<String> getForeignKeyField() {
+    return foreignKeyField;
+  }
+
+  /**
+   * @return Known failed dependent identities from a bounded page.
+   */
+  @JsonProperty("failed_instance_ids")
+  public Optional<List<String>> getFailedInstanceIds() {
+    return failedInstanceIds;
+  }
+
+  @JsonProperty("rejected")
+  public Optional<Integer> getRejected() {
+    return rejected;
+  }
+
+  /**
    * @return The dependent context slug.
    */
   @JsonProperty("context")
-  public Optional<String> getContext() {
+  public String getContext() {
     return context;
   }
 
@@ -79,7 +119,7 @@ public final class ContextCascadeSummary {
    * @return The relationship that linked the contexts.
    */
   @JsonProperty("relation")
-  public Optional<String> getRelation() {
+  public String getRelation() {
     return relation;
   }
 
@@ -112,14 +152,6 @@ public final class ContextCascadeSummary {
   }
 
   /**
-   * @return True when the affected instances exceeded the bounded cascade limit.
-   */
-  @JsonProperty("truncated")
-  public Optional<Boolean> getTruncated() {
-    return truncated;
-  }
-
-  /**
    * @return Present when dependent data was committed but execution was unavailable.
    */
   @JsonProperty("execution_degraded")
@@ -147,12 +179,12 @@ public final class ContextCascadeSummary {
   }
 
   private boolean equalTo(ContextCascadeSummary other) {
-    return context.equals(other.context) && relation.equals(other.relation) && instances.equals(other.instances) && executed.equals(other.executed) && evaluationErrors.equals(other.evaluationErrors) && infrastructureErrors.equals(other.infrastructureErrors) && skipped.equals(other.skipped) && truncated.equals(other.truncated) && executionDegraded.equals(other.executionDegraded) && error.equals(other.error);
+    return relationType.equals(other.relationType) && foreignKeyField.equals(other.foreignKeyField) && failedInstanceIds.equals(other.failedInstanceIds) && rejected.equals(other.rejected) && context.equals(other.context) && relation.equals(other.relation) && instances.equals(other.instances) && executed.equals(other.executed) && evaluationErrors.equals(other.evaluationErrors) && infrastructureErrors.equals(other.infrastructureErrors) && skipped.equals(other.skipped) && executionDegraded.equals(other.executionDegraded) && error.equals(other.error);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.relation, this.instances, this.executed, this.evaluationErrors, this.infrastructureErrors, this.skipped, this.truncated, this.executionDegraded, this.error);
+    return Objects.hash(this.relationType, this.foreignKeyField, this.failedInstanceIds, this.rejected, this.context, this.relation, this.instances, this.executed, this.evaluationErrors, this.infrastructureErrors, this.skipped, this.executionDegraded, this.error);
   }
 
   @java.lang.Override
@@ -160,33 +192,125 @@ public final class ContextCascadeSummary {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static ContextStage builder() {
     return new Builder();
+  }
+
+  public interface ContextStage {
+    /**
+     * <p>The dependent context slug.</p>
+     */
+    RelationStage context(@NotNull String context);
+
+    Builder from(ContextCascadeSummary other);
+  }
+
+  public interface RelationStage {
+    /**
+     * <p>The relationship that linked the contexts.</p>
+     */
+    _FinalStage relation(@NotNull String relation);
+  }
+
+  public interface _FinalStage {
+    ContextCascadeSummary build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>Relationship type used to find dependent work.</p>
+     */
+    _FinalStage relationType(Optional<String> relationType);
+
+    _FinalStage relationType(String relationType);
+
+    /**
+     * <p>Foreign key used to find dependent identities.</p>
+     */
+    _FinalStage foreignKeyField(Optional<String> foreignKeyField);
+
+    _FinalStage foreignKeyField(String foreignKeyField);
+
+    /**
+     * <p>Known failed dependent identities from a bounded page.</p>
+     */
+    _FinalStage failedInstanceIds(Optional<List<String>> failedInstanceIds);
+
+    _FinalStage failedInstanceIds(List<String> failedInstanceIds);
+
+    _FinalStage rejected(Optional<Integer> rejected);
+
+    _FinalStage rejected(Integer rejected);
+
+    /**
+     * <p>Distinct existing dependent instances re-evaluated.</p>
+     */
+    _FinalStage instances(Optional<Integer> instances);
+
+    _FinalStage instances(Integer instances);
+
+    _FinalStage executed(Optional<Integer> executed);
+
+    _FinalStage executed(Integer executed);
+
+    _FinalStage evaluationErrors(Optional<Integer> evaluationErrors);
+
+    _FinalStage evaluationErrors(Integer evaluationErrors);
+
+    _FinalStage infrastructureErrors(Optional<Integer> infrastructureErrors);
+
+    _FinalStage infrastructureErrors(Integer infrastructureErrors);
+
+    _FinalStage skipped(Optional<Integer> skipped);
+
+    _FinalStage skipped(Integer skipped);
+
+    /**
+     * <p>Present when dependent data was committed but execution was unavailable.</p>
+     */
+    _FinalStage executionDegraded(Optional<String> executionDegraded);
+
+    _FinalStage executionDegraded(String executionDegraded);
+
+    /**
+     * <p>Present when the dependent relationship lookup or cascade failed.</p>
+     */
+    _FinalStage error(Optional<String> error);
+
+    _FinalStage error(String error);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> context = Optional.empty();
+  public static final class Builder implements ContextStage, RelationStage, _FinalStage {
+    private String context;
 
-    private Optional<String> relation = Optional.empty();
+    private String relation;
 
-    private Optional<Integer> instances = Optional.empty();
-
-    private Optional<Integer> executed = Optional.empty();
-
-    private Optional<Integer> evaluationErrors = Optional.empty();
-
-    private Optional<Integer> infrastructureErrors = Optional.empty();
-
-    private Optional<Integer> skipped = Optional.empty();
-
-    private Optional<Boolean> truncated = Optional.empty();
+    private Optional<String> error = Optional.empty();
 
     private Optional<String> executionDegraded = Optional.empty();
 
-    private Optional<String> error = Optional.empty();
+    private Optional<Integer> skipped = Optional.empty();
+
+    private Optional<Integer> infrastructureErrors = Optional.empty();
+
+    private Optional<Integer> evaluationErrors = Optional.empty();
+
+    private Optional<Integer> executed = Optional.empty();
+
+    private Optional<Integer> instances = Optional.empty();
+
+    private Optional<Integer> rejected = Optional.empty();
+
+    private Optional<List<String>> failedInstanceIds = Optional.empty();
+
+    private Optional<String> foreignKeyField = Optional.empty();
+
+    private Optional<String> relationType = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -194,7 +318,12 @@ public final class ContextCascadeSummary {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(ContextCascadeSummary other) {
+      relationType(other.getRelationType());
+      foreignKeyField(other.getForeignKeyField());
+      failedInstanceIds(other.getFailedInstanceIds());
+      rejected(other.getRejected());
       context(other.getContext());
       relation(other.getRelation());
       instances(other.getInstances());
@@ -202,7 +331,6 @@ public final class ContextCascadeSummary {
       evaluationErrors(other.getEvaluationErrors());
       infrastructureErrors(other.getInfrastructureErrors());
       skipped(other.getSkipped());
-      truncated(other.getTruncated());
       executionDegraded(other.getExecutionDegraded());
       error(other.getError());
       return this;
@@ -210,171 +338,258 @@ public final class ContextCascadeSummary {
 
     /**
      * <p>The dependent context slug.</p>
+     * <p>The dependent context slug.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "context",
-        nulls = Nulls.SKIP
-    )
-    public Builder context(Optional<String> context) {
-      this.context = context;
-      return this;
-    }
-
-    public Builder context(String context) {
-      this.context = Optional.ofNullable(context);
+    @java.lang.Override
+    @JsonSetter("context")
+    public RelationStage context(@NotNull String context) {
+      this.context = Objects.requireNonNull(context, "context must not be null");
       return this;
     }
 
     /**
      * <p>The relationship that linked the contexts.</p>
+     * <p>The relationship that linked the contexts.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "relation",
-        nulls = Nulls.SKIP
-    )
-    public Builder relation(Optional<String> relation) {
-      this.relation = relation;
-      return this;
-    }
-
-    public Builder relation(String relation) {
-      this.relation = Optional.ofNullable(relation);
+    @java.lang.Override
+    @JsonSetter("relation")
+    public _FinalStage relation(@NotNull String relation) {
+      this.relation = Objects.requireNonNull(relation, "relation must not be null");
       return this;
     }
 
     /**
-     * <p>Distinct existing dependent instances re-evaluated.</p>
+     * <p>Present when the dependent relationship lookup or cascade failed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "instances",
-        nulls = Nulls.SKIP
-    )
-    public Builder instances(Optional<Integer> instances) {
-      this.instances = instances;
-      return this;
-    }
-
-    public Builder instances(Integer instances) {
-      this.instances = Optional.ofNullable(instances);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "executed",
-        nulls = Nulls.SKIP
-    )
-    public Builder executed(Optional<Integer> executed) {
-      this.executed = executed;
-      return this;
-    }
-
-    public Builder executed(Integer executed) {
-      this.executed = Optional.ofNullable(executed);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "evaluation_errors",
-        nulls = Nulls.SKIP
-    )
-    public Builder evaluationErrors(Optional<Integer> evaluationErrors) {
-      this.evaluationErrors = evaluationErrors;
-      return this;
-    }
-
-    public Builder evaluationErrors(Integer evaluationErrors) {
-      this.evaluationErrors = Optional.ofNullable(evaluationErrors);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "infrastructure_errors",
-        nulls = Nulls.SKIP
-    )
-    public Builder infrastructureErrors(Optional<Integer> infrastructureErrors) {
-      this.infrastructureErrors = infrastructureErrors;
-      return this;
-    }
-
-    public Builder infrastructureErrors(Integer infrastructureErrors) {
-      this.infrastructureErrors = Optional.ofNullable(infrastructureErrors);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "skipped",
-        nulls = Nulls.SKIP
-    )
-    public Builder skipped(Optional<Integer> skipped) {
-      this.skipped = skipped;
-      return this;
-    }
-
-    public Builder skipped(Integer skipped) {
-      this.skipped = Optional.ofNullable(skipped);
-      return this;
-    }
-
-    /**
-     * <p>True when the affected instances exceeded the bounded cascade limit.</p>
-     */
-    @JsonSetter(
-        value = "truncated",
-        nulls = Nulls.SKIP
-    )
-    public Builder truncated(Optional<Boolean> truncated) {
-      this.truncated = truncated;
-      return this;
-    }
-
-    public Builder truncated(Boolean truncated) {
-      this.truncated = Optional.ofNullable(truncated);
-      return this;
-    }
-
-    /**
-     * <p>Present when dependent data was committed but execution was unavailable.</p>
-     */
-    @JsonSetter(
-        value = "execution_degraded",
-        nulls = Nulls.SKIP
-    )
-    public Builder executionDegraded(Optional<String> executionDegraded) {
-      this.executionDegraded = executionDegraded;
-      return this;
-    }
-
-    public Builder executionDegraded(String executionDegraded) {
-      this.executionDegraded = Optional.ofNullable(executionDegraded);
+    @java.lang.Override
+    public _FinalStage error(String error) {
+      this.error = Optional.ofNullable(error);
       return this;
     }
 
     /**
      * <p>Present when the dependent relationship lookup or cascade failed.</p>
      */
+    @java.lang.Override
     @JsonSetter(
         value = "error",
         nulls = Nulls.SKIP
     )
-    public Builder error(Optional<String> error) {
+    public _FinalStage error(Optional<String> error) {
       this.error = error;
       return this;
     }
 
-    public Builder error(String error) {
-      this.error = Optional.ofNullable(error);
+    /**
+     * <p>Present when dependent data was committed but execution was unavailable.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage executionDegraded(String executionDegraded) {
+      this.executionDegraded = Optional.ofNullable(executionDegraded);
       return this;
     }
 
-    public ContextCascadeSummary build() {
-      return new ContextCascadeSummary(context, relation, instances, executed, evaluationErrors, infrastructureErrors, skipped, truncated, executionDegraded, error, additionalProperties);
+    /**
+     * <p>Present when dependent data was committed but execution was unavailable.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "execution_degraded",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage executionDegraded(Optional<String> executionDegraded) {
+      this.executionDegraded = executionDegraded;
+      return this;
     }
 
+    @java.lang.Override
+    public _FinalStage skipped(Integer skipped) {
+      this.skipped = Optional.ofNullable(skipped);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "skipped",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage skipped(Optional<Integer> skipped) {
+      this.skipped = skipped;
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage infrastructureErrors(Integer infrastructureErrors) {
+      this.infrastructureErrors = Optional.ofNullable(infrastructureErrors);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "infrastructure_errors",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage infrastructureErrors(Optional<Integer> infrastructureErrors) {
+      this.infrastructureErrors = infrastructureErrors;
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage evaluationErrors(Integer evaluationErrors) {
+      this.evaluationErrors = Optional.ofNullable(evaluationErrors);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "evaluation_errors",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage evaluationErrors(Optional<Integer> evaluationErrors) {
+      this.evaluationErrors = evaluationErrors;
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage executed(Integer executed) {
+      this.executed = Optional.ofNullable(executed);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "executed",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage executed(Optional<Integer> executed) {
+      this.executed = executed;
+      return this;
+    }
+
+    /**
+     * <p>Distinct existing dependent instances re-evaluated.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage instances(Integer instances) {
+      this.instances = Optional.ofNullable(instances);
+      return this;
+    }
+
+    /**
+     * <p>Distinct existing dependent instances re-evaluated.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "instances",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage instances(Optional<Integer> instances) {
+      this.instances = instances;
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage rejected(Integer rejected) {
+      this.rejected = Optional.ofNullable(rejected);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "rejected",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rejected(Optional<Integer> rejected) {
+      this.rejected = rejected;
+      return this;
+    }
+
+    /**
+     * <p>Known failed dependent identities from a bounded page.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage failedInstanceIds(List<String> failedInstanceIds) {
+      this.failedInstanceIds = Optional.ofNullable(failedInstanceIds);
+      return this;
+    }
+
+    /**
+     * <p>Known failed dependent identities from a bounded page.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "failed_instance_ids",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage failedInstanceIds(Optional<List<String>> failedInstanceIds) {
+      this.failedInstanceIds = failedInstanceIds;
+      return this;
+    }
+
+    /**
+     * <p>Foreign key used to find dependent identities.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage foreignKeyField(String foreignKeyField) {
+      this.foreignKeyField = Optional.ofNullable(foreignKeyField);
+      return this;
+    }
+
+    /**
+     * <p>Foreign key used to find dependent identities.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "foreign_key_field",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage foreignKeyField(Optional<String> foreignKeyField) {
+      this.foreignKeyField = foreignKeyField;
+      return this;
+    }
+
+    /**
+     * <p>Relationship type used to find dependent work.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage relationType(String relationType) {
+      this.relationType = Optional.ofNullable(relationType);
+      return this;
+    }
+
+    /**
+     * <p>Relationship type used to find dependent work.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "relation_type",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage relationType(Optional<String> relationType) {
+      this.relationType = relationType;
+      return this;
+    }
+
+    @java.lang.Override
+    public ContextCascadeSummary build() {
+      return new ContextCascadeSummary(relationType, foreignKeyField, failedInstanceIds, rejected, context, relation, instances, executed, evaluationErrors, infrastructureErrors, skipped, executionDegraded, error, additionalProperties);
+    }
+
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

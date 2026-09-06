@@ -17,7 +17,6 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.decisions.requests.QueryDecisionsRequest;
 import com.rulebricks.types.DecisionLogResponse;
-import com.rulebricks.types.Error;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
@@ -131,8 +130,8 @@ public class RawDecisionsClient {
         }
         try {
           switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }

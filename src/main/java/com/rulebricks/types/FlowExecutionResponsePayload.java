@@ -19,7 +19,6 @@ import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.SuppressWarnings;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @JsonDeserialize(
@@ -43,9 +42,9 @@ public final class FlowExecutionResponsePayload {
   @SuppressWarnings("unchecked")
   public <T> T visit(Visitor<T> visitor) {
     if(this.type == 0) {
-      return visitor.visit((Map<String, Object>) this.value);
+      return visitor.visit((FlowExecutionResult) this.value);
     } else if(this.type == 1) {
-      return visitor.visit((List<Map<String, Object>>) this.value);
+      return visitor.visit((List<FlowExecutionResult>) this.value);
     }
     throw new IllegalStateException("Failed to visit value. This should never happen.");
   }
@@ -70,18 +69,18 @@ public final class FlowExecutionResponsePayload {
     return this.value.toString();
   }
 
-  public static FlowExecutionResponsePayload of(Map<String, Object> value) {
+  public static FlowExecutionResponsePayload of(FlowExecutionResult value) {
     return new FlowExecutionResponsePayload(value, 0);
   }
 
-  public static FlowExecutionResponsePayload of(List<Map<String, Object>> value) {
+  public static FlowExecutionResponsePayload of(List<FlowExecutionResult> value) {
     return new FlowExecutionResponsePayload(value, 1);
   }
 
   public interface Visitor<T> {
-    T visit(Map<String, Object> value);
+    T visit(FlowExecutionResult value);
 
-    T visit(List<Map<String, Object>> value);
+    T visit(List<FlowExecutionResult> value);
   }
 
   static final class Deserializer extends StdDeserializer<FlowExecutionResponsePayload> {
@@ -94,11 +93,11 @@ public final class FlowExecutionResponsePayload {
         throws IOException {
       Object value = p.readValueAs(Object.class);
       try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<Map<String, Object>>() {}));
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, FlowExecutionResult.class));
       } catch(RuntimeException e) {
       }
       try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<List<Map<String, Object>>>() {}));
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<List<FlowExecutionResult>>() {}));
       } catch(RuntimeException e) {
       }
       throw new JsonParseException(p, "Failed to deserialize");

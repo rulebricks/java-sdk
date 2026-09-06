@@ -48,6 +48,8 @@ public final class ContextListItem implements IContextBase {
 
   private final Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch;
 
+  private final Optional<List<String>> sourceObjects;
+
   private final Optional<String> identityFact;
 
   private final Optional<ContextSchema> schema;
@@ -71,12 +73,12 @@ public final class ContextListItem implements IContextBase {
   private ContextListItem(Optional<String> id, Optional<String> name, Optional<String> slug,
       Optional<String> description, Optional<Boolean> autoExecuteDecisions,
       Optional<Integer> ttlSeconds, Optional<Integer> historyLimit,
-      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<String> identityFact,
-      Optional<ContextSchema> schema, Optional<List<String>> userGroups,
-      Optional<ContextListItemFolder> folder, Optional<Integer> boundRulesCount,
-      Optional<Integer> boundFlowsCount, Optional<Integer> relationshipsCount,
-      Optional<OffsetDateTime> createdAt, Optional<OffsetDateTime> updatedAt,
-      Map<String, Object> additionalProperties) {
+      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<List<String>> sourceObjects,
+      Optional<String> identityFact, Optional<ContextSchema> schema,
+      Optional<List<String>> userGroups, Optional<ContextListItemFolder> folder,
+      Optional<Integer> boundRulesCount, Optional<Integer> boundFlowsCount,
+      Optional<Integer> relationshipsCount, Optional<OffsetDateTime> createdAt,
+      Optional<OffsetDateTime> updatedAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.slug = slug;
@@ -85,6 +87,7 @@ public final class ContextListItem implements IContextBase {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
+    this.sourceObjects = sourceObjects;
     this.identityFact = identityFact;
     this.schema = schema;
     this.userGroups = userGroups;
@@ -169,6 +172,15 @@ public final class ContextListItem implements IContextBase {
   @JsonProperty("on_schema_mismatch")
   public Optional<ContextBaseOnSchemaMismatch> getOnSchemaMismatch() {
     return onSchemaMismatch;
+  }
+
+  /**
+   * @return Workspace object IDs associated with this context schema.
+   */
+  @JsonProperty("source_objects")
+  @java.lang.Override
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
   }
 
   /**
@@ -276,12 +288,12 @@ public final class ContextListItem implements IContextBase {
   }
 
   private boolean equalTo(ContextListItem other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && identityFact.equals(other.identityFact) && schema.equals(other.schema) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && boundRulesCount.equals(other.boundRulesCount) && boundFlowsCount.equals(other.boundFlowsCount) && relationshipsCount.equals(other.relationshipsCount) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && sourceObjects.equals(other.sourceObjects) && identityFact.equals(other.identityFact) && schema.equals(other.schema) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && boundRulesCount.equals(other.boundRulesCount) && boundFlowsCount.equals(other.boundFlowsCount) && relationshipsCount.equals(other.relationshipsCount) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.identityFact, this.schema, this.userGroups, this.folder, this.boundRulesCount, this.boundFlowsCount, this.relationshipsCount, this.createdAt, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.sourceObjects, this.identityFact, this.schema, this.userGroups, this.folder, this.boundRulesCount, this.boundFlowsCount, this.relationshipsCount, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -312,6 +324,8 @@ public final class ContextListItem implements IContextBase {
     private Optional<Integer> historyLimit = Optional.empty();
 
     private Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch = Optional.empty();
+
+    private Optional<List<String>> sourceObjects = Optional.empty();
 
     private Optional<String> identityFact = Optional.empty();
 
@@ -346,6 +360,7 @@ public final class ContextListItem implements IContextBase {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
+      sourceObjects(other.getSourceObjects());
       identityFact(other.getIdentityFact());
       schema(other.getSchema());
       userGroups(other.getUserGroups());
@@ -504,6 +519,23 @@ public final class ContextListItem implements IContextBase {
 
     public Builder onSchemaMismatch(ContextBaseOnSchemaMismatch onSchemaMismatch) {
       this.onSchemaMismatch = Optional.ofNullable(onSchemaMismatch);
+      return this;
+    }
+
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
+      return this;
+    }
+
+    public Builder sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
       return this;
     }
 
@@ -675,7 +707,7 @@ public final class ContextListItem implements IContextBase {
     }
 
     public ContextListItem build() {
-      return new ContextListItem(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, identityFact, schema, userGroups, folder, boundRulesCount, boundFlowsCount, relationshipsCount, createdAt, updatedAt, additionalProperties);
+      return new ContextListItem(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, sourceObjects, identityFact, schema, userGroups, folder, boundRulesCount, boundFlowsCount, relationshipsCount, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

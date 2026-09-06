@@ -17,7 +17,6 @@ import com.rulebricks.errors.InternalServerError;
 import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.decisions.requests.QueryDecisionsRequest;
 import com.rulebricks.types.DecisionLogResponse;
-import com.rulebricks.types.Error;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.Override;
@@ -142,9 +141,9 @@ public class AsyncRawDecisionsClient {
             }
             try {
               switch (response.code()) {
-                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
-                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
                 case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;

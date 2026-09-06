@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -25,6 +26,10 @@ import java.util.Optional;
     builder = ListContextsRequest.Builder.class
 )
 public final class ListContextsRequest {
+  private final Optional<Integer> limit;
+
+  private final Optional<String> cursor;
+
   private final Optional<String> folder;
 
   private final Optional<String> userGroup;
@@ -33,12 +38,31 @@ public final class ListContextsRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListContextsRequest(Optional<String> folder, Optional<String> userGroup,
-      Optional<String> name, Map<String, Object> additionalProperties) {
+  private ListContextsRequest(Optional<Integer> limit, Optional<String> cursor,
+      Optional<String> folder, Optional<String> userGroup, Optional<String> name,
+      Map<String, Object> additionalProperties) {
+    this.limit = limit;
+    this.cursor = cursor;
     this.folder = folder;
     this.userGroup = userGroup;
     this.name = name;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Page size; enables the {data,cursor} response.
+   */
+  @JsonProperty("limit")
+  public Optional<Integer> getLimit() {
+    return limit;
+  }
+
+  /**
+   * @return Opaque cursor returned by the previous page; requires limit.
+   */
+  @JsonProperty("cursor")
+  public Optional<String> getCursor() {
+    return cursor;
   }
 
   /**
@@ -77,12 +101,12 @@ public final class ListContextsRequest {
   }
 
   private boolean equalTo(ListContextsRequest other) {
-    return folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
+    return limit.equals(other.limit) && cursor.equals(other.cursor) && folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.folder, this.userGroup, this.name);
+    return Objects.hash(this.limit, this.cursor, this.folder, this.userGroup, this.name);
   }
 
   @java.lang.Override
@@ -98,6 +122,10 @@ public final class ListContextsRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Integer> limit = Optional.empty();
+
+    private Optional<String> cursor = Optional.empty();
+
     private Optional<String> folder = Optional.empty();
 
     private Optional<String> userGroup = Optional.empty();
@@ -111,9 +139,45 @@ public final class ListContextsRequest {
     }
 
     public Builder from(ListContextsRequest other) {
+      limit(other.getLimit());
+      cursor(other.getCursor());
       folder(other.getFolder());
       userGroup(other.getUserGroup());
       name(other.getName());
+      return this;
+    }
+
+    /**
+     * <p>Page size; enables the {data,cursor} response.</p>
+     */
+    @JsonSetter(
+        value = "limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder limit(Optional<Integer> limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public Builder limit(Integer limit) {
+      this.limit = Optional.ofNullable(limit);
+      return this;
+    }
+
+    /**
+     * <p>Opaque cursor returned by the previous page; requires limit.</p>
+     */
+    @JsonSetter(
+        value = "cursor",
+        nulls = Nulls.SKIP
+    )
+    public Builder cursor(Optional<String> cursor) {
+      this.cursor = cursor;
+      return this;
+    }
+
+    public Builder cursor(String cursor) {
+      this.cursor = Optional.ofNullable(cursor);
       return this;
     }
 
@@ -169,7 +233,7 @@ public final class ListContextsRequest {
     }
 
     public ListContextsRequest build() {
-      return new ListContextsRequest(folder, userGroup, name, additionalProperties);
+      return new ListContextsRequest(limit, cursor, folder, userGroup, name, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

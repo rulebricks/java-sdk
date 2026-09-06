@@ -10,6 +10,7 @@ import com.rulebricks.resources.rules.requests.BulkSolveRulesRequest;
 import com.rulebricks.resources.rules.requests.SolveRulesRequest;
 import com.rulebricks.types.BulkRuleResponseItem;
 import com.rulebricks.types.ParallelSolveRequestValue;
+import com.rulebricks.types.RuleExecutionResult;
 import java.lang.Object;
 import java.lang.String;
 import java.util.List;
@@ -36,7 +37,7 @@ public class AsyncRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> solve(String slug, String version,
+  public CompletableFuture<RuleExecutionResult> solve(String slug, String version,
       SolveRulesRequest request) {
     return this.rawClient.solve(slug, version, request).thenApply(response -> response.body());
   }
@@ -44,7 +45,7 @@ public class AsyncRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<Map<String, Object>> solve(String slug, String version,
+  public CompletableFuture<RuleExecutionResult> solve(String slug, String version,
       SolveRulesRequest request, RequestOptions requestOptions) {
     return this.rawClient.solve(slug, version, request, requestOptions).thenApply(response -> response.body());
   }

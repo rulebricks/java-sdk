@@ -44,7 +44,7 @@ public final class BulkRuleResponseItem {
     if(this.type == 0) {
       return visitor.visit((Map<String, Object>) this.value);
     } else if(this.type == 1) {
-      return visitor.visit((BulkRuleResponseItemError) this.value);
+      return visitor.visit((ExecutionErrorResult) this.value);
     }
     throw new IllegalStateException("Failed to visit value. This should never happen.");
   }
@@ -73,14 +73,14 @@ public final class BulkRuleResponseItem {
     return new BulkRuleResponseItem(value, 0);
   }
 
-  public static BulkRuleResponseItem of(BulkRuleResponseItemError value) {
+  public static BulkRuleResponseItem of(ExecutionErrorResult value) {
     return new BulkRuleResponseItem(value, 1);
   }
 
   public interface Visitor<T> {
     T visit(Map<String, Object> value);
 
-    T visit(BulkRuleResponseItemError value);
+    T visit(ExecutionErrorResult value);
   }
 
   static final class Deserializer extends StdDeserializer<BulkRuleResponseItem> {
@@ -92,12 +92,14 @@ public final class BulkRuleResponseItem {
     public BulkRuleResponseItem deserialize(JsonParser p, DeserializationContext context) throws
         IOException {
       Object value = p.readValueAs(Object.class);
-      try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<Map<String, Object>>() {}));
-      } catch(RuntimeException e) {
+      if (value instanceof Map<?, ?> && ((Map<?, ?>) value).containsKey("error")) {
+        try {
+          return of(ObjectMappers.JSON_MAPPER.convertValue(value, ExecutionErrorResult.class));
+        } catch(RuntimeException e) {
+        }
       }
       try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, BulkRuleResponseItemError.class));
+        return of(ObjectMappers.JSON_MAPPER.convertValue(value, new TypeReference<Map<String, Object>>() {}));
       } catch(RuntimeException e) {
       }
       throw new JsonParseException(p, "Failed to deserialize");

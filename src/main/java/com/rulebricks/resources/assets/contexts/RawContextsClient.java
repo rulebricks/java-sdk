@@ -5,7 +5,6 @@
 package com.rulebricks.resources.assets.contexts;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.rulebricks.core.ClientOptions;
 import com.rulebricks.core.MediaTypes;
 import com.rulebricks.core.ObjectMappers;
@@ -23,8 +22,8 @@ import com.rulebricks.resources.assets.contexts.requests.DeleteContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.GetContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.ListContextsRequest;
 import com.rulebricks.resources.assets.contexts.requests.UpdateContextRequest;
+import com.rulebricks.resources.assets.contexts.types.ListContextsResponse;
 import com.rulebricks.types.ContextDetail;
-import com.rulebricks.types.ContextListItem;
 import com.rulebricks.types.CreateContextResponse;
 import com.rulebricks.types.DeleteContextResponse;
 import com.rulebricks.types.Error;
@@ -32,7 +31,6 @@ import com.rulebricks.types.UpdateContextResponse;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
-import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -49,34 +47,40 @@ public class RawContextsClient {
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public RulebricksApiHttpResponse<List<ContextListItem>> list() {
+  public RulebricksApiHttpResponse<ListContextsResponse> list() {
     return list(ListContextsRequest.builder().build());
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public RulebricksApiHttpResponse<List<ContextListItem>> list(RequestOptions requestOptions) {
+  public RulebricksApiHttpResponse<ListContextsResponse> list(RequestOptions requestOptions) {
     return list(ListContextsRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public RulebricksApiHttpResponse<List<ContextListItem>> list(ListContextsRequest request) {
+  public RulebricksApiHttpResponse<ListContextsResponse> list(ListContextsRequest request) {
     return list(request,null);
   }
 
   /**
-   * Retrieve all contexts for the authenticated user. Results are scoped to the API key holder's user groups. Optionally filter by folder name or ID, by user group name or ID when the API key has access to that group, or by name.
+   * List contexts accessible to the API key. Filter by context name, folder name/ID, or an accessible user group's name/ID. Returns an array when pagination is omitted; optional limit/cursor pagination returns {data,cursor} in descending creation time and ID order.
    */
-  public RulebricksApiHttpResponse<List<ContextListItem>> list(ListContextsRequest request,
+  public RulebricksApiHttpResponse<ListContextsResponse> list(ListContextsRequest request,
       RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("admin/contexts");if (request.getFolder().isPresent()) {
+      .addPathSegments("admin/contexts");if (request.getLimit().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+      }
+      if (request.getCursor().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "cursor", request.getCursor().get(), false);
+      }
+      if (request.getFolder().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "folder", request.getFolder().get(), false);
       }
       if (request.getUserGroup().isPresent()) {
@@ -104,11 +108,11 @@ public class RawContextsClient {
         ResponseBody responseBody = response.body();
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<List<ContextListItem>>() {}), response);
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ListContextsResponse.class), response);
         }
         try {
           if (response.code() == 500) {
-            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }
         catch (JsonProcessingException ignored) {
@@ -167,9 +171,9 @@ public class RawContextsClient {
           }
           try {
             switch (response.code()) {
-              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -237,7 +241,7 @@ public class RawContextsClient {
             try {
               switch (response.code()) {
                 case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               }
             }
             catch (JsonProcessingException ignored) {
@@ -313,9 +317,9 @@ public class RawContextsClient {
               }
               try {
                 switch (response.code()) {
-                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-                  case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                  case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -384,7 +388,7 @@ public class RawContextsClient {
                 try {
                   switch (response.code()) {
                     case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-                    case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                    case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
                 catch (JsonProcessingException ignored) {

@@ -20,8 +20,8 @@ import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.rules.requests.BulkSolveRulesRequest;
 import com.rulebricks.resources.rules.requests.SolveRulesRequest;
 import com.rulebricks.types.BulkRuleResponseItem;
-import com.rulebricks.types.Error;
 import com.rulebricks.types.ParallelSolveRequestValue;
+import com.rulebricks.types.RuleExecutionResult;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.Override;
@@ -50,7 +50,7 @@ public class AsyncRawRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> solve(String slug,
+  public CompletableFuture<RulebricksApiHttpResponse<RuleExecutionResult>> solve(String slug,
       String version, SolveRulesRequest request) {
     return solve(slug,version,request,null);
   }
@@ -58,7 +58,7 @@ public class AsyncRawRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> solve(String slug,
+  public CompletableFuture<RulebricksApiHttpResponse<RuleExecutionResult>> solve(String slug,
       String version, SolveRulesRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -87,21 +87,21 @@ public class AsyncRawRulesClient {
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
       }
-      CompletableFuture<RulebricksApiHttpResponse<Map<String, Object>>> future = new CompletableFuture<>();
+      CompletableFuture<RulebricksApiHttpResponse<RuleExecutionResult>> future = new CompletableFuture<>();
       client.newCall(okhttpRequest).enqueue(new Callback() {
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
           try (ResponseBody responseBody = response.body()) {
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             if (response.isSuccessful()) {
-              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response));
+              future.complete(new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExecutionResult.class), response));
               return;
             }
             try {
               switch (response.code()) {
-                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
-                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
                 case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
@@ -181,9 +181,9 @@ public class AsyncRawRulesClient {
               }
               try {
                 switch (response.code()) {
-                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
-                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                  case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
@@ -261,9 +261,9 @@ public class AsyncRawRulesClient {
                 }
                 try {
                   switch (response.code()) {
-                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
-                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response));
+                    case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
                     case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;

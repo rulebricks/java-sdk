@@ -30,6 +30,8 @@ import java.util.Optional;
     builder = ContextBatchResponse.Builder.class
 )
 public final class ContextBatchResponse {
+  private final Optional<List<Map<String, Object>>> cascadeRejections;
+
   private final Optional<String> context;
 
   private final Optional<String> traceId;
@@ -52,13 +54,14 @@ public final class ContextBatchResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private ContextBatchResponse(Optional<String> context, Optional<String> traceId,
-      Optional<Integer> accepted, Optional<Integer> rejected, Optional<Integer> executed,
-      Optional<String> executionDegraded, Optional<List<ContextCascadeSummary>> cascaded,
-      Optional<ContextBatchResponseTimings> timings,
+  private ContextBatchResponse(Optional<List<Map<String, Object>>> cascadeRejections,
+      Optional<String> context, Optional<String> traceId, Optional<Integer> accepted,
+      Optional<Integer> rejected, Optional<Integer> executed, Optional<String> executionDegraded,
+      Optional<List<ContextCascadeSummary>> cascaded, Optional<ContextBatchResponseTimings> timings,
       Optional<List<ContextBatchResponseRejectionsItem>> rejections,
       Optional<List<ContextBatchResponseResultsItem>> results,
       Map<String, Object> additionalProperties) {
+    this.cascadeRejections = cascadeRejections;
     this.context = context;
     this.traceId = traceId;
     this.accepted = accepted;
@@ -70,6 +73,14 @@ public final class ContextBatchResponse {
     this.rejections = rejections;
     this.results = results;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Dependent work rejected or left incomplete; retained even when include narrows the response. Retry after correcting the failure.
+   */
+  @JsonProperty("cascade_rejections")
+  public Optional<List<Map<String, Object>>> getCascadeRejections() {
+    return cascadeRejections;
   }
 
   /**
@@ -173,12 +184,12 @@ public final class ContextBatchResponse {
   }
 
   private boolean equalTo(ContextBatchResponse other) {
-    return context.equals(other.context) && traceId.equals(other.traceId) && accepted.equals(other.accepted) && rejected.equals(other.rejected) && executed.equals(other.executed) && executionDegraded.equals(other.executionDegraded) && cascaded.equals(other.cascaded) && timings.equals(other.timings) && rejections.equals(other.rejections) && results.equals(other.results);
+    return cascadeRejections.equals(other.cascadeRejections) && context.equals(other.context) && traceId.equals(other.traceId) && accepted.equals(other.accepted) && rejected.equals(other.rejected) && executed.equals(other.executed) && executionDegraded.equals(other.executionDegraded) && cascaded.equals(other.cascaded) && timings.equals(other.timings) && rejections.equals(other.rejections) && results.equals(other.results);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.traceId, this.accepted, this.rejected, this.executed, this.executionDegraded, this.cascaded, this.timings, this.rejections, this.results);
+    return Objects.hash(this.cascadeRejections, this.context, this.traceId, this.accepted, this.rejected, this.executed, this.executionDegraded, this.cascaded, this.timings, this.rejections, this.results);
   }
 
   @java.lang.Override
@@ -194,6 +205,8 @@ public final class ContextBatchResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<List<Map<String, Object>>> cascadeRejections = Optional.empty();
+
     private Optional<String> context = Optional.empty();
 
     private Optional<String> traceId = Optional.empty();
@@ -221,6 +234,7 @@ public final class ContextBatchResponse {
     }
 
     public Builder from(ContextBatchResponse other) {
+      cascadeRejections(other.getCascadeRejections());
       context(other.getContext());
       traceId(other.getTraceId());
       accepted(other.getAccepted());
@@ -231,6 +245,23 @@ public final class ContextBatchResponse {
       timings(other.getTimings());
       rejections(other.getRejections());
       results(other.getResults());
+      return this;
+    }
+
+    /**
+     * <p>Dependent work rejected or left incomplete; retained even when include narrows the response. Retry after correcting the failure.</p>
+     */
+    @JsonSetter(
+        value = "cascade_rejections",
+        nulls = Nulls.SKIP
+    )
+    public Builder cascadeRejections(Optional<List<Map<String, Object>>> cascadeRejections) {
+      this.cascadeRejections = cascadeRejections;
+      return this;
+    }
+
+    public Builder cascadeRejections(List<Map<String, Object>> cascadeRejections) {
+      this.cascadeRejections = Optional.ofNullable(cascadeRejections);
       return this;
     }
 
@@ -415,7 +446,7 @@ public final class ContextBatchResponse {
     }
 
     public ContextBatchResponse build() {
-      return new ContextBatchResponse(context, traceId, accepted, rejected, executed, executionDegraded, cascaded, timings, rejections, results, additionalProperties);
+      return new ContextBatchResponse(cascadeRejections, context, traceId, accepted, rejected, executed, executionDegraded, cascaded, timings, rejections, results, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

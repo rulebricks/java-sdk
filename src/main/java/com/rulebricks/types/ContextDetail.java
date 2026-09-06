@@ -48,6 +48,8 @@ public final class ContextDetail implements IContextBase {
 
   private final Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch;
 
+  private final Optional<List<String>> sourceObjects;
+
   private final Optional<ContextSchema> schema;
 
   private final Optional<String> identityFact;
@@ -71,9 +73,10 @@ public final class ContextDetail implements IContextBase {
   private ContextDetail(Optional<String> id, Optional<String> name, Optional<String> slug,
       Optional<String> description, Optional<Boolean> autoExecuteDecisions,
       Optional<Integer> ttlSeconds, Optional<Integer> historyLimit,
-      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<ContextSchema> schema,
-      Optional<String> identityFact, Optional<List<String>> userGroups,
-      Optional<ContextDetailFolder> folder, Optional<List<ContextDetailBoundRulesItem>> boundRules,
+      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<List<String>> sourceObjects,
+      Optional<ContextSchema> schema, Optional<String> identityFact,
+      Optional<List<String>> userGroups, Optional<ContextDetailFolder> folder,
+      Optional<List<ContextDetailBoundRulesItem>> boundRules,
       Optional<List<ContextDetailBoundFlowsItem>> boundFlows,
       Optional<ContextDetailRelationships> relationships, Optional<OffsetDateTime> createdAt,
       Optional<OffsetDateTime> updatedAt, Map<String, Object> additionalProperties) {
@@ -85,6 +88,7 @@ public final class ContextDetail implements IContextBase {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
+    this.sourceObjects = sourceObjects;
     this.schema = schema;
     this.identityFact = identityFact;
     this.userGroups = userGroups;
@@ -169,6 +173,15 @@ public final class ContextDetail implements IContextBase {
   @JsonProperty("on_schema_mismatch")
   public Optional<ContextBaseOnSchemaMismatch> getOnSchemaMismatch() {
     return onSchemaMismatch;
+  }
+
+  /**
+   * @return Workspace object IDs associated with this context schema.
+   */
+  @JsonProperty("source_objects")
+  @java.lang.Override
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
   }
 
   @JsonProperty("schema")
@@ -294,12 +307,12 @@ public final class ContextDetail implements IContextBase {
   }
 
   private boolean equalTo(ContextDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && boundRules.equals(other.boundRules) && boundFlows.equals(other.boundFlows) && relationships.equals(other.relationships) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && sourceObjects.equals(other.sourceObjects) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && boundRules.equals(other.boundRules) && boundFlows.equals(other.boundFlows) && relationships.equals(other.relationships) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.schema, this.identityFact, this.userGroups, this.folder, this.boundRules, this.boundFlows, this.relationships, this.createdAt, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.sourceObjects, this.schema, this.identityFact, this.userGroups, this.folder, this.boundRules, this.boundFlows, this.relationships, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -330,6 +343,8 @@ public final class ContextDetail implements IContextBase {
     private Optional<Integer> historyLimit = Optional.empty();
 
     private Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch = Optional.empty();
+
+    private Optional<List<String>> sourceObjects = Optional.empty();
 
     private Optional<ContextSchema> schema = Optional.empty();
 
@@ -364,6 +379,7 @@ public final class ContextDetail implements IContextBase {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
+      sourceObjects(other.getSourceObjects());
       schema(other.getSchema());
       identityFact(other.getIdentityFact());
       userGroups(other.getUserGroups());
@@ -522,6 +538,23 @@ public final class ContextDetail implements IContextBase {
 
     public Builder onSchemaMismatch(ContextBaseOnSchemaMismatch onSchemaMismatch) {
       this.onSchemaMismatch = Optional.ofNullable(onSchemaMismatch);
+      return this;
+    }
+
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
+      return this;
+    }
+
+    public Builder sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
       return this;
     }
 
@@ -712,7 +745,7 @@ public final class ContextDetail implements IContextBase {
     }
 
     public ContextDetail build() {
-      return new ContextDetail(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, schema, identityFact, userGroups, folder, boundRules, boundFlows, relationships, createdAt, updatedAt, additionalProperties);
+      return new ContextDetail(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, sourceObjects, schema, identityFact, userGroups, folder, boundRules, boundFlows, relationships, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

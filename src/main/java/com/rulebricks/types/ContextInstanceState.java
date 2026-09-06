@@ -131,7 +131,7 @@ public final class ContextInstanceState {
   }
 
   /**
-   * @return Per-asset execution metadata, including <code>execution_id</code> for flow runs, present after a bound rule or flow has run for this instance.
+   * @return Per-asset last-run metadata, including <code>execution_id</code> for flow runs. Returned only when include contains executions.
    */
   @JsonProperty("executions")
   public Optional<Map<String, Object>> getExecutions() {
@@ -370,7 +370,7 @@ public final class ContextInstanceState {
     }
 
     /**
-     * <p>Per-asset execution metadata, including <code>execution_id</code> for flow runs, present after a bound rule or flow has run for this instance.</p>
+     * <p>Per-asset last-run metadata, including <code>execution_id</code> for flow runs. Returned only when include contains executions.</p>
      */
     @JsonSetter(
         value = "executions",

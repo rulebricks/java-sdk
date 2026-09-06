@@ -23,19 +23,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = ContextSchemaField.Builder.class
 )
 public final class ContextSchemaField {
-  private final Optional<String> key;
+  private final String key;
 
-  private final Optional<String> name;
+  private final String name;
 
   private final Optional<String> description;
 
-  private final Optional<ContextSchemaFieldType> type;
+  private final ContextSchemaFieldType type;
 
   private final Optional<Object> defaultValue;
 
@@ -53,10 +54,9 @@ public final class ContextSchemaField {
 
   private final Map<String, Object> additionalProperties;
 
-  private ContextSchemaField(Optional<String> key, Optional<String> name,
-      Optional<String> description, Optional<ContextSchemaFieldType> type,
-      Optional<Object> defaultValue, Optional<Boolean> required, Optional<Boolean> outputOnly,
-      Optional<Boolean> trackHistory, Optional<Boolean> valuesOnly,
+  private ContextSchemaField(String key, String name, Optional<String> description,
+      ContextSchemaFieldType type, Optional<Object> defaultValue, Optional<Boolean> required,
+      Optional<Boolean> outputOnly, Optional<Boolean> trackHistory, Optional<Boolean> valuesOnly,
       Optional<String> valuesCollection, Optional<String> expression,
       Map<String, Object> additionalProperties) {
     this.key = key;
@@ -77,7 +77,7 @@ public final class ContextSchemaField {
    * @return The unique key for this field.
    */
   @JsonProperty("key")
-  public Optional<String> getKey() {
+  public String getKey() {
     return key;
   }
 
@@ -85,7 +85,7 @@ public final class ContextSchemaField {
    * @return Display name for this field.
    */
   @JsonProperty("name")
-  public Optional<String> getName() {
+  public String getName() {
     return name;
   }
 
@@ -101,7 +101,7 @@ public final class ContextSchemaField {
    * @return Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.
    */
   @JsonProperty("type")
-  public Optional<ContextSchemaFieldType> getType() {
+  public ContextSchemaFieldType getType() {
     return type;
   }
 
@@ -151,11 +151,8 @@ public final class ContextSchemaField {
   /**
    * @return Vocabulary collection identifier, when configured.
    */
-  @JsonIgnore
+  @JsonProperty("values_collection")
   public Optional<String> getValuesCollection() {
-    if (valuesCollection == null) {
-      return Optional.empty();
-    }
     return valuesCollection;
   }
 
@@ -174,15 +171,6 @@ public final class ContextSchemaField {
   @JsonProperty("default_value")
   private Optional<Object> _getDefaultValue() {
     return defaultValue;
-  }
-
-  @JsonInclude(
-      value = JsonInclude.Include.CUSTOM,
-      valueFilter = NullableNonemptyFilter.class
-  )
-  @JsonProperty("values_collection")
-  private Optional<String> _getValuesCollection() {
-    return valuesCollection;
   }
 
   @java.lang.Override
@@ -210,35 +198,124 @@ public final class ContextSchemaField {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static KeyStage builder() {
     return new Builder();
+  }
+
+  public interface KeyStage {
+    /**
+     * <p>The unique key for this field.</p>
+     */
+    NameStage key(@NotNull String key);
+
+    Builder from(ContextSchemaField other);
+  }
+
+  public interface NameStage {
+    /**
+     * <p>Display name for this field.</p>
+     */
+    TypeStage name(@NotNull String name);
+  }
+
+  public interface TypeStage {
+    /**
+     * <p>Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.</p>
+     */
+    _FinalStage type(@NotNull ContextSchemaFieldType type);
+  }
+
+  public interface _FinalStage {
+    ContextSchemaField build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>Description of this field.</p>
+     */
+    _FinalStage description(Optional<String> description);
+
+    _FinalStage description(String description);
+
+    /**
+     * <p>Default value for this field.</p>
+     */
+    _FinalStage defaultValue(Optional<Object> defaultValue);
+
+    _FinalStage defaultValue(Object defaultValue);
+
+    _FinalStage defaultValue(Nullable<Object> defaultValue);
+
+    /**
+     * <p>Whether this base fact is required for overall context completeness.</p>
+     */
+    _FinalStage required(Optional<Boolean> required);
+
+    _FinalStage required(Boolean required);
+
+    /**
+     * <p>Whether external submissions are rejected for this base fact. Rule writebacks may still set it.</p>
+     */
+    _FinalStage outputOnly(Optional<Boolean> outputOnly);
+
+    _FinalStage outputOnly(Boolean outputOnly);
+
+    /**
+     * <p>Whether changed values for this base fact are retained for history expressions and the history endpoint.</p>
+     */
+    _FinalStage trackHistory(Optional<Boolean> trackHistory);
+
+    _FinalStage trackHistory(Boolean trackHistory);
+
+    /**
+     * <p>Whether values must come from the configured vocabulary collection.</p>
+     */
+    _FinalStage valuesOnly(Optional<Boolean> valuesOnly);
+
+    _FinalStage valuesOnly(Boolean valuesOnly);
+
+    /**
+     * <p>Vocabulary collection identifier, when configured.</p>
+     */
+    _FinalStage valuesCollection(Optional<String> valuesCollection);
+
+    _FinalStage valuesCollection(String valuesCollection);
+
+    /**
+     * <p>Required for derived facts: the expression evaluated from base, history, and relation values.</p>
+     */
+    _FinalStage expression(Optional<String> expression);
+
+    _FinalStage expression(String expression);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> key = Optional.empty();
+  public static final class Builder implements KeyStage, NameStage, TypeStage, _FinalStage {
+    private String key;
 
-    private Optional<String> name = Optional.empty();
+    private String name;
 
-    private Optional<String> description = Optional.empty();
+    private ContextSchemaFieldType type;
 
-    private Optional<ContextSchemaFieldType> type = Optional.empty();
-
-    private Optional<Object> defaultValue = Optional.empty();
-
-    private Optional<Boolean> required = Optional.empty();
-
-    private Optional<Boolean> outputOnly = Optional.empty();
-
-    private Optional<Boolean> trackHistory = Optional.empty();
-
-    private Optional<Boolean> valuesOnly = Optional.empty();
+    private Optional<String> expression = Optional.empty();
 
     private Optional<String> valuesCollection = Optional.empty();
 
-    private Optional<String> expression = Optional.empty();
+    private Optional<Boolean> valuesOnly = Optional.empty();
+
+    private Optional<Boolean> trackHistory = Optional.empty();
+
+    private Optional<Boolean> outputOnly = Optional.empty();
+
+    private Optional<Boolean> required = Optional.empty();
+
+    private Optional<Object> defaultValue = Optional.empty();
+
+    private Optional<String> description = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -246,6 +323,7 @@ public final class ContextSchemaField {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(ContextSchemaField other) {
       key(other.getKey());
       name(other.getName());
@@ -263,90 +341,184 @@ public final class ContextSchemaField {
 
     /**
      * <p>The unique key for this field.</p>
+     * <p>The unique key for this field.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "key",
-        nulls = Nulls.SKIP
-    )
-    public Builder key(Optional<String> key) {
-      this.key = key;
-      return this;
-    }
-
-    public Builder key(String key) {
-      this.key = Optional.ofNullable(key);
+    @java.lang.Override
+    @JsonSetter("key")
+    public NameStage key(@NotNull String key) {
+      this.key = Objects.requireNonNull(key, "key must not be null");
       return this;
     }
 
     /**
      * <p>Display name for this field.</p>
+     * <p>Display name for this field.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "name",
-        nulls = Nulls.SKIP
-    )
-    public Builder name(Optional<String> name) {
-      this.name = name;
-      return this;
-    }
-
-    public Builder name(String name) {
-      this.name = Optional.ofNullable(name);
-      return this;
-    }
-
-    /**
-     * <p>Description of this field.</p>
-     */
-    @JsonSetter(
-        value = "description",
-        nulls = Nulls.SKIP
-    )
-    public Builder description(Optional<String> description) {
-      this.description = description;
-      return this;
-    }
-
-    public Builder description(String description) {
-      this.description = Optional.ofNullable(description);
+    @java.lang.Override
+    @JsonSetter("name")
+    public TypeStage name(@NotNull String name) {
+      this.name = Objects.requireNonNull(name, "name must not be null");
       return this;
     }
 
     /**
      * <p>Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.</p>
+     * <p>Data type of this field. <code>object</code> fields are parent nodes for dotted child facts; <code>function</code> fields are output-only.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "type",
-        nulls = Nulls.SKIP
-    )
-    public Builder type(Optional<ContextSchemaFieldType> type) {
-      this.type = type;
+    @java.lang.Override
+    @JsonSetter("type")
+    public _FinalStage type(@NotNull ContextSchemaFieldType type) {
+      this.type = Objects.requireNonNull(type, "type must not be null");
       return this;
     }
 
-    public Builder type(ContextSchemaFieldType type) {
-      this.type = Optional.ofNullable(type);
+    /**
+     * <p>Required for derived facts: the expression evaluated from base, history, and relation values.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage expression(String expression) {
+      this.expression = Optional.ofNullable(expression);
+      return this;
+    }
+
+    /**
+     * <p>Required for derived facts: the expression evaluated from base, history, and relation values.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "expression",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage expression(Optional<String> expression) {
+      this.expression = expression;
+      return this;
+    }
+
+    /**
+     * <p>Vocabulary collection identifier, when configured.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage valuesCollection(String valuesCollection) {
+      this.valuesCollection = Optional.ofNullable(valuesCollection);
+      return this;
+    }
+
+    /**
+     * <p>Vocabulary collection identifier, when configured.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "values_collection",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage valuesCollection(Optional<String> valuesCollection) {
+      this.valuesCollection = valuesCollection;
+      return this;
+    }
+
+    /**
+     * <p>Whether values must come from the configured vocabulary collection.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage valuesOnly(Boolean valuesOnly) {
+      this.valuesOnly = Optional.ofNullable(valuesOnly);
+      return this;
+    }
+
+    /**
+     * <p>Whether values must come from the configured vocabulary collection.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "values_only",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage valuesOnly(Optional<Boolean> valuesOnly) {
+      this.valuesOnly = valuesOnly;
+      return this;
+    }
+
+    /**
+     * <p>Whether changed values for this base fact are retained for history expressions and the history endpoint.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage trackHistory(Boolean trackHistory) {
+      this.trackHistory = Optional.ofNullable(trackHistory);
+      return this;
+    }
+
+    /**
+     * <p>Whether changed values for this base fact are retained for history expressions and the history endpoint.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "track_history",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage trackHistory(Optional<Boolean> trackHistory) {
+      this.trackHistory = trackHistory;
+      return this;
+    }
+
+    /**
+     * <p>Whether external submissions are rejected for this base fact. Rule writebacks may still set it.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage outputOnly(Boolean outputOnly) {
+      this.outputOnly = Optional.ofNullable(outputOnly);
+      return this;
+    }
+
+    /**
+     * <p>Whether external submissions are rejected for this base fact. Rule writebacks may still set it.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "output_only",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage outputOnly(Optional<Boolean> outputOnly) {
+      this.outputOnly = outputOnly;
+      return this;
+    }
+
+    /**
+     * <p>Whether this base fact is required for overall context completeness.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage required(Boolean required) {
+      this.required = Optional.ofNullable(required);
+      return this;
+    }
+
+    /**
+     * <p>Whether this base fact is required for overall context completeness.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "required",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage required(Optional<Boolean> required) {
+      this.required = required;
       return this;
     }
 
     /**
      * <p>Default value for this field.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "default_value",
-        nulls = Nulls.SKIP
-    )
-    public Builder defaultValue(Optional<Object> defaultValue) {
-      this.defaultValue = defaultValue;
-      return this;
-    }
-
-    public Builder defaultValue(Object defaultValue) {
-      this.defaultValue = Optional.ofNullable(defaultValue);
-      return this;
-    }
-
-    public Builder defaultValue(Nullable<Object> defaultValue) {
+    @java.lang.Override
+    public _FinalStage defaultValue(Nullable<Object> defaultValue) {
       if (defaultValue.isNull()) {
         this.defaultValue = null;
       }
@@ -360,129 +532,63 @@ public final class ContextSchemaField {
     }
 
     /**
-     * <p>Whether this base fact is required for overall context completeness.</p>
+     * <p>Default value for this field.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "required",
-        nulls = Nulls.SKIP
-    )
-    public Builder required(Optional<Boolean> required) {
-      this.required = required;
-      return this;
-    }
-
-    public Builder required(Boolean required) {
-      this.required = Optional.ofNullable(required);
+    @java.lang.Override
+    public _FinalStage defaultValue(Object defaultValue) {
+      this.defaultValue = Optional.ofNullable(defaultValue);
       return this;
     }
 
     /**
-     * <p>Whether external submissions are rejected for this base fact. Rule writebacks may still set it.</p>
+     * <p>Default value for this field.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "output_only",
+        value = "default_value",
         nulls = Nulls.SKIP
     )
-    public Builder outputOnly(Optional<Boolean> outputOnly) {
-      this.outputOnly = outputOnly;
-      return this;
-    }
-
-    public Builder outputOnly(Boolean outputOnly) {
-      this.outputOnly = Optional.ofNullable(outputOnly);
+    public _FinalStage defaultValue(Optional<Object> defaultValue) {
+      this.defaultValue = defaultValue;
       return this;
     }
 
     /**
-     * <p>Whether changed values for this base fact are retained for history expressions and the history endpoint.</p>
+     * <p>Description of this field.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "track_history",
-        nulls = Nulls.SKIP
-    )
-    public Builder trackHistory(Optional<Boolean> trackHistory) {
-      this.trackHistory = trackHistory;
-      return this;
-    }
-
-    public Builder trackHistory(Boolean trackHistory) {
-      this.trackHistory = Optional.ofNullable(trackHistory);
+    @java.lang.Override
+    public _FinalStage description(String description) {
+      this.description = Optional.ofNullable(description);
       return this;
     }
 
     /**
-     * <p>Whether values must come from the configured vocabulary collection.</p>
+     * <p>Description of this field.</p>
      */
+    @java.lang.Override
     @JsonSetter(
-        value = "values_only",
+        value = "description",
         nulls = Nulls.SKIP
     )
-    public Builder valuesOnly(Optional<Boolean> valuesOnly) {
-      this.valuesOnly = valuesOnly;
+    public _FinalStage description(Optional<String> description) {
+      this.description = description;
       return this;
     }
 
-    public Builder valuesOnly(Boolean valuesOnly) {
-      this.valuesOnly = Optional.ofNullable(valuesOnly);
-      return this;
-    }
-
-    /**
-     * <p>Vocabulary collection identifier, when configured.</p>
-     */
-    @JsonSetter(
-        value = "values_collection",
-        nulls = Nulls.SKIP
-    )
-    public Builder valuesCollection(Optional<String> valuesCollection) {
-      this.valuesCollection = valuesCollection;
-      return this;
-    }
-
-    public Builder valuesCollection(String valuesCollection) {
-      this.valuesCollection = Optional.ofNullable(valuesCollection);
-      return this;
-    }
-
-    public Builder valuesCollection(Nullable<String> valuesCollection) {
-      if (valuesCollection.isNull()) {
-        this.valuesCollection = null;
-      }
-      else if (valuesCollection.isEmpty()) {
-        this.valuesCollection = Optional.empty();
-      }
-      else {
-        this.valuesCollection = Optional.of(valuesCollection.get());
-      }
-      return this;
-    }
-
-    /**
-     * <p>Required for derived facts: the expression evaluated from base, history, and relation values.</p>
-     */
-    @JsonSetter(
-        value = "expression",
-        nulls = Nulls.SKIP
-    )
-    public Builder expression(Optional<String> expression) {
-      this.expression = expression;
-      return this;
-    }
-
-    public Builder expression(String expression) {
-      this.expression = Optional.ofNullable(expression);
-      return this;
-    }
-
+    @java.lang.Override
     public ContextSchemaField build() {
       return new ContextSchemaField(key, name, description, type, defaultValue, required, outputOnly, trackHistory, valuesOnly, valuesCollection, expression, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

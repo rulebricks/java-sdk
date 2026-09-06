@@ -6,17 +6,23 @@ package com.rulebricks.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
+import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,15 +38,50 @@ public final class CreateContextResponse {
 
   private final Optional<String> name;
 
+  private final Optional<String> description;
+
+  private final Optional<ContextSchema> schema;
+
+  private final Optional<String> identityFact;
+
+  private final Optional<Integer> ttlSeconds;
+
+  private final Optional<Integer> historyLimit;
+
+  private final Optional<CreateContextResponseOnSchemaMismatch> onSchemaMismatch;
+
+  private final Optional<Boolean> autoExecuteDecisions;
+
+  private final Optional<List<String>> sourceObjects;
+
+  private final Optional<List<String>> userGroups;
+
+  private final Optional<String> folder;
+
   private final Optional<OffsetDateTime> createdAt;
 
   private final Map<String, Object> additionalProperties;
 
   private CreateContextResponse(Optional<String> id, Optional<String> slug, Optional<String> name,
+      Optional<String> description, Optional<ContextSchema> schema, Optional<String> identityFact,
+      Optional<Integer> ttlSeconds, Optional<Integer> historyLimit,
+      Optional<CreateContextResponseOnSchemaMismatch> onSchemaMismatch,
+      Optional<Boolean> autoExecuteDecisions, Optional<List<String>> sourceObjects,
+      Optional<List<String>> userGroups, Optional<String> folder,
       Optional<OffsetDateTime> createdAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.slug = slug;
     this.name = name;
+    this.description = description;
+    this.schema = schema;
+    this.identityFact = identityFact;
+    this.ttlSeconds = ttlSeconds;
+    this.historyLimit = historyLimit;
+    this.onSchemaMismatch = onSchemaMismatch;
+    this.autoExecuteDecisions = autoExecuteDecisions;
+    this.sourceObjects = sourceObjects;
+    this.userGroups = userGroups;
+    this.folder = folder;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -70,11 +111,91 @@ public final class CreateContextResponse {
   }
 
   /**
+   * @return The description of the context.
+   */
+  @JsonIgnore
+  public Optional<String> getDescription() {
+    if (description == null) {
+      return Optional.empty();
+    }
+    return description;
+  }
+
+  @JsonProperty("schema")
+  public Optional<ContextSchema> getSchema() {
+    return schema;
+  }
+
+  /**
+   * @return The identity fact path.
+   */
+  @JsonProperty("identity_fact")
+  public Optional<String> getIdentityFact() {
+    return identityFact;
+  }
+
+  @JsonProperty("ttl_seconds")
+  public Optional<Integer> getTtlSeconds() {
+    return ttlSeconds;
+  }
+
+  @JsonProperty("history_limit")
+  public Optional<Integer> getHistoryLimit() {
+    return historyLimit;
+  }
+
+  @JsonProperty("on_schema_mismatch")
+  public Optional<CreateContextResponseOnSchemaMismatch> getOnSchemaMismatch() {
+    return onSchemaMismatch;
+  }
+
+  @JsonProperty("auto_execute_decisions")
+  public Optional<Boolean> getAutoExecuteDecisions() {
+    return autoExecuteDecisions;
+  }
+
+  @JsonProperty("source_objects")
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
+  }
+
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
+  }
+
+  @JsonIgnore
+  public Optional<String> getFolder() {
+    if (folder == null) {
+      return Optional.empty();
+    }
+    return folder;
+  }
+
+  /**
    * @return Creation timestamp.
    */
   @JsonProperty("created_at")
   public Optional<OffsetDateTime> getCreatedAt() {
     return createdAt;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("description")
+  private Optional<String> _getDescription() {
+    return description;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("folder")
+  private Optional<String> _getFolder() {
+    return folder;
   }
 
   @java.lang.Override
@@ -89,12 +210,12 @@ public final class CreateContextResponse {
   }
 
   private boolean equalTo(CreateContextResponse other) {
-    return id.equals(other.id) && slug.equals(other.slug) && name.equals(other.name) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && slug.equals(other.slug) && name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && sourceObjects.equals(other.sourceObjects) && userGroups.equals(other.userGroups) && folder.equals(other.folder) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.slug, this.name, this.createdAt);
+    return Objects.hash(this.id, this.slug, this.name, this.description, this.schema, this.identityFact, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.autoExecuteDecisions, this.sourceObjects, this.userGroups, this.folder, this.createdAt);
   }
 
   @java.lang.Override
@@ -116,6 +237,26 @@ public final class CreateContextResponse {
 
     private Optional<String> name = Optional.empty();
 
+    private Optional<String> description = Optional.empty();
+
+    private Optional<ContextSchema> schema = Optional.empty();
+
+    private Optional<String> identityFact = Optional.empty();
+
+    private Optional<Integer> ttlSeconds = Optional.empty();
+
+    private Optional<Integer> historyLimit = Optional.empty();
+
+    private Optional<CreateContextResponseOnSchemaMismatch> onSchemaMismatch = Optional.empty();
+
+    private Optional<Boolean> autoExecuteDecisions = Optional.empty();
+
+    private Optional<List<String>> sourceObjects = Optional.empty();
+
+    private Optional<List<String>> userGroups = Optional.empty();
+
+    private Optional<String> folder = Optional.empty();
+
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     @JsonAnySetter
@@ -128,6 +269,16 @@ public final class CreateContextResponse {
       id(other.getId());
       slug(other.getSlug());
       name(other.getName());
+      description(other.getDescription());
+      schema(other.getSchema());
+      identityFact(other.getIdentityFact());
+      ttlSeconds(other.getTtlSeconds());
+      historyLimit(other.getHistoryLimit());
+      onSchemaMismatch(other.getOnSchemaMismatch());
+      autoExecuteDecisions(other.getAutoExecuteDecisions());
+      sourceObjects(other.getSourceObjects());
+      userGroups(other.getUserGroups());
+      folder(other.getFolder());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -184,6 +335,179 @@ public final class CreateContextResponse {
     }
 
     /**
+     * <p>The description of the context.</p>
+     */
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
+      this.description = Optional.ofNullable(description);
+      return this;
+    }
+
+    public Builder description(Nullable<String> description) {
+      if (description.isNull()) {
+        this.description = null;
+      }
+      else if (description.isEmpty()) {
+        this.description = Optional.empty();
+      }
+      else {
+        this.description = Optional.of(description.get());
+      }
+      return this;
+    }
+
+    @JsonSetter(
+        value = "schema",
+        nulls = Nulls.SKIP
+    )
+    public Builder schema(Optional<ContextSchema> schema) {
+      this.schema = schema;
+      return this;
+    }
+
+    public Builder schema(ContextSchema schema) {
+      this.schema = Optional.ofNullable(schema);
+      return this;
+    }
+
+    /**
+     * <p>The identity fact path.</p>
+     */
+    @JsonSetter(
+        value = "identity_fact",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityFact(Optional<String> identityFact) {
+      this.identityFact = identityFact;
+      return this;
+    }
+
+    public Builder identityFact(String identityFact) {
+      this.identityFact = Optional.ofNullable(identityFact);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "ttl_seconds",
+        nulls = Nulls.SKIP
+    )
+    public Builder ttlSeconds(Optional<Integer> ttlSeconds) {
+      this.ttlSeconds = ttlSeconds;
+      return this;
+    }
+
+    public Builder ttlSeconds(Integer ttlSeconds) {
+      this.ttlSeconds = Optional.ofNullable(ttlSeconds);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "history_limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder historyLimit(Optional<Integer> historyLimit) {
+      this.historyLimit = historyLimit;
+      return this;
+    }
+
+    public Builder historyLimit(Integer historyLimit) {
+      this.historyLimit = Optional.ofNullable(historyLimit);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "on_schema_mismatch",
+        nulls = Nulls.SKIP
+    )
+    public Builder onSchemaMismatch(
+        Optional<CreateContextResponseOnSchemaMismatch> onSchemaMismatch) {
+      this.onSchemaMismatch = onSchemaMismatch;
+      return this;
+    }
+
+    public Builder onSchemaMismatch(CreateContextResponseOnSchemaMismatch onSchemaMismatch) {
+      this.onSchemaMismatch = Optional.ofNullable(onSchemaMismatch);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "auto_execute_decisions",
+        nulls = Nulls.SKIP
+    )
+    public Builder autoExecuteDecisions(Optional<Boolean> autoExecuteDecisions) {
+      this.autoExecuteDecisions = autoExecuteDecisions;
+      return this;
+    }
+
+    public Builder autoExecuteDecisions(Boolean autoExecuteDecisions) {
+      this.autoExecuteDecisions = Optional.ofNullable(autoExecuteDecisions);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
+      return this;
+    }
+
+    public Builder sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "folder",
+        nulls = Nulls.SKIP
+    )
+    public Builder folder(Optional<String> folder) {
+      this.folder = folder;
+      return this;
+    }
+
+    public Builder folder(String folder) {
+      this.folder = Optional.ofNullable(folder);
+      return this;
+    }
+
+    public Builder folder(Nullable<String> folder) {
+      if (folder.isNull()) {
+        this.folder = null;
+      }
+      else if (folder.isEmpty()) {
+        this.folder = Optional.empty();
+      }
+      else {
+        this.folder = Optional.of(folder.get());
+      }
+      return this;
+    }
+
+    /**
      * <p>Creation timestamp.</p>
      */
     @JsonSetter(
@@ -201,7 +525,7 @@ public final class CreateContextResponse {
     }
 
     public CreateContextResponse build() {
-      return new CreateContextResponse(id, slug, name, createdAt, additionalProperties);
+      return new CreateContextResponse(id, slug, name, description, schema, identityFact, ttlSeconds, historyLimit, onSchemaMismatch, autoExecuteDecisions, sourceObjects, userGroups, folder, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

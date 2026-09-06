@@ -20,15 +20,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = SolveContextRuleResponse.Builder.class
 )
 public final class SolveContextRuleResponse {
-  private final Optional<SolveContextRuleResponseStatus> status;
+  private final SolveContextRuleResponseStatus status;
 
-  private final Optional<String> context;
+  private final String context;
 
   private final Optional<String> rule;
 
@@ -40,8 +41,8 @@ public final class SolveContextRuleResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private SolveContextRuleResponse(Optional<SolveContextRuleResponseStatus> status,
-      Optional<String> context, Optional<String> rule, Optional<Map<String, Object>> result,
+  private SolveContextRuleResponse(SolveContextRuleResponseStatus status, String context,
+      Optional<String> rule, Optional<Map<String, Object>> result,
       Optional<List<String>> writtenToContext, Optional<List<CascadeResult>> cascaded,
       Map<String, Object> additionalProperties) {
     this.status = status;
@@ -57,7 +58,7 @@ public final class SolveContextRuleResponse {
    * @return Whether the rule executed successfully.
    */
   @JsonProperty("status")
-  public Optional<SolveContextRuleResponseStatus> getStatus() {
+  public SolveContextRuleResponseStatus getStatus() {
     return status;
   }
 
@@ -65,7 +66,7 @@ public final class SolveContextRuleResponse {
    * @return Combined identifier in format 'contextSlug:instanceId'.
    */
   @JsonProperty("context")
-  public Optional<String> getContext() {
+  public String getContext() {
     return context;
   }
 
@@ -126,25 +127,77 @@ public final class SolveContextRuleResponse {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static StatusStage builder() {
     return new Builder();
+  }
+
+  public interface StatusStage {
+    /**
+     * <p>Whether the rule executed successfully.</p>
+     */
+    ContextStage status(@NotNull SolveContextRuleResponseStatus status);
+
+    Builder from(SolveContextRuleResponse other);
+  }
+
+  public interface ContextStage {
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     */
+    _FinalStage context(@NotNull String context);
+  }
+
+  public interface _FinalStage {
+    SolveContextRuleResponse build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>The slug of the rule that was executed.</p>
+     */
+    _FinalStage rule(Optional<String> rule);
+
+    _FinalStage rule(String rule);
+
+    /**
+     * <p>The rule evaluation result (output values).</p>
+     */
+    _FinalStage result(Optional<Map<String, Object>> result);
+
+    _FinalStage result(Map<String, Object> result);
+
+    /**
+     * <p>List of field keys that were written back to the context instance.</p>
+     */
+    _FinalStage writtenToContext(Optional<List<String>> writtenToContext);
+
+    _FinalStage writtenToContext(List<String> writtenToContext);
+
+    /**
+     * <p>Results from any cascaded evaluations triggered by the rule outputs.</p>
+     */
+    _FinalStage cascaded(Optional<List<CascadeResult>> cascaded);
+
+    _FinalStage cascaded(List<CascadeResult> cascaded);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<SolveContextRuleResponseStatus> status = Optional.empty();
+  public static final class Builder implements StatusStage, ContextStage, _FinalStage {
+    private SolveContextRuleResponseStatus status;
 
-    private Optional<String> context = Optional.empty();
+    private String context;
 
-    private Optional<String> rule = Optional.empty();
-
-    private Optional<Map<String, Object>> result = Optional.empty();
+    private Optional<List<CascadeResult>> cascaded = Optional.empty();
 
     private Optional<List<String>> writtenToContext = Optional.empty();
 
-    private Optional<List<CascadeResult>> cascaded = Optional.empty();
+    private Optional<Map<String, Object>> result = Optional.empty();
+
+    private Optional<String> rule = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -152,6 +205,7 @@ public final class SolveContextRuleResponse {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(SolveContextRuleResponse other) {
       status(other.getStatus());
       context(other.getContext());
@@ -164,115 +218,132 @@ public final class SolveContextRuleResponse {
 
     /**
      * <p>Whether the rule executed successfully.</p>
+     * <p>Whether the rule executed successfully.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public Builder status(Optional<SolveContextRuleResponseStatus> status) {
-      this.status = status;
-      return this;
-    }
-
-    public Builder status(SolveContextRuleResponseStatus status) {
-      this.status = Optional.ofNullable(status);
+    @java.lang.Override
+    @JsonSetter("status")
+    public ContextStage status(@NotNull SolveContextRuleResponseStatus status) {
+      this.status = Objects.requireNonNull(status, "status must not be null");
       return this;
     }
 
     /**
      * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "context",
-        nulls = Nulls.SKIP
-    )
-    public Builder context(Optional<String> context) {
-      this.context = context;
-      return this;
-    }
-
-    public Builder context(String context) {
-      this.context = Optional.ofNullable(context);
+    @java.lang.Override
+    @JsonSetter("context")
+    public _FinalStage context(@NotNull String context) {
+      this.context = Objects.requireNonNull(context, "context must not be null");
       return this;
     }
 
     /**
-     * <p>The slug of the rule that was executed.</p>
+     * <p>Results from any cascaded evaluations triggered by the rule outputs.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "rule",
-        nulls = Nulls.SKIP
-    )
-    public Builder rule(Optional<String> rule) {
-      this.rule = rule;
-      return this;
-    }
-
-    public Builder rule(String rule) {
-      this.rule = Optional.ofNullable(rule);
-      return this;
-    }
-
-    /**
-     * <p>The rule evaluation result (output values).</p>
-     */
-    @JsonSetter(
-        value = "result",
-        nulls = Nulls.SKIP
-    )
-    public Builder result(Optional<Map<String, Object>> result) {
-      this.result = result;
-      return this;
-    }
-
-    public Builder result(Map<String, Object> result) {
-      this.result = Optional.ofNullable(result);
-      return this;
-    }
-
-    /**
-     * <p>List of field keys that were written back to the context instance.</p>
-     */
-    @JsonSetter(
-        value = "written_to_context",
-        nulls = Nulls.SKIP
-    )
-    public Builder writtenToContext(Optional<List<String>> writtenToContext) {
-      this.writtenToContext = writtenToContext;
-      return this;
-    }
-
-    public Builder writtenToContext(List<String> writtenToContext) {
-      this.writtenToContext = Optional.ofNullable(writtenToContext);
+    @java.lang.Override
+    public _FinalStage cascaded(List<CascadeResult> cascaded) {
+      this.cascaded = Optional.ofNullable(cascaded);
       return this;
     }
 
     /**
      * <p>Results from any cascaded evaluations triggered by the rule outputs.</p>
      */
+    @java.lang.Override
     @JsonSetter(
         value = "cascaded",
         nulls = Nulls.SKIP
     )
-    public Builder cascaded(Optional<List<CascadeResult>> cascaded) {
+    public _FinalStage cascaded(Optional<List<CascadeResult>> cascaded) {
       this.cascaded = cascaded;
       return this;
     }
 
-    public Builder cascaded(List<CascadeResult> cascaded) {
-      this.cascaded = Optional.ofNullable(cascaded);
+    /**
+     * <p>List of field keys that were written back to the context instance.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage writtenToContext(List<String> writtenToContext) {
+      this.writtenToContext = Optional.ofNullable(writtenToContext);
       return this;
     }
 
+    /**
+     * <p>List of field keys that were written back to the context instance.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "written_to_context",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage writtenToContext(Optional<List<String>> writtenToContext) {
+      this.writtenToContext = writtenToContext;
+      return this;
+    }
+
+    /**
+     * <p>The rule evaluation result (output values).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage result(Map<String, Object> result) {
+      this.result = Optional.ofNullable(result);
+      return this;
+    }
+
+    /**
+     * <p>The rule evaluation result (output values).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "result",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage result(Optional<Map<String, Object>> result) {
+      this.result = result;
+      return this;
+    }
+
+    /**
+     * <p>The slug of the rule that was executed.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage rule(String rule) {
+      this.rule = Optional.ofNullable(rule);
+      return this;
+    }
+
+    /**
+     * <p>The slug of the rule that was executed.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "rule",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rule(Optional<String> rule) {
+      this.rule = rule;
+      return this;
+    }
+
+    @java.lang.Override
     public SolveContextRuleResponse build() {
       return new SolveContextRuleResponse(status, context, rule, result, writtenToContext, cascaded, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

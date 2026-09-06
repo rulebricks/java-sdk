@@ -17,6 +17,7 @@ import java.lang.Object;
 import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.Map;
 import java.util.Objects;
 
 @JsonDeserialize(
@@ -90,13 +91,17 @@ public final class SubmitContextDataResponseCascadedItem {
     public SubmitContextDataResponseCascadedItem deserialize(JsonParser p,
         DeserializationContext context) throws IOException {
       Object value = p.readValueAs(Object.class);
-      try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, CascadeResult.class));
-      } catch(RuntimeException e) {
+      if (value instanceof Map<?, ?> && ((Map<?, ?>) value).containsKey("status")) {
+        try {
+          return of(ObjectMappers.JSON_MAPPER.convertValue(value, CascadeResult.class));
+        } catch(RuntimeException e) {
+        }
       }
-      try {
-        return of(ObjectMappers.JSON_MAPPER.convertValue(value, ContextCascadeSummary.class));
-      } catch(RuntimeException e) {
+      if (value instanceof Map<?, ?> && ((Map<?, ?>) value).containsKey("context") && ((Map<?, ?>) value).containsKey("relation")) {
+        try {
+          return of(ObjectMappers.JSON_MAPPER.convertValue(value, ContextCascadeSummary.class));
+        } catch(RuntimeException e) {
+        }
       }
       throw new JsonParseException(p, "Failed to deserialize");
     }

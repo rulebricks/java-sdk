@@ -6,12 +6,15 @@ package com.rulebricks.resources.assets.contexts.requests;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.resources.assets.contexts.types.UpdateContextRequestOnSchemaMismatch;
 import com.rulebricks.types.ContextSchema;
@@ -20,6 +23,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,6 +49,12 @@ public final class UpdateContextRequest {
 
   private final Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch;
 
+  private final Optional<List<String>> sourceObjects;
+
+  private final Optional<List<String>> userGroups;
+
+  private final Optional<String> folder;
+
   private final Map<String, Object> additionalProperties;
 
   private UpdateContextRequest(Optional<String> name, Optional<String> description,
@@ -52,7 +62,8 @@ public final class UpdateContextRequest {
       Optional<Boolean> autoExecuteDecisions, Optional<Integer> ttlSeconds,
       Optional<Integer> historyLimit,
       Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> sourceObjects, Optional<List<String>> userGroups,
+      Optional<String> folder, Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
     this.schema = schema;
@@ -61,6 +72,9 @@ public final class UpdateContextRequest {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
+    this.sourceObjects = sourceObjects;
+    this.userGroups = userGroups;
+    this.folder = folder;
     this.additionalProperties = additionalProperties;
   }
 
@@ -128,6 +142,42 @@ public final class UpdateContextRequest {
     return onSchemaMismatch;
   }
 
+  /**
+   * @return Workspace object IDs associated with this context schema.
+   */
+  @JsonProperty("source_objects")
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
+  }
+
+  /**
+   * @return User groups allowed to access the context.
+   */
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
+  }
+
+  /**
+   * @return Context folder ID.
+   */
+  @JsonIgnore
+  public Optional<String> getFolder() {
+    if (folder == null) {
+      return Optional.empty();
+    }
+    return folder;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("folder")
+  private Optional<String> _getFolder() {
+    return folder;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -140,12 +190,12 @@ public final class UpdateContextRequest {
   }
 
   private boolean equalTo(UpdateContextRequest other) {
-    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
+    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && sourceObjects.equals(other.sourceObjects) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
+    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.sourceObjects, this.userGroups, this.folder);
   }
 
   @java.lang.Override
@@ -177,6 +227,12 @@ public final class UpdateContextRequest {
 
     private Optional<UpdateContextRequestOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
+    private Optional<List<String>> sourceObjects = Optional.empty();
+
+    private Optional<List<String>> userGroups = Optional.empty();
+
+    private Optional<String> folder = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -192,6 +248,9 @@ public final class UpdateContextRequest {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
+      sourceObjects(other.getSourceObjects());
+      userGroups(other.getUserGroups());
+      folder(other.getFolder());
       return this;
     }
 
@@ -332,8 +391,72 @@ public final class UpdateContextRequest {
       return this;
     }
 
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
+      return this;
+    }
+
+    public Builder sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
+      return this;
+    }
+
+    /**
+     * <p>User groups allowed to access the context.</p>
+     */
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public Builder userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    public Builder userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
+    /**
+     * <p>Context folder ID.</p>
+     */
+    @JsonSetter(
+        value = "folder",
+        nulls = Nulls.SKIP
+    )
+    public Builder folder(Optional<String> folder) {
+      this.folder = folder;
+      return this;
+    }
+
+    public Builder folder(String folder) {
+      this.folder = Optional.ofNullable(folder);
+      return this;
+    }
+
+    public Builder folder(Nullable<String> folder) {
+      if (folder.isNull()) {
+        this.folder = null;
+      }
+      else if (folder.isEmpty()) {
+        this.folder = Optional.empty();
+      }
+      else {
+        this.folder = Optional.of(folder.get());
+      }
+      return this;
+    }
+
     public UpdateContextRequest build() {
-      return new UpdateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
+      return new UpdateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, sourceObjects, userGroups, folder, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

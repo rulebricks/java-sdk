@@ -25,18 +25,29 @@ import java.util.Optional;
     builder = GetContextsRequest.Builder.class
 )
 public final class GetContextsRequest {
+  private final Optional<String> include;
+
   private final Optional<String> includeRelations;
 
   private final Map<String, Object> additionalProperties;
 
-  private GetContextsRequest(Optional<String> includeRelations,
+  private GetContextsRequest(Optional<String> include, Optional<String> includeRelations,
       Map<String, Object> additionalProperties) {
+    this.include = include;
     this.includeRelations = includeRelations;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Comma-separated relationship names to include in the response under a 'relations' key (has_many relations return a list of related instance states; has_one/belongs_to return a single state or null). Use '*' for all relationships. Omitted by default - related instances are never fetched into the payload unrequested.
+   * @return Select comma-separated fields; <code>context</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (GET last-run metadata), <code>execution_results</code> (POST <code>cascaded[].result</code>). Unavailable fields are omitted; relations require <code>include_relations</code>. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.
+   */
+  @JsonProperty("include")
+  public Optional<String> getInclude() {
+    return include;
+  }
+
+  /**
+   * @return Include named relationships under <code>relations</code> (comma-separated; <code>*</code> for all). <code>has_many</code> returns a list; <code>has_one</code>/<code>belongs_to</code> return one state or null. Omitted by default.
    */
   @JsonProperty("include_relations")
   public Optional<String> getIncludeRelations() {
@@ -55,12 +66,12 @@ public final class GetContextsRequest {
   }
 
   private boolean equalTo(GetContextsRequest other) {
-    return includeRelations.equals(other.includeRelations);
+    return include.equals(other.include) && includeRelations.equals(other.includeRelations);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.includeRelations);
+    return Objects.hash(this.include, this.includeRelations);
   }
 
   @java.lang.Override
@@ -76,6 +87,8 @@ public final class GetContextsRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> include = Optional.empty();
+
     private Optional<String> includeRelations = Optional.empty();
 
     @JsonAnySetter
@@ -85,12 +98,30 @@ public final class GetContextsRequest {
     }
 
     public Builder from(GetContextsRequest other) {
+      include(other.getInclude());
       includeRelations(other.getIncludeRelations());
       return this;
     }
 
     /**
-     * <p>Comma-separated relationship names to include in the response under a 'relations' key (has_many relations return a list of related instance states; has_one/belongs_to return a single state or null). Use '*' for all relationships. Omitted by default - related instances are never fetched into the payload unrequested.</p>
+     * <p>Select comma-separated fields; <code>context</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (GET last-run metadata), <code>execution_results</code> (POST <code>cascaded[].result</code>). Unavailable fields are omitted; relations require <code>include_relations</code>. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.</p>
+     */
+    @JsonSetter(
+        value = "include",
+        nulls = Nulls.SKIP
+    )
+    public Builder include(Optional<String> include) {
+      this.include = include;
+      return this;
+    }
+
+    public Builder include(String include) {
+      this.include = Optional.ofNullable(include);
+      return this;
+    }
+
+    /**
+     * <p>Include named relationships under <code>relations</code> (comma-separated; <code>*</code> for all). <code>has_many</code> returns a list; <code>has_one</code>/<code>belongs_to</code> return one state or null. Omitted by default.</p>
      */
     @JsonSetter(
         value = "include_relations",
@@ -107,7 +138,7 @@ public final class GetContextsRequest {
     }
 
     public GetContextsRequest build() {
-      return new GetContextsRequest(includeRelations, additionalProperties);
+      return new GetContextsRequest(include, includeRelations, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

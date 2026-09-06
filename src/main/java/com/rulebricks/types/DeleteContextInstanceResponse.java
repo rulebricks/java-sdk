@@ -17,6 +17,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,17 +27,50 @@ import java.util.Optional;
     builder = DeleteContextInstanceResponse.Builder.class
 )
 public final class DeleteContextInstanceResponse {
+  private final Optional<String> executionDegraded;
+
+  private final Optional<List<ContextCascadeSummary>> cascaded;
+
+  private final Optional<DeleteContextInstanceResponseCascadeRecovery> cascadeRecovery;
+
   private final Optional<String> message;
 
   private final Optional<Integer> pendingEvaluationsCancelled;
 
   private final Map<String, Object> additionalProperties;
 
-  private DeleteContextInstanceResponse(Optional<String> message,
-      Optional<Integer> pendingEvaluationsCancelled, Map<String, Object> additionalProperties) {
+  private DeleteContextInstanceResponse(Optional<String> executionDegraded,
+      Optional<List<ContextCascadeSummary>> cascaded,
+      Optional<DeleteContextInstanceResponseCascadeRecovery> cascadeRecovery,
+      Optional<String> message, Optional<Integer> pendingEvaluationsCancelled,
+      Map<String, Object> additionalProperties) {
+    this.executionDegraded = executionDegraded;
+    this.cascaded = cascaded;
+    this.cascadeRecovery = cascadeRecovery;
     this.message = message;
     this.pendingEvaluationsCancelled = pendingEvaluationsCancelled;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return The source was deleted but dependent reevaluation did not complete.
+   */
+  @JsonProperty("execution_degraded")
+  public Optional<String> getExecutionDegraded() {
+    return executionDegraded;
+  }
+
+  @JsonProperty("cascaded")
+  public Optional<List<ContextCascadeSummary>> getCascaded() {
+    return cascaded;
+  }
+
+  /**
+   * @return Information needed to reconcile dependent work after physical source deletion. Retain this response; an identical delete cannot reconstruct removed facts.
+   */
+  @JsonProperty("cascade_recovery")
+  public Optional<DeleteContextInstanceResponseCascadeRecovery> getCascadeRecovery() {
+    return cascadeRecovery;
   }
 
   /**
@@ -67,12 +101,12 @@ public final class DeleteContextInstanceResponse {
   }
 
   private boolean equalTo(DeleteContextInstanceResponse other) {
-    return message.equals(other.message) && pendingEvaluationsCancelled.equals(other.pendingEvaluationsCancelled);
+    return executionDegraded.equals(other.executionDegraded) && cascaded.equals(other.cascaded) && cascadeRecovery.equals(other.cascadeRecovery) && message.equals(other.message) && pendingEvaluationsCancelled.equals(other.pendingEvaluationsCancelled);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.message, this.pendingEvaluationsCancelled);
+    return Objects.hash(this.executionDegraded, this.cascaded, this.cascadeRecovery, this.message, this.pendingEvaluationsCancelled);
   }
 
   @java.lang.Override
@@ -88,6 +122,12 @@ public final class DeleteContextInstanceResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> executionDegraded = Optional.empty();
+
+    private Optional<List<ContextCascadeSummary>> cascaded = Optional.empty();
+
+    private Optional<DeleteContextInstanceResponseCascadeRecovery> cascadeRecovery = Optional.empty();
+
     private Optional<String> message = Optional.empty();
 
     private Optional<Integer> pendingEvaluationsCancelled = Optional.empty();
@@ -99,8 +139,60 @@ public final class DeleteContextInstanceResponse {
     }
 
     public Builder from(DeleteContextInstanceResponse other) {
+      executionDegraded(other.getExecutionDegraded());
+      cascaded(other.getCascaded());
+      cascadeRecovery(other.getCascadeRecovery());
       message(other.getMessage());
       pendingEvaluationsCancelled(other.getPendingEvaluationsCancelled());
+      return this;
+    }
+
+    /**
+     * <p>The source was deleted but dependent reevaluation did not complete.</p>
+     */
+    @JsonSetter(
+        value = "execution_degraded",
+        nulls = Nulls.SKIP
+    )
+    public Builder executionDegraded(Optional<String> executionDegraded) {
+      this.executionDegraded = executionDegraded;
+      return this;
+    }
+
+    public Builder executionDegraded(String executionDegraded) {
+      this.executionDegraded = Optional.ofNullable(executionDegraded);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "cascaded",
+        nulls = Nulls.SKIP
+    )
+    public Builder cascaded(Optional<List<ContextCascadeSummary>> cascaded) {
+      this.cascaded = cascaded;
+      return this;
+    }
+
+    public Builder cascaded(List<ContextCascadeSummary> cascaded) {
+      this.cascaded = Optional.ofNullable(cascaded);
+      return this;
+    }
+
+    /**
+     * <p>Information needed to reconcile dependent work after physical source deletion. Retain this response; an identical delete cannot reconstruct removed facts.</p>
+     */
+    @JsonSetter(
+        value = "cascade_recovery",
+        nulls = Nulls.SKIP
+    )
+    public Builder cascadeRecovery(
+        Optional<DeleteContextInstanceResponseCascadeRecovery> cascadeRecovery) {
+      this.cascadeRecovery = cascadeRecovery;
+      return this;
+    }
+
+    public Builder cascadeRecovery(DeleteContextInstanceResponseCascadeRecovery cascadeRecovery) {
+      this.cascadeRecovery = Optional.ofNullable(cascadeRecovery);
       return this;
     }
 
@@ -139,7 +231,7 @@ public final class DeleteContextInstanceResponse {
     }
 
     public DeleteContextInstanceResponse build() {
-      return new DeleteContextInstanceResponse(message, pendingEvaluationsCancelled, additionalProperties);
+      return new DeleteContextInstanceResponse(executionDegraded, cascaded, cascadeRecovery, message, pendingEvaluationsCancelled, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

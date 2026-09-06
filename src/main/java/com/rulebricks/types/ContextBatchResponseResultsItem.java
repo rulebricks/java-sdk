@@ -131,7 +131,7 @@ public final class ContextBatchResponseResultsItem {
   }
 
   /**
-   * @return Per-asset record of the last run: input hash, status, timestamp, trace IDs, <code>execution_id</code> for flows, error.
+   * @return Per-asset last-run metadata: input hash, status, timestamp, trace IDs, execution_id for flows, error. Returned only when include contains executions.
    */
   @JsonProperty("executions")
   public Optional<Map<String, Object>> getExecutions() {
@@ -147,7 +147,7 @@ public final class ContextBatchResponseResultsItem {
   }
 
   /**
-   * @return True when at least one bound asset was considered for this instance - including assets that settled as skipped_already_run. False (with a reason) when nothing was attempted.
+   * @return True when at least one bound asset was attempted for this instance. False, with a reason, when all assets were skipped or nothing was ready to run.
    */
   @JsonProperty("triggered")
   public Optional<Boolean> getTriggered() {
@@ -155,7 +155,7 @@ public final class ContextBatchResponseResultsItem {
   }
 
   /**
-   * @return Present when triggered is false (executed is empty): not_ready = required facts still missing; inputs_unchanged = the instance is complete but no bound asset had satisfiable inputs to attempt; no_bound_assets = the context has no published bound rules or flows; auto_execute_disabled = the context's auto_execute_decisions is off; execution_unavailable = the execution backend was unreachable. Note: assets whose inputs are unchanged since their last successful run appear as executed entries with status skipped_already_run and leave triggered true.
+   * @return When triggered=false: not_ready (missing facts), inputs_unchanged (no ready asset needs rerunning), no_bound_assets (no published bindings), auto_execute_disabled (automatic execution off), execution_unavailable (backend unavailable), or execution_in_progress (ancestor flow running). Skipped entries may appear in executed.
    */
   @JsonProperty("reason")
   public Optional<ContextBatchResponseResultsItemReason> getReason() {
@@ -382,7 +382,7 @@ public final class ContextBatchResponseResultsItem {
     }
 
     /**
-     * <p>Per-asset record of the last run: input hash, status, timestamp, trace IDs, <code>execution_id</code> for flows, error.</p>
+     * <p>Per-asset last-run metadata: input hash, status, timestamp, trace IDs, execution_id for flows, error. Returned only when include contains executions.</p>
      */
     @JsonSetter(
         value = "executions",
@@ -416,7 +416,7 @@ public final class ContextBatchResponseResultsItem {
     }
 
     /**
-     * <p>True when at least one bound asset was considered for this instance - including assets that settled as skipped_already_run. False (with a reason) when nothing was attempted.</p>
+     * <p>True when at least one bound asset was attempted for this instance. False, with a reason, when all assets were skipped or nothing was ready to run.</p>
      */
     @JsonSetter(
         value = "triggered",
@@ -433,7 +433,7 @@ public final class ContextBatchResponseResultsItem {
     }
 
     /**
-     * <p>Present when triggered is false (executed is empty): not_ready = required facts still missing; inputs_unchanged = the instance is complete but no bound asset had satisfiable inputs to attempt; no_bound_assets = the context has no published bound rules or flows; auto_execute_disabled = the context's auto_execute_decisions is off; execution_unavailable = the execution backend was unreachable. Note: assets whose inputs are unchanged since their last successful run appear as executed entries with status skipped_already_run and leave triggered true.</p>
+     * <p>When triggered=false: not_ready (missing facts), inputs_unchanged (no ready asset needs rerunning), no_bound_assets (no published bindings), auto_execute_disabled (automatic execution off), execution_unavailable (backend unavailable), or execution_in_progress (ancestor flow running). Skipped entries may appear in executed.</p>
      */
     @JsonSetter(
         value = "reason",

@@ -21,15 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = PendingContextEvaluationResponse.Builder.class
 )
 public final class PendingContextEvaluationResponse {
-  private final Optional<PendingContextEvaluationResponseStatus> status;
+  private final PendingContextEvaluationResponseStatus status;
 
-  private final Optional<String> context;
+  private final String context;
 
   private final Optional<String> rule;
 
@@ -45,11 +46,10 @@ public final class PendingContextEvaluationResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private PendingContextEvaluationResponse(Optional<PendingContextEvaluationResponseStatus> status,
-      Optional<String> context, Optional<String> rule, Optional<String> flow,
-      Optional<List<String>> have, Optional<List<String>> need,
-      Optional<List<ContextWaitingOn>> waitingOn, Optional<OffsetDateTime> expiresAt,
-      Map<String, Object> additionalProperties) {
+  private PendingContextEvaluationResponse(PendingContextEvaluationResponseStatus status,
+      String context, Optional<String> rule, Optional<String> flow, Optional<List<String>> have,
+      Optional<List<String>> need, Optional<List<ContextWaitingOn>> waitingOn,
+      Optional<OffsetDateTime> expiresAt, Map<String, Object> additionalProperties) {
     this.status = status;
     this.context = context;
     this.rule = rule;
@@ -65,7 +65,7 @@ public final class PendingContextEvaluationResponse {
    * @return Always 'pending'.
    */
   @JsonProperty("status")
-  public Optional<PendingContextEvaluationResponseStatus> getStatus() {
+  public PendingContextEvaluationResponseStatus getStatus() {
     return status;
   }
 
@@ -73,7 +73,7 @@ public final class PendingContextEvaluationResponse {
    * @return Combined identifier in format 'contextSlug:instanceId'.
    */
   @JsonProperty("context")
-  public Optional<String> getContext() {
+  public String getContext() {
     return context;
   }
 
@@ -150,29 +150,95 @@ public final class PendingContextEvaluationResponse {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static StatusStage builder() {
     return new Builder();
+  }
+
+  public interface StatusStage {
+    /**
+     * <p>Always 'pending'.</p>
+     */
+    ContextStage status(@NotNull PendingContextEvaluationResponseStatus status);
+
+    Builder from(PendingContextEvaluationResponse other);
+  }
+
+  public interface ContextStage {
+    /**
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     */
+    _FinalStage context(@NotNull String context);
+  }
+
+  public interface _FinalStage {
+    PendingContextEvaluationResponse build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>The slug of the rule awaiting execution (rule solves only).</p>
+     */
+    _FinalStage rule(Optional<String> rule);
+
+    _FinalStage rule(String rule);
+
+    /**
+     * <p>The slug of the flow awaiting execution (flow executions only).</p>
+     */
+    _FinalStage flow(Optional<String> flow);
+
+    _FinalStage flow(String flow);
+
+    /**
+     * <p>Fact keys currently present on the instance.</p>
+     */
+    _FinalStage have(Optional<List<String>> have);
+
+    _FinalStage have(List<String> have);
+
+    /**
+     * <p>Fact keys still required before execution.</p>
+     */
+    _FinalStage need(Optional<List<String>> need);
+
+    _FinalStage need(List<String> need);
+
+    /**
+     * <p>What the evaluation is waiting for: entries carry either a context/instance/fields triple for missing facts, or a relation name for pending related data.</p>
+     */
+    _FinalStage waitingOn(Optional<List<ContextWaitingOn>> waitingOn);
+
+    _FinalStage waitingOn(List<ContextWaitingOn> waitingOn);
+
+    /**
+     * <p>When the pending registration expires (the context's TTL from now).</p>
+     */
+    _FinalStage expiresAt(Optional<OffsetDateTime> expiresAt);
+
+    _FinalStage expiresAt(OffsetDateTime expiresAt);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<PendingContextEvaluationResponseStatus> status = Optional.empty();
+  public static final class Builder implements StatusStage, ContextStage, _FinalStage {
+    private PendingContextEvaluationResponseStatus status;
 
-    private Optional<String> context = Optional.empty();
+    private String context;
 
-    private Optional<String> rule = Optional.empty();
-
-    private Optional<String> flow = Optional.empty();
-
-    private Optional<List<String>> have = Optional.empty();
-
-    private Optional<List<String>> need = Optional.empty();
+    private Optional<OffsetDateTime> expiresAt = Optional.empty();
 
     private Optional<List<ContextWaitingOn>> waitingOn = Optional.empty();
 
-    private Optional<OffsetDateTime> expiresAt = Optional.empty();
+    private Optional<List<String>> need = Optional.empty();
+
+    private Optional<List<String>> have = Optional.empty();
+
+    private Optional<String> flow = Optional.empty();
+
+    private Optional<String> rule = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -180,6 +246,7 @@ public final class PendingContextEvaluationResponse {
     private Builder() {
     }
 
+    @java.lang.Override
     public Builder from(PendingContextEvaluationResponse other) {
       status(other.getStatus());
       context(other.getContext());
@@ -194,149 +261,178 @@ public final class PendingContextEvaluationResponse {
 
     /**
      * <p>Always 'pending'.</p>
+     * <p>Always 'pending'.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public Builder status(Optional<PendingContextEvaluationResponseStatus> status) {
-      this.status = status;
-      return this;
-    }
-
-    public Builder status(PendingContextEvaluationResponseStatus status) {
-      this.status = Optional.ofNullable(status);
+    @java.lang.Override
+    @JsonSetter("status")
+    public ContextStage status(@NotNull PendingContextEvaluationResponseStatus status) {
+      this.status = Objects.requireNonNull(status, "status must not be null");
       return this;
     }
 
     /**
      * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * <p>Combined identifier in format 'contextSlug:instanceId'.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "context",
-        nulls = Nulls.SKIP
-    )
-    public Builder context(Optional<String> context) {
-      this.context = context;
-      return this;
-    }
-
-    public Builder context(String context) {
-      this.context = Optional.ofNullable(context);
+    @java.lang.Override
+    @JsonSetter("context")
+    public _FinalStage context(@NotNull String context) {
+      this.context = Objects.requireNonNull(context, "context must not be null");
       return this;
     }
 
     /**
-     * <p>The slug of the rule awaiting execution (rule solves only).</p>
+     * <p>When the pending registration expires (the context's TTL from now).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "rule",
-        nulls = Nulls.SKIP
-    )
-    public Builder rule(Optional<String> rule) {
-      this.rule = rule;
-      return this;
-    }
-
-    public Builder rule(String rule) {
-      this.rule = Optional.ofNullable(rule);
-      return this;
-    }
-
-    /**
-     * <p>The slug of the flow awaiting execution (flow executions only).</p>
-     */
-    @JsonSetter(
-        value = "flow",
-        nulls = Nulls.SKIP
-    )
-    public Builder flow(Optional<String> flow) {
-      this.flow = flow;
-      return this;
-    }
-
-    public Builder flow(String flow) {
-      this.flow = Optional.ofNullable(flow);
-      return this;
-    }
-
-    /**
-     * <p>Fact keys currently present on the instance.</p>
-     */
-    @JsonSetter(
-        value = "have",
-        nulls = Nulls.SKIP
-    )
-    public Builder have(Optional<List<String>> have) {
-      this.have = have;
-      return this;
-    }
-
-    public Builder have(List<String> have) {
-      this.have = Optional.ofNullable(have);
-      return this;
-    }
-
-    /**
-     * <p>Fact keys still required before execution.</p>
-     */
-    @JsonSetter(
-        value = "need",
-        nulls = Nulls.SKIP
-    )
-    public Builder need(Optional<List<String>> need) {
-      this.need = need;
-      return this;
-    }
-
-    public Builder need(List<String> need) {
-      this.need = Optional.ofNullable(need);
-      return this;
-    }
-
-    /**
-     * <p>What the evaluation is waiting for: entries carry either a context/instance/fields triple for missing facts, or a relation name for pending related data.</p>
-     */
-    @JsonSetter(
-        value = "waiting_on",
-        nulls = Nulls.SKIP
-    )
-    public Builder waitingOn(Optional<List<ContextWaitingOn>> waitingOn) {
-      this.waitingOn = waitingOn;
-      return this;
-    }
-
-    public Builder waitingOn(List<ContextWaitingOn> waitingOn) {
-      this.waitingOn = Optional.ofNullable(waitingOn);
+    @java.lang.Override
+    public _FinalStage expiresAt(OffsetDateTime expiresAt) {
+      this.expiresAt = Optional.ofNullable(expiresAt);
       return this;
     }
 
     /**
      * <p>When the pending registration expires (the context's TTL from now).</p>
      */
+    @java.lang.Override
     @JsonSetter(
         value = "expires_at",
         nulls = Nulls.SKIP
     )
-    public Builder expiresAt(Optional<OffsetDateTime> expiresAt) {
+    public _FinalStage expiresAt(Optional<OffsetDateTime> expiresAt) {
       this.expiresAt = expiresAt;
       return this;
     }
 
-    public Builder expiresAt(OffsetDateTime expiresAt) {
-      this.expiresAt = Optional.ofNullable(expiresAt);
+    /**
+     * <p>What the evaluation is waiting for: entries carry either a context/instance/fields triple for missing facts, or a relation name for pending related data.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage waitingOn(List<ContextWaitingOn> waitingOn) {
+      this.waitingOn = Optional.ofNullable(waitingOn);
       return this;
     }
 
+    /**
+     * <p>What the evaluation is waiting for: entries carry either a context/instance/fields triple for missing facts, or a relation name for pending related data.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "waiting_on",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage waitingOn(Optional<List<ContextWaitingOn>> waitingOn) {
+      this.waitingOn = waitingOn;
+      return this;
+    }
+
+    /**
+     * <p>Fact keys still required before execution.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage need(List<String> need) {
+      this.need = Optional.ofNullable(need);
+      return this;
+    }
+
+    /**
+     * <p>Fact keys still required before execution.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "need",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage need(Optional<List<String>> need) {
+      this.need = need;
+      return this;
+    }
+
+    /**
+     * <p>Fact keys currently present on the instance.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage have(List<String> have) {
+      this.have = Optional.ofNullable(have);
+      return this;
+    }
+
+    /**
+     * <p>Fact keys currently present on the instance.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "have",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage have(Optional<List<String>> have) {
+      this.have = have;
+      return this;
+    }
+
+    /**
+     * <p>The slug of the flow awaiting execution (flow executions only).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage flow(String flow) {
+      this.flow = Optional.ofNullable(flow);
+      return this;
+    }
+
+    /**
+     * <p>The slug of the flow awaiting execution (flow executions only).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "flow",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage flow(Optional<String> flow) {
+      this.flow = flow;
+      return this;
+    }
+
+    /**
+     * <p>The slug of the rule awaiting execution (rule solves only).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage rule(String rule) {
+      this.rule = Optional.ofNullable(rule);
+      return this;
+    }
+
+    /**
+     * <p>The slug of the rule awaiting execution (rule solves only).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "rule",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage rule(Optional<String> rule) {
+      this.rule = rule;
+      return this;
+    }
+
+    @java.lang.Override
     public PendingContextEvaluationResponse build() {
       return new PendingContextEvaluationResponse(status, context, rule, flow, have, need, waitingOn, expiresAt, additionalProperties);
     }
 
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

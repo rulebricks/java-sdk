@@ -29,6 +29,14 @@ import java.util.Optional;
 public final class ListFlowsRequest {
   private final Optional<List<String>> labels;
 
+  private final Optional<String> id;
+
+  private final Optional<String> slug;
+
+  private final Optional<String> search;
+
+  private final Optional<String> version;
+
   private final Optional<String> folder;
 
   private final Optional<String> userGroup;
@@ -37,9 +45,15 @@ public final class ListFlowsRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListFlowsRequest(Optional<List<String>> labels, Optional<String> folder,
-      Optional<String> userGroup, Optional<String> name, Map<String, Object> additionalProperties) {
+  private ListFlowsRequest(Optional<List<String>> labels, Optional<String> id,
+      Optional<String> slug, Optional<String> search, Optional<String> version,
+      Optional<String> folder, Optional<String> userGroup, Optional<String> name,
+      Map<String, Object> additionalProperties) {
     this.labels = labels;
+    this.id = id;
+    this.slug = slug;
+    this.search = search;
+    this.version = version;
     this.folder = folder;
     this.userGroup = userGroup;
     this.name = name;
@@ -52,6 +66,38 @@ public final class ListFlowsRequest {
   @JsonProperty("labels")
   public Optional<List<String>> getLabels() {
     return labels;
+  }
+
+  /**
+   * @return Filter by the exact rule or flow ID.
+   */
+  @JsonProperty("id")
+  public Optional<String> getId() {
+    return id;
+  }
+
+  /**
+   * @return Filter by the exact rule or flow slug (case-sensitive).
+   */
+  @JsonProperty("slug")
+  public Optional<String> getSlug() {
+    return slug;
+  }
+
+  /**
+   * @return Match an exact ID or slug, or a case-insensitive substring of the name. Combined with all other filters.
+   */
+  @JsonProperty("search")
+  public Optional<String> getSearch() {
+    return search;
+  }
+
+  /**
+   * @return Select a published version number (e.g. 3), release environment slug (e.g. production), or latest. Requires exactly one asset after all filters and permission checks. Multiple matches or an invalid version return 400; no match, an unpublished asset, or a missing version/release returns 404. The response is still a one-item array.
+   */
+  @JsonProperty("version")
+  public Optional<String> getVersion() {
+    return version;
   }
 
   /**
@@ -90,12 +136,12 @@ public final class ListFlowsRequest {
   }
 
   private boolean equalTo(ListFlowsRequest other) {
-    return labels.equals(other.labels) && folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
+    return labels.equals(other.labels) && id.equals(other.id) && slug.equals(other.slug) && search.equals(other.search) && version.equals(other.version) && folder.equals(other.folder) && userGroup.equals(other.userGroup) && name.equals(other.name);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.labels, this.folder, this.userGroup, this.name);
+    return Objects.hash(this.labels, this.id, this.slug, this.search, this.version, this.folder, this.userGroup, this.name);
   }
 
   @java.lang.Override
@@ -113,6 +159,14 @@ public final class ListFlowsRequest {
   public static final class Builder {
     private Optional<List<String>> labels = Optional.empty();
 
+    private Optional<String> id = Optional.empty();
+
+    private Optional<String> slug = Optional.empty();
+
+    private Optional<String> search = Optional.empty();
+
+    private Optional<String> version = Optional.empty();
+
     private Optional<String> folder = Optional.empty();
 
     private Optional<String> userGroup = Optional.empty();
@@ -127,6 +181,10 @@ public final class ListFlowsRequest {
 
     public Builder from(ListFlowsRequest other) {
       labels(other.getLabels());
+      id(other.getId());
+      slug(other.getSlug());
+      search(other.getSearch());
+      version(other.getVersion());
       folder(other.getFolder());
       userGroup(other.getUserGroup());
       name(other.getName());
@@ -152,6 +210,74 @@ public final class ListFlowsRequest {
 
     public Builder labels(String labels) {
       this.labels = Optional.of(Collections.singletonList(labels));
+      return this;
+    }
+
+    /**
+     * <p>Filter by the exact rule or flow ID.</p>
+     */
+    @JsonSetter(
+        value = "id",
+        nulls = Nulls.SKIP
+    )
+    public Builder id(Optional<String> id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder id(String id) {
+      this.id = Optional.ofNullable(id);
+      return this;
+    }
+
+    /**
+     * <p>Filter by the exact rule or flow slug (case-sensitive).</p>
+     */
+    @JsonSetter(
+        value = "slug",
+        nulls = Nulls.SKIP
+    )
+    public Builder slug(Optional<String> slug) {
+      this.slug = slug;
+      return this;
+    }
+
+    public Builder slug(String slug) {
+      this.slug = Optional.ofNullable(slug);
+      return this;
+    }
+
+    /**
+     * <p>Match an exact ID or slug, or a case-insensitive substring of the name. Combined with all other filters.</p>
+     */
+    @JsonSetter(
+        value = "search",
+        nulls = Nulls.SKIP
+    )
+    public Builder search(Optional<String> search) {
+      this.search = search;
+      return this;
+    }
+
+    public Builder search(String search) {
+      this.search = Optional.ofNullable(search);
+      return this;
+    }
+
+    /**
+     * <p>Select a published version number (e.g. 3), release environment slug (e.g. production), or latest. Requires exactly one asset after all filters and permission checks. Multiple matches or an invalid version return 400; no match, an unpublished asset, or a missing version/release returns 404. The response is still a one-item array.</p>
+     */
+    @JsonSetter(
+        value = "version",
+        nulls = Nulls.SKIP
+    )
+    public Builder version(Optional<String> version) {
+      this.version = version;
+      return this;
+    }
+
+    public Builder version(String version) {
+      this.version = Optional.ofNullable(version);
       return this;
     }
 
@@ -207,7 +333,7 @@ public final class ListFlowsRequest {
     }
 
     public ListFlowsRequest build() {
-      return new ListFlowsRequest(labels, folder, userGroup, name, additionalProperties);
+      return new ListFlowsRequest(labels, id, slug, search, version, folder, userGroup, name, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

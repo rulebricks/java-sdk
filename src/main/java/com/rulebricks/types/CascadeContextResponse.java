@@ -28,11 +28,12 @@ import java.util.Optional;
 public final class CascadeContextResponse {
   private final Optional<String> context;
 
-  private final Optional<List<CascadeResult>> cascaded;
+  private final Optional<List<CascadeContextResponseCascadedItem>> cascaded;
 
   private final Map<String, Object> additionalProperties;
 
-  private CascadeContextResponse(Optional<String> context, Optional<List<CascadeResult>> cascaded,
+  private CascadeContextResponse(Optional<String> context,
+      Optional<List<CascadeContextResponseCascadedItem>> cascaded,
       Map<String, Object> additionalProperties) {
     this.context = context;
     this.cascaded = cascaded;
@@ -51,7 +52,7 @@ public final class CascadeContextResponse {
    * @return Results from all cascaded evaluations.
    */
   @JsonProperty("cascaded")
-  public Optional<List<CascadeResult>> getCascaded() {
+  public Optional<List<CascadeContextResponseCascadedItem>> getCascaded() {
     return cascaded;
   }
 
@@ -90,7 +91,7 @@ public final class CascadeContextResponse {
   public static final class Builder {
     private Optional<String> context = Optional.empty();
 
-    private Optional<List<CascadeResult>> cascaded = Optional.empty();
+    private Optional<List<CascadeContextResponseCascadedItem>> cascaded = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -128,12 +129,12 @@ public final class CascadeContextResponse {
         value = "cascaded",
         nulls = Nulls.SKIP
     )
-    public Builder cascaded(Optional<List<CascadeResult>> cascaded) {
+    public Builder cascaded(Optional<List<CascadeContextResponseCascadedItem>> cascaded) {
       this.cascaded = cascaded;
       return this;
     }
 
-    public Builder cascaded(List<CascadeResult> cascaded) {
+    public Builder cascaded(List<CascadeContextResponseCascadedItem> cascaded) {
       this.cascaded = Optional.ofNullable(cascaded);
       return this;
     }

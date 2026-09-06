@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +27,14 @@ import java.util.Optional;
     builder = ContextSchema.Builder.class
 )
 public final class ContextSchema {
-  private final Optional<List<ContextSchemaField>> base;
+  private final List<ContextSchemaField> base;
 
-  private final Optional<List<ContextSchemaField>> derived;
+  private final Optional<List<ContextDerivedField>> derived;
 
   private final Map<String, Object> additionalProperties;
 
-  private ContextSchema(Optional<List<ContextSchemaField>> base,
-      Optional<List<ContextSchemaField>> derived, Map<String, Object> additionalProperties) {
+  private ContextSchema(List<ContextSchemaField> base, Optional<List<ContextDerivedField>> derived,
+      Map<String, Object> additionalProperties) {
     this.base = base;
     this.derived = derived;
     this.additionalProperties = additionalProperties;
@@ -43,7 +44,7 @@ public final class ContextSchema {
    * @return User-defined base fields for the context.
    */
   @JsonProperty("base")
-  public Optional<List<ContextSchemaField>> getBase() {
+  public List<ContextSchemaField> getBase() {
     return base;
   }
 
@@ -51,7 +52,7 @@ public final class ContextSchema {
    * @return Expression-computed fields. Each entry supplies an <code>expression</code> evaluated from base facts, tracked history, and configured relationships.
    */
   @JsonProperty("derived")
-  public Optional<List<ContextSchemaField>> getDerived() {
+  public Optional<List<ContextDerivedField>> getDerived() {
     return derived;
   }
 
@@ -88,9 +89,9 @@ public final class ContextSchema {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<List<ContextSchemaField>> base = Optional.empty();
+    private List<ContextSchemaField> base = new ArrayList<>();
 
-    private Optional<List<ContextSchemaField>> derived = Optional.empty();
+    private Optional<List<ContextDerivedField>> derived = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -111,13 +112,23 @@ public final class ContextSchema {
         value = "base",
         nulls = Nulls.SKIP
     )
-    public Builder base(Optional<List<ContextSchemaField>> base) {
-      this.base = base;
+    public Builder base(List<ContextSchemaField> base) {
+      this.base.clear();
+      if (base != null) {
+        this.base.addAll(base);
+      }
       return this;
     }
 
-    public Builder base(List<ContextSchemaField> base) {
-      this.base = Optional.ofNullable(base);
+    public Builder addBase(ContextSchemaField base) {
+      this.base.add(base);
+      return this;
+    }
+
+    public Builder addAllBase(List<ContextSchemaField> base) {
+      if (base != null) {
+        this.base.addAll(base);
+      }
       return this;
     }
 
@@ -128,12 +139,12 @@ public final class ContextSchema {
         value = "derived",
         nulls = Nulls.SKIP
     )
-    public Builder derived(Optional<List<ContextSchemaField>> derived) {
+    public Builder derived(Optional<List<ContextDerivedField>> derived) {
       this.derived = derived;
       return this;
     }
 
-    public Builder derived(List<ContextSchemaField> derived) {
+    public Builder derived(List<ContextDerivedField> derived) {
       this.derived = Optional.ofNullable(derived);
       return this;
     }

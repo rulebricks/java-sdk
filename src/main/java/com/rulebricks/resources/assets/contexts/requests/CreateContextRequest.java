@@ -6,12 +6,15 @@ package com.rulebricks.resources.assets.contexts.requests;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rulebricks.core.Nullable;
+import com.rulebricks.core.NullableNonemptyFilter;
 import com.rulebricks.core.ObjectMappers;
 import com.rulebricks.resources.assets.contexts.types.CreateContextRequestOnSchemaMismatch;
 import com.rulebricks.types.ContextSchema;
@@ -20,6 +23,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,13 +50,20 @@ public final class CreateContextRequest {
 
   private final Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch;
 
+  private final Optional<List<String>> sourceObjects;
+
+  private final Optional<List<String>> userGroups;
+
+  private final Optional<String> folder;
+
   private final Map<String, Object> additionalProperties;
 
   private CreateContextRequest(String name, Optional<String> description, ContextSchema schema,
       String identityFact, Optional<Boolean> autoExecuteDecisions, Optional<Integer> ttlSeconds,
       Optional<Integer> historyLimit,
       Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> sourceObjects, Optional<List<String>> userGroups,
+      Optional<String> folder, Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
     this.schema = schema;
@@ -61,6 +72,9 @@ public final class CreateContextRequest {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
+    this.sourceObjects = sourceObjects;
+    this.userGroups = userGroups;
+    this.folder = folder;
     this.additionalProperties = additionalProperties;
   }
 
@@ -128,6 +142,42 @@ public final class CreateContextRequest {
     return onSchemaMismatch;
   }
 
+  /**
+   * @return Workspace object IDs associated with this context schema.
+   */
+  @JsonProperty("source_objects")
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
+  }
+
+  /**
+   * @return User groups allowed to access the context.
+   */
+  @JsonProperty("user_groups")
+  public Optional<List<String>> getUserGroups() {
+    return userGroups;
+  }
+
+  /**
+   * @return Context folder ID.
+   */
+  @JsonIgnore
+  public Optional<String> getFolder() {
+    if (folder == null) {
+      return Optional.empty();
+    }
+    return folder;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("folder")
+  private Optional<String> _getFolder() {
+    return folder;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -140,12 +190,12 @@ public final class CreateContextRequest {
   }
 
   private boolean equalTo(CreateContextRequest other) {
-    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
+    return name.equals(other.name) && description.equals(other.description) && schema.equals(other.schema) && identityFact.equals(other.identityFact) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && sourceObjects.equals(other.sourceObjects) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
+    return Objects.hash(this.name, this.description, this.schema, this.identityFact, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.sourceObjects, this.userGroups, this.folder);
   }
 
   @java.lang.Override
@@ -221,6 +271,29 @@ public final class CreateContextRequest {
     _FinalStage onSchemaMismatch(Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch);
 
     _FinalStage onSchemaMismatch(CreateContextRequestOnSchemaMismatch onSchemaMismatch);
+
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    _FinalStage sourceObjects(Optional<List<String>> sourceObjects);
+
+    _FinalStage sourceObjects(List<String> sourceObjects);
+
+    /**
+     * <p>User groups allowed to access the context.</p>
+     */
+    _FinalStage userGroups(Optional<List<String>> userGroups);
+
+    _FinalStage userGroups(List<String> userGroups);
+
+    /**
+     * <p>Context folder ID.</p>
+     */
+    _FinalStage folder(Optional<String> folder);
+
+    _FinalStage folder(String folder);
+
+    _FinalStage folder(Nullable<String> folder);
   }
 
   @JsonIgnoreProperties(
@@ -232,6 +305,12 @@ public final class CreateContextRequest {
     private ContextSchema schema;
 
     private String identityFact;
+
+    private Optional<String> folder = Optional.empty();
+
+    private Optional<List<String>> userGroups = Optional.empty();
+
+    private Optional<List<String>> sourceObjects = Optional.empty();
 
     private Optional<CreateContextRequestOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
@@ -259,6 +338,9 @@ public final class CreateContextRequest {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
+      sourceObjects(other.getSourceObjects());
+      userGroups(other.getUserGroups());
+      folder(other.getFolder());
       return this;
     }
 
@@ -295,6 +377,93 @@ public final class CreateContextRequest {
     @JsonSetter("identity_fact")
     public _FinalStage identityFact(@NotNull String identityFact) {
       this.identityFact = Objects.requireNonNull(identityFact, "identityFact must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Context folder ID.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage folder(Nullable<String> folder) {
+      if (folder.isNull()) {
+        this.folder = null;
+      }
+      else if (folder.isEmpty()) {
+        this.folder = Optional.empty();
+      }
+      else {
+        this.folder = Optional.of(folder.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Context folder ID.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage folder(String folder) {
+      this.folder = Optional.ofNullable(folder);
+      return this;
+    }
+
+    /**
+     * <p>Context folder ID.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "folder",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage folder(Optional<String> folder) {
+      this.folder = folder;
+      return this;
+    }
+
+    /**
+     * <p>User groups allowed to access the context.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage userGroups(List<String> userGroups) {
+      this.userGroups = Optional.ofNullable(userGroups);
+      return this;
+    }
+
+    /**
+     * <p>User groups allowed to access the context.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "user_groups",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage userGroups(Optional<List<String>> userGroups) {
+      this.userGroups = userGroups;
+      return this;
+    }
+
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
+      return this;
+    }
+
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
       return this;
     }
 
@@ -416,7 +585,7 @@ public final class CreateContextRequest {
 
     @java.lang.Override
     public CreateContextRequest build() {
-      return new CreateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
+      return new CreateContextRequest(name, description, schema, identityFact, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, sourceObjects, userGroups, folder, additionalProperties);
     }
 
     @java.lang.Override

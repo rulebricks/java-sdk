@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rulebricks.core.ObjectMappers;
 import java.lang.Object;
@@ -18,35 +17,34 @@ import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = BulkRuleResponseItemError.Builder.class
+    builder = ExecutionErrorResult.Builder.class
 )
-public final class BulkRuleResponseItemError {
-  private final Optional<String> error;
+public final class ExecutionErrorResult {
+  private final String error;
 
   private final Map<String, Object> additionalProperties;
 
-  private BulkRuleResponseItemError(Optional<String> error,
-      Map<String, Object> additionalProperties) {
+  private ExecutionErrorResult(String error, Map<String, Object> additionalProperties) {
     this.error = error;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Error message if this specific item failed to process
+   * @return Human-readable execution failure message.
    */
   @JsonProperty("error")
-  public Optional<String> getError() {
+  public String getError() {
     return error;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof BulkRuleResponseItemError && equalTo((BulkRuleResponseItemError) other);
+    return other instanceof ExecutionErrorResult && equalTo((ExecutionErrorResult) other);
   }
 
   @JsonAnyGetter
@@ -54,7 +52,7 @@ public final class BulkRuleResponseItemError {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(BulkRuleResponseItemError other) {
+  private boolean equalTo(ExecutionErrorResult other) {
     return error.equals(other.error);
   }
 
@@ -68,15 +66,32 @@ public final class BulkRuleResponseItemError {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static ErrorStage builder() {
     return new Builder();
+  }
+
+  public interface ErrorStage {
+    /**
+     * <p>Human-readable execution failure message.</p>
+     */
+    _FinalStage error(@NotNull String error);
+
+    Builder from(ExecutionErrorResult other);
+  }
+
+  public interface _FinalStage {
+    ExecutionErrorResult build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> error = Optional.empty();
+  public static final class Builder implements ErrorStage, _FinalStage {
+    private String error;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -84,37 +99,36 @@ public final class BulkRuleResponseItemError {
     private Builder() {
     }
 
-    public Builder from(BulkRuleResponseItemError other) {
+    @java.lang.Override
+    public Builder from(ExecutionErrorResult other) {
       error(other.getError());
       return this;
     }
 
     /**
-     * <p>Error message if this specific item failed to process</p>
+     * <p>Human-readable execution failure message.</p>
+     * <p>Human-readable execution failure message.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @JsonSetter(
-        value = "error",
-        nulls = Nulls.SKIP
-    )
-    public Builder error(Optional<String> error) {
-      this.error = error;
+    @java.lang.Override
+    @JsonSetter("error")
+    public _FinalStage error(@NotNull String error) {
+      this.error = Objects.requireNonNull(error, "error must not be null");
       return this;
     }
 
-    public Builder error(String error) {
-      this.error = Optional.ofNullable(error);
-      return this;
+    @java.lang.Override
+    public ExecutionErrorResult build() {
+      return new ExecutionErrorResult(error, additionalProperties);
     }
 
-    public BulkRuleResponseItemError build() {
-      return new BulkRuleResponseItemError(error, additionalProperties);
-    }
-
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

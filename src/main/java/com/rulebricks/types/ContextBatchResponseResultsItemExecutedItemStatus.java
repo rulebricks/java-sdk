@@ -18,6 +18,8 @@ public final class ContextBatchResponseResultsItemExecutedItemStatus {
 
   public static final ContextBatchResponseResultsItemExecutedItemStatus INFRASTRUCTURE_ERROR = new ContextBatchResponseResultsItemExecutedItemStatus(Value.INFRASTRUCTURE_ERROR, "infrastructure_error");
 
+  public static final ContextBatchResponseResultsItemExecutedItemStatus SKIPPED_IN_PROGRESS = new ContextBatchResponseResultsItemExecutedItemStatus(Value.SKIPPED_IN_PROGRESS, "skipped_in_progress");
+
   private final Value value;
 
   private final String string;
@@ -58,6 +60,8 @@ public final class ContextBatchResponseResultsItemExecutedItemStatus {
         return visitor.visitEvaluationError();
       case INFRASTRUCTURE_ERROR:
         return visitor.visitInfrastructureError();
+      case SKIPPED_IN_PROGRESS:
+        return visitor.visitSkippedInProgress();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -77,6 +81,8 @@ public final class ContextBatchResponseResultsItemExecutedItemStatus {
         return EVALUATION_ERROR;
       case "infrastructure_error":
         return INFRASTRUCTURE_ERROR;
+      case "skipped_in_progress":
+        return SKIPPED_IN_PROGRESS;
       default:
         return new ContextBatchResponseResultsItemExecutedItemStatus(Value.UNKNOWN, value);
     }
@@ -91,6 +97,8 @@ public final class ContextBatchResponseResultsItemExecutedItemStatus {
 
     SKIPPED_ALREADY_RUN,
 
+    SKIPPED_IN_PROGRESS,
+
     UNKNOWN
   }
 
@@ -102,6 +110,8 @@ public final class ContextBatchResponseResultsItemExecutedItemStatus {
     T visitInfrastructureError();
 
     T visitSkippedAlreadyRun();
+
+    T visitSkippedInProgress();
 
     T visitUnknown(String unknownType);
   }

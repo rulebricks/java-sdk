@@ -31,6 +31,10 @@ import java.util.Optional;
     builder = SubmitContextDataResponse.Builder.class
 )
 public final class SubmitContextDataResponse {
+  private final Optional<String> executionDegraded;
+
+  private final Optional<List<Map<String, Object>>> cascadeRejections;
+
   private final Optional<String> context;
 
   private final Optional<Map<String, Object>> state;
@@ -43,26 +47,49 @@ public final class SubmitContextDataResponse {
 
   private final Optional<Boolean> isNew;
 
+  private final Optional<Boolean> triggered;
+
   private final Optional<OffsetDateTime> expiresAt;
 
   private final Optional<List<SubmitContextDataResponseCascadedItem>> cascaded;
 
   private final Map<String, Object> additionalProperties;
 
-  private SubmitContextDataResponse(Optional<String> context, Optional<Map<String, Object>> state,
-      Optional<SubmitContextDataResponseStatus> status, Optional<List<String>> have,
-      Optional<List<String>> need, Optional<Boolean> isNew, Optional<OffsetDateTime> expiresAt,
+  private SubmitContextDataResponse(Optional<String> executionDegraded,
+      Optional<List<Map<String, Object>>> cascadeRejections, Optional<String> context,
+      Optional<Map<String, Object>> state, Optional<SubmitContextDataResponseStatus> status,
+      Optional<List<String>> have, Optional<List<String>> need, Optional<Boolean> isNew,
+      Optional<Boolean> triggered, Optional<OffsetDateTime> expiresAt,
       Optional<List<SubmitContextDataResponseCascadedItem>> cascaded,
       Map<String, Object> additionalProperties) {
+    this.executionDegraded = executionDegraded;
+    this.cascadeRejections = cascadeRejections;
     this.context = context;
     this.state = state;
     this.status = status;
     this.have = have;
     this.need = need;
     this.isNew = isNew;
+    this.triggered = triggered;
     this.expiresAt = expiresAt;
     this.cascaded = cascaded;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Committed data has incomplete execution work; retained under narrow projections.
+   */
+  @JsonProperty("execution_degraded")
+  public Optional<String> getExecutionDegraded() {
+    return executionDegraded;
+  }
+
+  /**
+   * @return Dependent work rejected or incomplete; retained under narrow projections.
+   */
+  @JsonProperty("cascade_rejections")
+  public Optional<List<Map<String, Object>>> getCascadeRejections() {
+    return cascadeRejections;
   }
 
   /**
@@ -114,6 +141,14 @@ public final class SubmitContextDataResponse {
   }
 
   /**
+   * @return True when this submission attempted a bound or pending evaluation. Skipped or unchanged inputs alone leave this false.
+   */
+  @JsonProperty("triggered")
+  public Optional<Boolean> getTriggered() {
+    return triggered;
+  }
+
+  /**
    * @return When the instance will expire based on context TTL.
    */
   @JsonIgnore
@@ -125,7 +160,7 @@ public final class SubmitContextDataResponse {
   }
 
   /**
-   * @return Results from auto-executed rules/flows and pending evaluation cascades, plus summaries when a relationship change re-evaluated dependent contexts.
+   * @return Execution summaries from auto-executed rules/flows and pending evaluations, plus summaries of dependent context cascades. Status, errors and flow execution IDs are retained; raw result payloads are present only when include contains execution_results.
    */
   @JsonProperty("cascaded")
   public Optional<List<SubmitContextDataResponseCascadedItem>> getCascaded() {
@@ -153,12 +188,12 @@ public final class SubmitContextDataResponse {
   }
 
   private boolean equalTo(SubmitContextDataResponse other) {
-    return context.equals(other.context) && state.equals(other.state) && status.equals(other.status) && have.equals(other.have) && need.equals(other.need) && isNew.equals(other.isNew) && expiresAt.equals(other.expiresAt) && cascaded.equals(other.cascaded);
+    return executionDegraded.equals(other.executionDegraded) && cascadeRejections.equals(other.cascadeRejections) && context.equals(other.context) && state.equals(other.state) && status.equals(other.status) && have.equals(other.have) && need.equals(other.need) && isNew.equals(other.isNew) && triggered.equals(other.triggered) && expiresAt.equals(other.expiresAt) && cascaded.equals(other.cascaded);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.context, this.state, this.status, this.have, this.need, this.isNew, this.expiresAt, this.cascaded);
+    return Objects.hash(this.executionDegraded, this.cascadeRejections, this.context, this.state, this.status, this.have, this.need, this.isNew, this.triggered, this.expiresAt, this.cascaded);
   }
 
   @java.lang.Override
@@ -174,6 +209,10 @@ public final class SubmitContextDataResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> executionDegraded = Optional.empty();
+
+    private Optional<List<Map<String, Object>>> cascadeRejections = Optional.empty();
+
     private Optional<String> context = Optional.empty();
 
     private Optional<Map<String, Object>> state = Optional.empty();
@@ -186,6 +225,8 @@ public final class SubmitContextDataResponse {
 
     private Optional<Boolean> isNew = Optional.empty();
 
+    private Optional<Boolean> triggered = Optional.empty();
+
     private Optional<OffsetDateTime> expiresAt = Optional.empty();
 
     private Optional<List<SubmitContextDataResponseCascadedItem>> cascaded = Optional.empty();
@@ -197,14 +238,51 @@ public final class SubmitContextDataResponse {
     }
 
     public Builder from(SubmitContextDataResponse other) {
+      executionDegraded(other.getExecutionDegraded());
+      cascadeRejections(other.getCascadeRejections());
       context(other.getContext());
       state(other.getState());
       status(other.getStatus());
       have(other.getHave());
       need(other.getNeed());
       isNew(other.getIsNew());
+      triggered(other.getTriggered());
       expiresAt(other.getExpiresAt());
       cascaded(other.getCascaded());
+      return this;
+    }
+
+    /**
+     * <p>Committed data has incomplete execution work; retained under narrow projections.</p>
+     */
+    @JsonSetter(
+        value = "execution_degraded",
+        nulls = Nulls.SKIP
+    )
+    public Builder executionDegraded(Optional<String> executionDegraded) {
+      this.executionDegraded = executionDegraded;
+      return this;
+    }
+
+    public Builder executionDegraded(String executionDegraded) {
+      this.executionDegraded = Optional.ofNullable(executionDegraded);
+      return this;
+    }
+
+    /**
+     * <p>Dependent work rejected or incomplete; retained under narrow projections.</p>
+     */
+    @JsonSetter(
+        value = "cascade_rejections",
+        nulls = Nulls.SKIP
+    )
+    public Builder cascadeRejections(Optional<List<Map<String, Object>>> cascadeRejections) {
+      this.cascadeRejections = cascadeRejections;
+      return this;
+    }
+
+    public Builder cascadeRejections(List<Map<String, Object>> cascadeRejections) {
+      this.cascadeRejections = Optional.ofNullable(cascadeRejections);
       return this;
     }
 
@@ -311,6 +389,23 @@ public final class SubmitContextDataResponse {
     }
 
     /**
+     * <p>True when this submission attempted a bound or pending evaluation. Skipped or unchanged inputs alone leave this false.</p>
+     */
+    @JsonSetter(
+        value = "triggered",
+        nulls = Nulls.SKIP
+    )
+    public Builder triggered(Optional<Boolean> triggered) {
+      this.triggered = triggered;
+      return this;
+    }
+
+    public Builder triggered(Boolean triggered) {
+      this.triggered = Optional.ofNullable(triggered);
+      return this;
+    }
+
+    /**
      * <p>When the instance will expire based on context TTL.</p>
      */
     @JsonSetter(
@@ -341,7 +436,7 @@ public final class SubmitContextDataResponse {
     }
 
     /**
-     * <p>Results from auto-executed rules/flows and pending evaluation cascades, plus summaries when a relationship change re-evaluated dependent contexts.</p>
+     * <p>Execution summaries from auto-executed rules/flows and pending evaluations, plus summaries of dependent context cascades. Status, errors and flow execution IDs are retained; raw result payloads are present only when include contains execution_results.</p>
      */
     @JsonSetter(
         value = "cascaded",
@@ -358,7 +453,7 @@ public final class SubmitContextDataResponse {
     }
 
     public SubmitContextDataResponse build() {
-      return new SubmitContextDataResponse(context, state, status, have, need, isNew, expiresAt, cascaded, additionalProperties);
+      return new SubmitContextDataResponse(executionDegraded, cascadeRejections, context, state, status, have, need, isNew, triggered, expiresAt, cascaded, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

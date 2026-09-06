@@ -39,6 +39,8 @@ public final class FlowDetail implements IFlowBase {
 
   private final Optional<String> slug;
 
+  private final Optional<List<SchemaField>> requestSchema;
+
   private final Optional<Boolean> published;
 
   private final Optional<OffsetDateTime> updatedAt;
@@ -56,14 +58,16 @@ public final class FlowDetail implements IFlowBase {
   private final Map<String, Object> additionalProperties;
 
   private FlowDetail(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<String> slug, Optional<Boolean> published, Optional<OffsetDateTime> updatedAt,
-      Optional<List<String>> labels, Optional<FlowDetailOriginRule> originRule,
-      Optional<FlowDetailContext> context, Optional<List<String>> userGroups,
-      Optional<Folder> folder, Map<String, Object> additionalProperties) {
+      Optional<String> slug, Optional<List<SchemaField>> requestSchema, Optional<Boolean> published,
+      Optional<OffsetDateTime> updatedAt, Optional<List<String>> labels,
+      Optional<FlowDetailOriginRule> originRule, Optional<FlowDetailContext> context,
+      Optional<List<String>> userGroups, Optional<Folder> folder,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.slug = slug;
+    this.requestSchema = requestSchema;
     this.published = published;
     this.updatedAt = updatedAt;
     this.labels = labels;
@@ -108,6 +112,14 @@ public final class FlowDetail implements IFlowBase {
   @java.lang.Override
   public Optional<String> getSlug() {
     return slug;
+  }
+
+  /**
+   * @return The request schema embedded in the selected graph's origin rule. Without version, uses the published graph when published, otherwise the draft graph. Empty when the graph has no origin schema.
+   */
+  @JsonProperty("request_schema")
+  public Optional<List<SchemaField>> getRequestSchema() {
+    return requestSchema;
   }
 
   /**
@@ -211,12 +223,12 @@ public final class FlowDetail implements IFlowBase {
   }
 
   private boolean equalTo(FlowDetail other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && labels.equals(other.labels) && originRule.equals(other.originRule) && context.equals(other.context) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && slug.equals(other.slug) && requestSchema.equals(other.requestSchema) && published.equals(other.published) && updatedAt.equals(other.updatedAt) && labels.equals(other.labels) && originRule.equals(other.originRule) && context.equals(other.context) && userGroups.equals(other.userGroups) && folder.equals(other.folder);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.slug, this.published, this.updatedAt, this.labels, this.originRule, this.context, this.userGroups, this.folder);
+    return Objects.hash(this.id, this.name, this.description, this.slug, this.requestSchema, this.published, this.updatedAt, this.labels, this.originRule, this.context, this.userGroups, this.folder);
   }
 
   @java.lang.Override
@@ -239,6 +251,8 @@ public final class FlowDetail implements IFlowBase {
     private Optional<String> description = Optional.empty();
 
     private Optional<String> slug = Optional.empty();
+
+    private Optional<List<SchemaField>> requestSchema = Optional.empty();
 
     private Optional<Boolean> published = Optional.empty();
 
@@ -265,6 +279,7 @@ public final class FlowDetail implements IFlowBase {
       name(other.getName());
       description(other.getDescription());
       slug(other.getSlug());
+      requestSchema(other.getRequestSchema());
       published(other.getPublished());
       updatedAt(other.getUpdatedAt());
       labels(other.getLabels());
@@ -340,6 +355,23 @@ public final class FlowDetail implements IFlowBase {
 
     public Builder slug(String slug) {
       this.slug = Optional.ofNullable(slug);
+      return this;
+    }
+
+    /**
+     * <p>The request schema embedded in the selected graph's origin rule. Without version, uses the published graph when published, otherwise the draft graph. Empty when the graph has no origin schema.</p>
+     */
+    @JsonSetter(
+        value = "request_schema",
+        nulls = Nulls.SKIP
+    )
+    public Builder requestSchema(Optional<List<SchemaField>> requestSchema) {
+      this.requestSchema = requestSchema;
+      return this;
+    }
+
+    public Builder requestSchema(List<SchemaField> requestSchema) {
+      this.requestSchema = Optional.ofNullable(requestSchema);
       return this;
     }
 
@@ -499,7 +531,7 @@ public final class FlowDetail implements IFlowBase {
     }
 
     public FlowDetail build() {
-      return new FlowDetail(id, name, description, slug, published, updatedAt, labels, originRule, context, userGroups, folder, additionalProperties);
+      return new FlowDetail(id, name, description, slug, requestSchema, published, updatedAt, labels, originRule, context, userGroups, folder, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

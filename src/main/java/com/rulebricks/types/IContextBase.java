@@ -7,6 +7,7 @@ package com.rulebricks.types;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
+import java.util.List;
 import java.util.Optional;
 
 public interface IContextBase {
@@ -25,4 +26,6 @@ public interface IContextBase {
   Optional<Integer> getHistoryLimit();
 
   Optional<ContextBaseOnSchemaMismatch> getOnSchemaMismatch();
+
+  Optional<List<String>> getSourceObjects();
 }

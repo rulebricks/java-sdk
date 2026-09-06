@@ -20,8 +20,8 @@ import com.rulebricks.errors.ServiceUnavailableError;
 import com.rulebricks.resources.rules.requests.BulkSolveRulesRequest;
 import com.rulebricks.resources.rules.requests.SolveRulesRequest;
 import com.rulebricks.types.BulkRuleResponseItem;
-import com.rulebricks.types.Error;
 import com.rulebricks.types.ParallelSolveRequestValue;
+import com.rulebricks.types.RuleExecutionResult;
 import java.io.IOException;
 import java.lang.Object;
 import java.lang.String;
@@ -45,7 +45,7 @@ public class RawRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug, String version,
+  public RulebricksApiHttpResponse<RuleExecutionResult> solve(String slug, String version,
       SolveRulesRequest request) {
     return solve(slug,version,request,null);
   }
@@ -53,7 +53,7 @@ public class RawRulesClient {
   /**
    * Executes a single rule identified by a unique slug. The request and response formats are dynamic, dependent on the rule configuration. Optionally target a specific published version (e.g. <code>3</code>) or a release environment (e.g. <code>production</code>) via the <code>version</code> path segment; <code>latest</code> (the default) executes the current published version.
    */
-  public RulebricksApiHttpResponse<Map<String, Object>> solve(String slug, String version,
+  public RulebricksApiHttpResponse<RuleExecutionResult> solve(String slug, String version,
       SolveRulesRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -86,12 +86,12 @@ public class RawRulesClient {
         ResponseBody responseBody = response.body();
         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
         if (response.isSuccessful()) {
-          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, new TypeReference<Map<String, Object>>() {}), response);
+          return new RulebricksApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RuleExecutionResult.class), response);
         }
         try {
           switch (response.code()) {
-            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             case 504:throw new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
@@ -155,8 +155,8 @@ public class RawRulesClient {
           }
           try {
             switch (response.code()) {
-              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 504:throw new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
@@ -218,8 +218,8 @@ public class RawRulesClient {
             }
             try {
               switch (response.code()) {
-                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
-                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Error.class), response);
+                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 504:throw new GatewayTimeoutError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               }

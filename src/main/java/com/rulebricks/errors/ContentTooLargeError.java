@@ -5,21 +5,21 @@
 package com.rulebricks.errors;
 
 import com.rulebricks.core.RulebricksApiApiException;
-import com.rulebricks.types.Error;
+import com.rulebricks.types.ContextOperationError;
 import okhttp3.Response;
 
 public final class ContentTooLargeError extends RulebricksApiApiException {
   /**
    * The body of the response that triggered the exception.
    */
-  private final Error body;
+  private final ContextOperationError body;
 
-  public ContentTooLargeError(Error body) {
+  public ContentTooLargeError(ContextOperationError body) {
     super("ContentTooLargeError", 413, body);
     this.body = body;
   }
 
-  public ContentTooLargeError(Error body, Response rawResponse) {
+  public ContentTooLargeError(ContextOperationError body, Response rawResponse) {
     super("ContentTooLargeError", 413, body, rawResponse);
     this.body = body;
   }
@@ -28,7 +28,7 @@ public final class ContentTooLargeError extends RulebricksApiApiException {
    * @return the body
    */
   @java.lang.Override
-  public Error body() {
+  public ContextOperationError body() {
     return this.body;
   }
 }

@@ -39,6 +39,8 @@ public final class ContextBatchResponseResultsItemExecutedItem {
 
   private final Optional<String> error;
 
+  private final Optional<Object> result;
+
   private final Optional<List<String>> writtenToContext;
 
   private final Map<String, Object> additionalProperties;
@@ -46,13 +48,14 @@ public final class ContextBatchResponseResultsItemExecutedItem {
   private ContextBatchResponseResultsItemExecutedItem(
       Optional<ContextBatchResponseResultsItemExecutedItemType> type, Optional<String> slug,
       Optional<ContextBatchResponseResultsItemExecutedItemStatus> status,
-      Optional<String> executionId, Optional<String> error, Optional<List<String>> writtenToContext,
-      Map<String, Object> additionalProperties) {
+      Optional<String> executionId, Optional<String> error, Optional<Object> result,
+      Optional<List<String>> writtenToContext, Map<String, Object> additionalProperties) {
     this.type = type;
     this.slug = slug;
     this.status = status;
     this.executionId = executionId;
     this.error = error;
+    this.result = result;
     this.writtenToContext = writtenToContext;
     this.additionalProperties = additionalProperties;
   }
@@ -88,6 +91,14 @@ public final class ContextBatchResponseResultsItemExecutedItem {
     return error;
   }
 
+  /**
+   * @return Full execution result, present only when include contains execution_results. May be large.
+   */
+  @JsonProperty("result")
+  public Optional<Object> getResult() {
+    return result;
+  }
+
   @JsonProperty("written_to_context")
   public Optional<List<String>> getWrittenToContext() {
     return writtenToContext;
@@ -114,12 +125,12 @@ public final class ContextBatchResponseResultsItemExecutedItem {
   }
 
   private boolean equalTo(ContextBatchResponseResultsItemExecutedItem other) {
-    return type.equals(other.type) && slug.equals(other.slug) && status.equals(other.status) && executionId.equals(other.executionId) && error.equals(other.error) && writtenToContext.equals(other.writtenToContext);
+    return type.equals(other.type) && slug.equals(other.slug) && status.equals(other.status) && executionId.equals(other.executionId) && error.equals(other.error) && result.equals(other.result) && writtenToContext.equals(other.writtenToContext);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.slug, this.status, this.executionId, this.error, this.writtenToContext);
+    return Objects.hash(this.type, this.slug, this.status, this.executionId, this.error, this.result, this.writtenToContext);
   }
 
   @java.lang.Override
@@ -145,6 +156,8 @@ public final class ContextBatchResponseResultsItemExecutedItem {
 
     private Optional<String> error = Optional.empty();
 
+    private Optional<Object> result = Optional.empty();
+
     private Optional<List<String>> writtenToContext = Optional.empty();
 
     @JsonAnySetter
@@ -159,6 +172,7 @@ public final class ContextBatchResponseResultsItemExecutedItem {
       status(other.getStatus());
       executionId(other.getExecutionId());
       error(other.getError());
+      result(other.getResult());
       writtenToContext(other.getWrittenToContext());
       return this;
     }
@@ -249,6 +263,23 @@ public final class ContextBatchResponseResultsItemExecutedItem {
       return this;
     }
 
+    /**
+     * <p>Full execution result, present only when include contains execution_results. May be large.</p>
+     */
+    @JsonSetter(
+        value = "result",
+        nulls = Nulls.SKIP
+    )
+    public Builder result(Optional<Object> result) {
+      this.result = result;
+      return this;
+    }
+
+    public Builder result(Object result) {
+      this.result = Optional.ofNullable(result);
+      return this;
+    }
+
     @JsonSetter(
         value = "written_to_context",
         nulls = Nulls.SKIP
@@ -264,7 +295,7 @@ public final class ContextBatchResponseResultsItemExecutedItem {
     }
 
     public ContextBatchResponseResultsItemExecutedItem build() {
-      return new ContextBatchResponseResultsItemExecutedItem(type, slug, status, executionId, error, writtenToContext, additionalProperties);
+      return new ContextBatchResponseResultsItemExecutedItem(type, slug, status, executionId, error, result, writtenToContext, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

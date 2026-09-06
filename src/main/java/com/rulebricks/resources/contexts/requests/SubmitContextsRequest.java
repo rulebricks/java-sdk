@@ -19,20 +19,32 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = SubmitContextsRequest.Builder.class
 )
 public final class SubmitContextsRequest {
+  private final Optional<String> include;
+
   private final Map<String, Object> body;
 
   private final Map<String, Object> additionalProperties;
 
-  private SubmitContextsRequest(Map<String, Object> body,
+  private SubmitContextsRequest(Optional<String> include, Map<String, Object> body,
       Map<String, Object> additionalProperties) {
+    this.include = include;
     this.body = body;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Select comma-separated fields; <code>context</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (GET last-run metadata), <code>execution_results</code> (POST <code>cascaded[].result</code>). Unavailable fields are omitted; relations require <code>include_relations</code>. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.
+   */
+  @JsonProperty("include")
+  public Optional<String> getInclude() {
+    return include;
   }
 
   @JsonProperty("body")
@@ -52,12 +64,12 @@ public final class SubmitContextsRequest {
   }
 
   private boolean equalTo(SubmitContextsRequest other) {
-    return body.equals(other.body);
+    return include.equals(other.include) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.body);
+    return Objects.hash(this.include, this.body);
   }
 
   @java.lang.Override
@@ -73,6 +85,8 @@ public final class SubmitContextsRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> include = Optional.empty();
+
     private Map<String, Object> body = new LinkedHashMap<>();
 
     @JsonAnySetter
@@ -82,7 +96,25 @@ public final class SubmitContextsRequest {
     }
 
     public Builder from(SubmitContextsRequest other) {
+      include(other.getInclude());
       body(other.getBody());
+      return this;
+    }
+
+    /**
+     * <p>Select comma-separated fields; <code>context</code> is always returned. Default: state and execution summaries. Opt-ins: <code>executions</code> (GET last-run metadata), <code>execution_results</code> (POST <code>cascaded[].result</code>). Unavailable fields are omitted; relations require <code>include_relations</code>. History: <code>/history</code>. Fields: positions, is_new, status, have, need, state, derived, expires_at, created_at, updated_at, executions, executed, triggered, reason, cascaded, relations, execution_results.</p>
+     */
+    @JsonSetter(
+        value = "include",
+        nulls = Nulls.SKIP
+    )
+    public Builder include(Optional<String> include) {
+      this.include = include;
+      return this;
+    }
+
+    public Builder include(String include) {
+      this.include = Optional.ofNullable(include);
       return this;
     }
 
@@ -111,7 +143,7 @@ public final class SubmitContextsRequest {
     }
 
     public SubmitContextsRequest build() {
-      return new SubmitContextsRequest(body, additionalProperties);
+      return new SubmitContextsRequest(include, body, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

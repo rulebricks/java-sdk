@@ -18,6 +18,12 @@ public final class CascadeResultStatus {
 
   public static final CascadeResultStatus SOLVED = new CascadeResultStatus(Value.SOLVED, "solved");
 
+  public static final CascadeResultStatus EVALUATION_ERROR = new CascadeResultStatus(Value.EVALUATION_ERROR, "evaluation_error");
+
+  public static final CascadeResultStatus INFRASTRUCTURE_ERROR = new CascadeResultStatus(Value.INFRASTRUCTURE_ERROR, "infrastructure_error");
+
+  public static final CascadeResultStatus SKIPPED_IN_PROGRESS = new CascadeResultStatus(Value.SKIPPED_IN_PROGRESS, "skipped_in_progress");
+
   private final Value value;
 
   private final String string;
@@ -58,6 +64,12 @@ public final class CascadeResultStatus {
         return visitor.visitError();
       case SOLVED:
         return visitor.visitSolved();
+      case EVALUATION_ERROR:
+        return visitor.visitEvaluationError();
+      case INFRASTRUCTURE_ERROR:
+        return visitor.visitInfrastructureError();
+      case SKIPPED_IN_PROGRESS:
+        return visitor.visitSkippedInProgress();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -77,6 +89,12 @@ public final class CascadeResultStatus {
         return ERROR;
       case "solved":
         return SOLVED;
+      case "evaluation_error":
+        return EVALUATION_ERROR;
+      case "infrastructure_error":
+        return INFRASTRUCTURE_ERROR;
+      case "skipped_in_progress":
+        return SKIPPED_IN_PROGRESS;
       default:
         return new CascadeResultStatus(Value.UNKNOWN, value);
     }
@@ -91,6 +109,12 @@ public final class CascadeResultStatus {
 
     SKIPPED_ALREADY_RUN,
 
+    SKIPPED_IN_PROGRESS,
+
+    EVALUATION_ERROR,
+
+    INFRASTRUCTURE_ERROR,
+
     UNKNOWN
   }
 
@@ -102,6 +126,12 @@ public final class CascadeResultStatus {
     T visitPending();
 
     T visitSkippedAlreadyRun();
+
+    T visitSkippedInProgress();
+
+    T visitEvaluationError();
+
+    T visitInfrastructureError();
 
     T visitUnknown(String unknownType);
   }

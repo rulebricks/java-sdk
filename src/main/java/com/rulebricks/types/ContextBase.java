@@ -21,6 +21,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,12 +47,14 @@ public final class ContextBase implements IContextBase {
 
   private final Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch;
 
+  private final Optional<List<String>> sourceObjects;
+
   private final Map<String, Object> additionalProperties;
 
   private ContextBase(Optional<String> id, Optional<String> name, Optional<String> slug,
       Optional<String> description, Optional<Boolean> autoExecuteDecisions,
       Optional<Integer> ttlSeconds, Optional<Integer> historyLimit,
-      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch,
+      Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch, Optional<List<String>> sourceObjects,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
@@ -61,6 +64,7 @@ public final class ContextBase implements IContextBase {
     this.ttlSeconds = ttlSeconds;
     this.historyLimit = historyLimit;
     this.onSchemaMismatch = onSchemaMismatch;
+    this.sourceObjects = sourceObjects;
     this.additionalProperties = additionalProperties;
   }
 
@@ -138,6 +142,15 @@ public final class ContextBase implements IContextBase {
     return onSchemaMismatch;
   }
 
+  /**
+   * @return Workspace object IDs associated with this context schema.
+   */
+  @JsonProperty("source_objects")
+  @java.lang.Override
+  public Optional<List<String>> getSourceObjects() {
+    return sourceObjects;
+  }
+
   @JsonInclude(
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
@@ -159,12 +172,12 @@ public final class ContextBase implements IContextBase {
   }
 
   private boolean equalTo(ContextBase other) {
-    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch);
+    return id.equals(other.id) && name.equals(other.name) && slug.equals(other.slug) && description.equals(other.description) && autoExecuteDecisions.equals(other.autoExecuteDecisions) && ttlSeconds.equals(other.ttlSeconds) && historyLimit.equals(other.historyLimit) && onSchemaMismatch.equals(other.onSchemaMismatch) && sourceObjects.equals(other.sourceObjects);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch);
+    return Objects.hash(this.id, this.name, this.slug, this.description, this.autoExecuteDecisions, this.ttlSeconds, this.historyLimit, this.onSchemaMismatch, this.sourceObjects);
   }
 
   @java.lang.Override
@@ -196,6 +209,8 @@ public final class ContextBase implements IContextBase {
 
     private Optional<ContextBaseOnSchemaMismatch> onSchemaMismatch = Optional.empty();
 
+    private Optional<List<String>> sourceObjects = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -211,6 +226,7 @@ public final class ContextBase implements IContextBase {
       ttlSeconds(other.getTtlSeconds());
       historyLimit(other.getHistoryLimit());
       onSchemaMismatch(other.getOnSchemaMismatch());
+      sourceObjects(other.getSourceObjects());
       return this;
     }
 
@@ -363,8 +379,25 @@ public final class ContextBase implements IContextBase {
       return this;
     }
 
+    /**
+     * <p>Workspace object IDs associated with this context schema.</p>
+     */
+    @JsonSetter(
+        value = "source_objects",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceObjects(Optional<List<String>> sourceObjects) {
+      this.sourceObjects = sourceObjects;
+      return this;
+    }
+
+    public Builder sourceObjects(List<String> sourceObjects) {
+      this.sourceObjects = Optional.ofNullable(sourceObjects);
+      return this;
+    }
+
     public ContextBase build() {
-      return new ContextBase(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, additionalProperties);
+      return new ContextBase(id, name, slug, description, autoExecuteDecisions, ttlSeconds, historyLimit, onSchemaMismatch, sourceObjects, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {
